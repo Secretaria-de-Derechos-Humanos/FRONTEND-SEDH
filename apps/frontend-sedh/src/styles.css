@@ -1,1 +1,163 @@
-/* You can add global styles to this file, and also import other style files */
+/* ===========================================
+   SISTEMA SEDH - Paleta de Colores Oficial
+   =========================================== */
+
+:root {
+  /* ── Azul institucional (primario) ── */
+  --sedh-primary:     #264DA0;
+  --sedh-primary-50:  #F1F4FB;
+  --sedh-primary-100: #DEE6F6;
+  --sedh-primary-150: #CCD7F1;
+  --sedh-primary-200: #BCCDEE;
+  --sedh-primary-250: #A9BCE7;
+  --sedh-primary-300: #8FA8E0;
+  --sedh-primary-350: #778FCD;
+  --sedh-primary-400: #5F7FD0;
+  --sedh-primary-450: #4A67BD;
+  --sedh-primary-500: #264DA0;
+  --sedh-primary-550: #22458F;
+  --sedh-primary-600: #1F3E82;
+  --sedh-primary-650: #1B366F;
+  --sedh-primary-700: #182F63;
+  --sedh-primary-750: #142654;
+  --sedh-primary-800: #101F41;
+  --sedh-primary-850: #0C1733;
+  --sedh-primary-900: #080F21;
+  --sedh-primary-950: #050814;
+
+  /* ── Dorado institucional (secundario) ── */
+  --sedh-secondary:     #AD8411;
+  --sedh-secondary-50:  #FDF8EB;
+  --sedh-secondary-100: #FAEDC7;
+  --sedh-secondary-150: #F7E3A6;
+  --sedh-secondary-200: #F4DB8F;
+  --sedh-secondary-250: #F1D274;
+  --sedh-secondary-300: #EABF44;
+  --sedh-secondary-350: #E5AE2F;
+  --sedh-secondary-400: #D39A20;
+  --sedh-secondary-450: #C9A227;
+  --sedh-secondary-500: #AD8411;
+  --sedh-secondary-550: #9A770F;
+  --sedh-secondary-600: #8B6A0E;
+  --sedh-secondary-650: #775C0C;
+  --sedh-secondary-700: #684F0A;
+  --sedh-secondary-750: #564208;
+  --sedh-secondary-800: #453406;
+  --sedh-secondary-850: #332705;
+  --sedh-secondary-900: #221903;
+  --sedh-secondary-950: #140F02;
+
+  /* ── Grises neutros ── */
+  --sedh-white:      #FFFFFF;
+  --sedh-black:      #000000;
+  --sedh-gray-50:    #FAFAFA;
+  --sedh-gray-100:   #F4F4F5;
+  --sedh-gray-150:   #EAEAEC;
+  --sedh-gray-200:   #E0E0E2;
+  --sedh-gray-250:   #D4D4D7;
+  --sedh-gray-300:   #C4C4C8;
+  --sedh-gray-350:   #B0B0B5;
+  --sedh-gray-400:   #9A9AA0;
+  --sedh-gray-450:   #84848B;
+  --sedh-gray-500:   #6E6E76;
+  --sedh-gray-550:   #5A5A61;
+  --sedh-gray-600:   #48484E;
+  --sedh-gray-650:   #38383D;
+  --sedh-gray-700:   #2C2C30;
+  --sedh-gray-750:   #222225;
+  --sedh-gray-800:   #1A1A1D;
+  --sedh-gray-850:   #121214;
+  --sedh-gray-900:   #0C0C0E;
+  --sedh-gray-950:   #060607;
+
+  /* ── Semánticos modo claro ── */
+  --sedh-bg:         var(--sedh-gray-50);
+  --sedh-surface:    var(--sedh-white);
+  --sedh-border:     var(--sedh-gray-200);
+  --sedh-text:       var(--sedh-gray-900);
+  --sedh-text-muted: var(--sedh-gray-500);
+
+  /* ── Estados semánticos (modo claro) ── */
+  /* Satisfactorio → Dorado institucional */
+  --sedh-success:       var(--sedh-secondary-500);  /* #AD8411 */
+  --sedh-success-light: var(--sedh-secondary-100);  /* fondo suave */
+  --sedh-success-dark:  var(--sedh-secondary-700);  /* hover/activo */
+
+  /* Informativo → Azul institucional */
+  --sedh-info:          var(--sedh-primary-500);    /* #264DA0 */
+  --sedh-info-light:    var(--sedh-primary-100);    /* fondo suave */
+  --sedh-info-dark:     var(--sedh-primary-700);    /* hover/activo */
+
+  /* Advertencia → Azul medio (tono intermedio) */
+  --sedh-warning:       var(--sedh-primary-350);    /* #778FCD */
+  --sedh-warning-light: var(--sedh-primary-50);     /* fondo suave */
+  --sedh-warning-dark:  var(--sedh-primary-450);    /* hover/activo */
+
+  /* Error → Rojo (único externo permitido) */
+  --sedh-danger:        #C62828;
+  --sedh-danger-light:  #FFEBEE;
+  --sedh-danger-dark:   #8E0000;
+
+  /* ── Espaciado ── */
+  --sedh-space-xs:  4px;
+  --sedh-space-sm:  8px;
+  --sedh-space-md:  16px;
+  --sedh-space-lg:  24px;
+  --sedh-space-xl:  32px;
+  --sedh-space-2xl: 48px;
+
+  /* ── Radios y sombras ── */
+  --sedh-radius:    6px;
+  --sedh-radius-lg: 12px;
+  --sedh-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --sedh-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Tema Oscuro ── */
+.dark-theme {
+  --sedh-bg:         var(--sedh-gray-900);
+  --sedh-surface:    var(--sedh-gray-800);
+  --sedh-border:     var(--sedh-gray-700);
+  --sedh-text:       var(--sedh-gray-50);
+  --sedh-text-muted: var(--sedh-gray-400);
+  --sedh-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.5);
+  --sedh-shadow-md:  0 4px 6px rgba(0, 0, 0, 0.6);
+
+  /* Estados semánticos ajustados para oscuro */
+  --sedh-success-light: var(--sedh-secondary-850);
+  --sedh-info-light:    var(--sedh-primary-850);
+  --sedh-warning-light: var(--sedh-primary-800);
+  --sedh-danger-light:  #311313;
+}
+
+/* --- Reset y base --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- Responsive breakpoints (referencia) ---
+   xs:  < 576px  — Móvil pequeño
+   sm:  >= 576px — Móvil
+   md:  >= 768px — Tablet
+   lg:  >= 992px — Desktop
+   xl:  >= 1200px — Desktop grande
+   xxl: >= 1400px — Pantalla ancha
+*/

@@ -106,6 +106,14 @@
 
 .form-field__input {
   width: 100%;
+  padding-block: 0.5rem;
+  padding-inline: 0.875rem;
+}
+
+/* PrimeNG InputText — forzar padding igual al campo nativo */
+:host ::ng-deep input.p-inputtext.form-field__input {
+  padding-block: 0.5rem;
+  padding-inline: 0.875rem;
 }
 
 .form-field__error {
@@ -122,10 +130,29 @@
   width: 100%;
 }
 
-/* ── Botón submit ── */
+/* ── Botón submit — colores SEDH institucionales ── */
 :host ::ng-deep .login__submit-btn {
   width: 100%;
   margin-top: var(--sedh-space-sm);
+  background: var(--sedh-primary-500);
+  border-color: var(--sedh-primary-500);
+  color: #ffffff;
+  padding-block: 0.75rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: 0.02em;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+:host ::ng-deep .login__submit-btn:not(:disabled):hover {
+  background: var(--sedh-primary-700);
+  border-color: var(--sedh-primary-700);
+  box-shadow: 0 4px 12px rgba(38, 77, 160, 0.35);
+}
+
+:host ::ng-deep .login__submit-btn:focus-visible {
+  outline: 2px solid var(--sedh-primary-300);
+  outline-offset: 2px;
 }
 
 /* ── Responsive ── */

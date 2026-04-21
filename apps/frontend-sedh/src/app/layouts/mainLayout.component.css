@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  height: 100vh;
+}
+
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--sedh-bg);
+}
+
+.layout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.layout__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sedh-space-lg);
+  background: var(--sedh-bg);
+}
+
+/* ── Responsive: sidebar oculto en móvil ── */
+@media (max-width: 767px) {
+  .layout__content {
+    padding: var(--sedh-space-md);
+  }
+}

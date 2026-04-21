@@ -1,0 +1,27 @@
+<header class="navbar">
+  <button
+    class="navbar__toggle"
+    type="button"
+    (click)="onToggleSidebar()"
+    [title]="sidebarCollapsed() ? 'Expandir menú' : 'Colapsar menú'">
+    <i class="pi pi-bars"></i>
+  </button>
+
+  <div class="navbar__brand">
+    <span class="navbar__brand-text">Sistema SEDH</span>
+  </div>
+
+  <div class="navbar__actions">
+    <button
+      class="navbar__action-btn"
+      type="button"
+      (click)="onToggleTheme()"
+      [title]="themeService.themeLabel()">
+      <i [class]="'pi ' + (themeService.isDark() ? 'pi-sun' : 'pi-moon')"></i>
+    </button>
+
+    <div class="navbar__user-avatar" title="Usuario">
+      <i class="pi pi-user"></i>
+    </div>
+  </div>
+</header>

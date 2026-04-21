@@ -1,0 +1,92 @@
+:host {
+  display: block;
+}
+
+.dashboard__header {
+  margin-bottom: var(--sedh-space-xl);
+}
+
+.dashboard__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--sedh-primary-700);
+  margin-bottom: var(--sedh-space-xs);
+}
+
+.dashboard__subtitle {
+  color: var(--sedh-text-muted);
+  font-size: 0.9375rem;
+}
+
+/* ── Grid de tarjetas ── */
+.dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--sedh-space-lg);
+}
+
+.stat-card {
+  background: var(--sedh-surface);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  box-shadow: var(--sedh-shadow-sm);
+  padding: var(--sedh-space-lg);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sedh-space-md);
+  transition: box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  box-shadow: var(--sedh-shadow-md);
+}
+
+.stat-card__icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--sedh-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.375rem;
+  flex-shrink: 0;
+}
+
+.stat-card__icon--primary {
+  background: var(--sedh-info-light);
+  color: var(--sedh-info);
+}
+
+.stat-card__icon--secondary {
+  background: var(--sedh-success-light);
+  color: var(--sedh-success);
+}
+
+.stat-card__icon--info {
+  background: var(--sedh-warning-light);
+  color: var(--sedh-warning);
+}
+
+.stat-card__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-card__label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--sedh-text-muted);
+}
+
+.stat-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--sedh-text);
+  line-height: 1.2;
+}
+
+.stat-card__sub {
+  font-size: 0.75rem;
+  color: var(--sedh-text-muted);
+}

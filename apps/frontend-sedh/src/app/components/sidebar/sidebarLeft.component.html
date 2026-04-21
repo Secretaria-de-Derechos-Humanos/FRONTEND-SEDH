@@ -1,0 +1,39 @@
+<aside class="sidebar" [class.sidebar--collapsed]="collapsed()">
+
+  <!-- Logo -->
+  <div class="sidebar__logo">
+    <div class="sidebar__logo-emblem">
+      <i class="pi pi-shield"></i>
+    </div>
+    <div class="sidebar__logo-info">
+      <span class="sidebar__logo-text">SEDH</span>
+      <span class="sidebar__logo-sub">Sistema Institucional</span>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <nav class="sidebar__nav">
+    @for (item of navItems; track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="nav-item--active"
+        class="nav-item"
+        [title]="collapsed() ? item.label : ''">
+        <i [class]="'nav-item__icon pi ' + item.icon.replace('pi pi-', 'pi-')"></i>
+        <span class="nav-item__label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- Footer: usuario -->
+  <div class="sidebar__footer">
+    <div class="sidebar__user-avatar">
+      <i class="pi pi-user"></i>
+    </div>
+    <div class="sidebar__user-info">
+      <span class="sidebar__user-name">Luis Cardona</span>
+      <span class="sidebar__user-role">Administrador</span>
+    </div>
+  </div>
+
+</aside>

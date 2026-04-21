@@ -1,0 +1,136 @@
+:host {
+  display: block;
+}
+
+/* ── Pantalla completa con gradiente institucional ── */
+.login {
+  min-height: 100vh;
+  background: linear-gradient(
+    145deg,
+    var(--sedh-primary-800) 0%,
+    var(--sedh-primary-600) 60%,
+    var(--sedh-primary-500) 100%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sedh-space-md);
+  position: relative;
+}
+
+/* ── Botón de tema en esquina superior derecha ── */
+.login__theme-btn {
+  position: absolute;
+  top: var(--sedh-space-md);
+  right: var(--sedh-space-md);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--sedh-white);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+
+.login__theme-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Tarjeta ── */
+.login__card {
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius-lg);
+  box-shadow: var(--sedh-shadow-md);
+  padding: var(--sedh-space-2xl) var(--sedh-space-xl);
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ── Header ── */
+.login__header {
+  text-align: center;
+  margin-bottom: var(--sedh-space-xl);
+}
+
+.login__emblem {
+  width: 64px;
+  height: 64px;
+  background: var(--sedh-primary-500);
+  border-radius: var(--sedh-radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sedh-white);
+  font-size: 1.75rem;
+  margin: 0 auto var(--sedh-space-md);
+  box-shadow: var(--sedh-shadow-md);
+}
+
+.login__title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--sedh-primary-700);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--sedh-space-xs);
+}
+
+.login__subtitle {
+  color: var(--sedh-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* ── Formulario ── */
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sedh-space-md);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sedh-space-xs);
+}
+
+.form-field__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sedh-text);
+}
+
+.form-field__input {
+  width: 100%;
+}
+
+.form-field__error {
+  font-size: 0.75rem;
+  color: var(--sedh-danger);
+}
+
+/* PrimeNG password wrapper a ancho completo */
+:host ::ng-deep .form-field__password {
+  width: 100%;
+}
+
+:host ::ng-deep .form-field__password .p-password-input {
+  width: 100%;
+}
+
+/* ── Botón submit ── */
+:host ::ng-deep .login__submit-btn {
+  width: 100%;
+  margin-top: var(--sedh-space-sm);
+}
+
+/* ── Responsive ── */
+@media (max-width: 575px) {
+  .login__card {
+    padding: var(--sedh-space-xl) var(--sedh-space-md);
+  }
+}

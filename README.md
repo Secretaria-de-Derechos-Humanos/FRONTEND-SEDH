@@ -1,8 +1,116 @@
-# FrontendSedh
+# SEDH — Sistema Electrónico de Datos de Hacienda
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Frontend institucional construido con **Angular 21+**, **Nx Monorepo** y **PrimeNG**.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+---
+
+## Requisitos
+
+- Node.js >= 20
+- npm >= 10
+- Nx CLI global: `npm install -g nx`
+
+---
+
+## Comandos principales
+
+```sh
+# Servidor de desarrollo
+npx nx serve frontend-sedh --configuration=development
+
+# Build de producción
+npx nx build frontend-sedh
+
+# Ver todas las tareas disponibles del proyecto
+npx nx show project frontend-sedh
+
+# Grafo de dependencias del workspace
+npx nx graph
+```
+
+---
+
+## Estructura del proyecto
+
+```
+FRONTEND-SEDH/
+├── apps/
+│   └── frontend-sedh/
+│       └── src/app/
+│           ├── template/                  # Recursos compartidos
+│           │   ├── components/
+│           │   │   ├── navbar/            # NavbarTopComponent
+│           │   │   └── sidebar/           # SidebarLeftComponent
+│           │   ├── layouts/               # MainLayoutComponent
+│           │   ├── models/                # Interfaces TypeScript
+│           │   ├── pages/
+│           │   │   ├── login/             # LoginPageComponent
+│           │   │   └── dashboard/         # DashboardPageComponent
+│           │   └── services/              # ThemeService
+│           └── [unidad]/                  # Carpeta por departamento
+│               ├── components/
+│               ├── pages/
+│               └── services/
+├── .github/prompts/                       # Agente y skills de Copilot
+└── node_modules/
+```
+
+---
+
+## Rutas de la aplicación
+
+| Ruta | Componente | Descripción |
+|---|---|---|
+| `/` | → `/login` | Redirección automática |
+| `/login` | `LoginPageComponent` | Pantalla de acceso |
+| `/app/dashboard` | `DashboardPageComponent` | Panel principal |
+| `/app/recursosHumanos` | *(próximamente)* | Módulo de RRHH |
+
+---
+
+## Stack tecnológico
+
+| Tecnología | Versión |
+|---|---|
+| Angular | 21.2+ |
+| Nx | 22.6+ |
+| PrimeNG | 18+ |
+| TypeScript | Strict mode |
+| Bundler | esbuild |
+| SSR | Angular SSR (Express) |
+
+---
+
+## Convenciones de desarrollo
+
+- **Archivos**: camelCase (`loginPage.component.ts`)
+- **Componentes**: siempre Standalone + `OnPush`
+- **Estado**: Angular Signals
+- **Estilos**: variables CSS `--sedh-*` (nunca hex directos en componentes)
+- **UI**: PrimeNG como primera opción, CSS personalizado si no cubre el caso
+
+---
+
+## Agregar una nueva unidad (departamento)
+
+```sh
+# Crear carpeta de nueva unidad (ej: finanzas)
+mkdir apps/frontend-sedh/src/app/finanzas
+mkdir apps/frontend-sedh/src/app/finanzas/components
+mkdir apps/frontend-sedh/src/app/finanzas/pages
+mkdir apps/frontend-sedh/src/app/finanzas/services
+```
+
+Luego agregar la ruta en `app.routes.ts` y el item de navegación en `sidebarLeft.component.ts`.
+
+---
+
+## Variables de entorno
+
+Configura en `apps/frontend-sedh/src/environments/`:
+- `environment.ts` — desarrollo
+- `environment.prod.ts` — producción
+
 
 [Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
 

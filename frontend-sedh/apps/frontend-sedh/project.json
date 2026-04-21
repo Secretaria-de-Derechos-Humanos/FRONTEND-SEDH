@@ -1,0 +1,79 @@
+{
+  "name": "frontend-sedh",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "apps/frontend-sedh/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/frontend-sedh",
+        "browser": "apps/frontend-sedh/src/main.ts",
+        "tsConfig": "apps/frontend-sedh/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/frontend-sedh/public"
+          }
+        ],
+        "styles": ["apps/frontend-sedh/src/styles.css"],
+        "server": "apps/frontend-sedh/src/main.server.ts",
+        "ssr": {
+          "entry": "apps/frontend-sedh/src/server.ts"
+        },
+        "outputMode": "server"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "frontend-sedh:build:production"
+        },
+        "development": {
+          "buildTarget": "frontend-sedh:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "frontend-sedh:build",
+        "staticFilePath": "dist/apps/frontend-sedh/browser",
+        "spa": true
+      }
+    }
+  }
+}

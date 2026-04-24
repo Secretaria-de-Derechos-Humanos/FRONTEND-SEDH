@@ -131,11 +131,18 @@
 }
 
 .login__subtitle {
-  color: var(--sedh-text-muted);
-  font-size: 0.8125rem;
+  color: var(--sedh-primary-500);
+  font-size: 1rem;
+  font-weight: bold;
   line-height: 1.4;
   transition: color 0.35s;
 }
+
+/* — Modo oscuro — */
+.dark-theme .login__subtitle {
+  color: var(--sedh-secondary-500);
+}
+
 
 /* =============================================
    Formulario
@@ -188,8 +195,7 @@
   padding: 0.65rem 0.875rem;
 }
 
-/* ── Input de contraseña (p-password) ── */
-/* En PrimeNG 21 el ojo es un <svg> directo dentro del host — NO hay <button> */
+
 :host ::ng-deep .form-field__password,
 :host ::ng-deep .form-field__password.p-password {
   display: block;
@@ -287,9 +293,6 @@
   outline-offset: 2px;
 }
 
-/* =============================================
-   Dark mode — logo blanco sobre fondo oscuro
-   ============================================= */
 
 /* =============================================
    Responsive

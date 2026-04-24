@@ -191,10 +191,17 @@ Para sobrescribir tokens de PrimeNG, usa el layer `primeng`:
 
 ```css
 /* nombreComponente.css */
+
+/* ── Bloque host (solo aquí) ── */
 :host {
   display: block;
 }
 
+/* =============================================
+   Tarjeta
+   ============================================= */
+
+/* — Modo claro — */
 .card {
   background: var(--sedh-surface);
   border: 1px solid var(--sedh-border);
@@ -216,6 +223,29 @@ Para sobrescribir tokens de PrimeNG, usa el layer `primeng`:
   font-size: 0.875rem;
 }
 
+/* — Modo oscuro — */
+.dark-theme .card {
+  background: var(--sedh-gray-800);
+  border-color: var(--sedh-gray-700);
+}
+
+.dark-theme .card__title {
+  color: var(--sedh-secondary-300);
+}
+
+/* — Responsive — */
+@media (max-width: 576px) {
+  .card {
+    padding: var(--sedh-space-sm);
+    border-radius: var(--sedh-radius);
+  }
+}
+
+/* =============================================
+   Badges
+   ============================================= */
+
+/* — Modo claro — */
 .badge--success {
   background: var(--sedh-success-light);
   color: var(--sedh-success-dark);
@@ -229,7 +259,104 @@ Para sobrescribir tokens de PrimeNG, usa el layer `primeng`:
   border-radius: var(--sedh-radius);
   padding: 2px var(--sedh-space-sm);
 }
+
+/* — Modo oscuro — */
+/* (los badges usan variables semánticas que ya cambian con .dark-theme en styles.css) */
 ```
+
+---
+
+## Organización del CSS por componente
+
+### Regla de estructura
+
+Cada sección o bloque de un componente debe seguir **siempre este orden**:
+
+```
+1. Modo claro (base — sin modificador)
+2. Modo oscuro (.dark-theme .clase)
+3. Responsive (@media)
+```
+
+### `:host` — solo al inicio
+
+`:host` solo se usa **al inicio del archivo** para propiedades del propio elemento host (como `display` o `min-height`), no mezclado con otros selectores:
+
+```css
+/* ✅ Correcto — solo al inicio del archivo */
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* ✅ Correcto — llamar la clase directamente */
+.mi-tarjeta {
+  background: var(--sedh-surface);
+  color: var(--sedh-text);
+}
+
+/* ✅ Correcto — modo oscuro con .dark-theme */
+.dark-theme .mi-tarjeta {
+  background: var(--sedh-gray-750);
+}
+
+/* ✅ Correcto — responsive al final */
+@media (max-width: 576px) {
+  .mi-tarjeta {
+    padding: var(--sedh-space-sm);
+  }
+}
+```
+
+```css
+/* ❌ Incorrecto — :host mezclado con otras clases */
+:host ::ng-deep .p-button { ... }   /* solo válido si no hay otra forma */
+
+/* ❌ Incorrecto — :host-context para dark mode */
+:host-context(.dark-theme) .mi-tarjeta { ... }
+
+/* ❌ Incorrecto — dark mode antes de claro */
+.dark-theme .mi-tarjeta { ... }
+.mi-tarjeta { ... }
+```
+
+### Patrón completo de sección
+
+```css
+/* =============================================
+   Nombre del bloque / componente
+   ============================================= */
+
+/* — Modo claro — */
+.mi-clase {
+  background: var(--sedh-surface);
+  border: 1px solid var(--sedh-border);
+  color: var(--sedh-text);
+}
+
+.mi-clase__titulo {
+  color: var(--sedh-primary-700);
+  font-weight: 600;
+}
+
+/* — Modo oscuro — */
+.dark-theme .mi-clase {
+  background: var(--sedh-gray-800);
+}
+
+.dark-theme .mi-clase__titulo {
+  color: var(--sedh-secondary-300);
+}
+
+/* — Responsive — */
+@media (max-width: 576px) {
+  .mi-clase {
+    padding: var(--sedh-space-sm);
+  }
+}
+```
+
+> **Nota para PrimeNG**: `::ng-deep` sigue siendo necesario para acceder a los internos de componentes PrimeNG. En esos casos, `:host ::ng-deep` es la única excepción permitida fuera del inicio del archivo, y también debe seguir el orden claro → oscuro.
 
 ---
 

@@ -259,8 +259,8 @@
 }
 
 /* — oscuro — */
-.dark-theme .login__subtitle {
-  color: var(--sedh-white);
+:host-context(.dark-theme) .login__subtitle {
+  color: var(--sedh-secondary-300);
 }
 
 /* — movil — */

@@ -1,24 +1,21 @@
 :host {
   display: block;
-}
-
-/* ── Pantalla completa con gradiente institucional ── */
-.login {
   min-height: 100vh;
-  background: linear-gradient(
-    145deg,
-    var(--sedh-primary-800) 0%,
-    var(--sedh-primary-600) 60%,
-    var(--sedh-primary-500) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sedh-space-md);
-  position: relative;
 }
 
-/* ── Botón de tema en esquina superior derecha ── */
+/* =============================================
+   Fondo de página — cambia con el tema
+   ============================================= */
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  background: var(--sedh-login-bg);
+  transition: background 0.35s ease;
+}
+
+/* =============================================
+   Botón de tema — esquina superior derecha
+   ============================================= */
 .login__theme-btn {
   position: absolute;
   top: var(--sedh-space-md);
@@ -33,59 +30,116 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
   transition: background 0.2s;
+  z-index: 10;
 }
 
 .login__theme-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
 }
 
-/* ── Tarjeta ── */
-.login__card {
-  background: var(--sedh-surface);
-  border-radius: var(--sedh-radius-lg);
-  box-shadow: var(--sedh-shadow-md);
+/* =============================================
+   Contenedor central
+   ============================================= */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--sedh-space-lg);
+}
+
+/* =============================================
+   Stack de cartas
+   ============================================= */
+.card-stack {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+}
+
+.card-ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  border: 1.5px solid var(--sedh-login-ghost-border);
+  background: var(--sedh-login-ghost-bg);
+  pointer-events: none;
+  transition: border-color 0.35s ease, background 0.35s ease;
+}
+
+.card-ghost-1 {
+  opacity: 0.55;
+  transform: rotate(-4deg) translateX(-6px) translateY(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 0;
+}
+
+.card-ghost-2 {
+  opacity: 0.32;
+  transform: rotate(4deg) translateX(6px) translateY(14px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  z-index: -1;
+}
+
+.card-ghost-right {
+  opacity: 0.32;
+  transform: rotate(4deg) translateX(16px) translateY(4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 0;
+}
+
+/* =============================================
+   Tarjeta principal
+   ============================================= */
+.login-box {
+  background: var(--sedh-login-card-bg);
+  border: 1.5px solid var(--sedh-border);
+  border-radius: 20px;
   padding: var(--sedh-space-2xl) var(--sedh-space-xl);
   width: 100%;
-  max-width: 420px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  animation: fadeUp 0.45s ease-out;
+  position: relative;
+  z-index: 1;
+  transition: background 0.35s ease, border-color 0.35s ease;
 }
 
-/* ── Header ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   Header institucional
+   ============================================= */
 .login__header {
   text-align: center;
   margin-bottom: var(--sedh-space-xl);
 }
 
-.login__emblem {
-  width: 64px;
-  height: 64px;
-  background: var(--sedh-primary-500);
-  border-radius: var(--sedh-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--sedh-white);
-  font-size: 1.75rem;
+.login__logo {
+  display: block;
+  width: 100%;
+  max-width: min(320px, 100%);
+  height: auto;
   margin: 0 auto var(--sedh-space-md);
-  box-shadow: var(--sedh-shadow-md);
-}
-
-.login__title {
-  font-size: 2rem;
-  font-weight: 800;
-  color: var(--sedh-primary-700);
-  letter-spacing: 0.1em;
-  margin-bottom: var(--sedh-space-xs);
+  object-fit: contain;
+  filter: var(--logo-filter);
+  transition: filter 0.35s ease;
 }
 
 .login__subtitle {
   color: var(--sedh-text-muted);
   font-size: 0.8125rem;
   line-height: 1.4;
+  transition: color 0.35s;
 }
 
-/* ── Formulario ── */
+/* =============================================
+   Formulario
+   ============================================= */
 .login__form {
   display: flex;
   flex-direction: column;
@@ -100,64 +154,163 @@
 
 .form-field__label {
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--sedh-text);
+  transition: color 0.35s;
 }
 
+/* ── Input de texto (usuario) ── */
 .form-field__input {
   width: 100%;
-  padding-block: 0.5rem;
-  padding-inline: 0.875rem;
+  padding: 0.65rem 0.875rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--sedh-border);
+  background: var(--sedh-bg);
+  color: var(--sedh-text);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.25s, background 0.35s, color 0.35s, box-shadow 0.25s;
 }
 
-/* PrimeNG InputText — forzar padding igual al campo nativo */
+.form-field__input:focus {
+  border-color: var(--sedh-login-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sedh-login-focus) 20%, transparent);
+}
+
+.form-field__input::placeholder {
+  color: var(--sedh-text-muted);
+  font-size: 0.875rem;
+}
+
+/* PrimeNG InputText — forzar mismo padding */
 :host ::ng-deep input.p-inputtext.form-field__input {
-  padding-block: 0.5rem;
-  padding-inline: 0.875rem;
+  padding: 0.65rem 0.875rem;
 }
 
-.form-field__error {
-  font-size: 0.75rem;
-  color: var(--sedh-danger);
-}
-
-/* PrimeNG password wrapper a ancho completo */
-:host ::ng-deep .form-field__password {
+/* ── Input de contraseña (p-password) ── */
+/* En PrimeNG 21 el ojo es un <svg> directo dentro del host — NO hay <button> */
+:host ::ng-deep .form-field__password,
+:host ::ng-deep .form-field__password.p-password {
+  display: block;
+  position: relative;
   width: 100%;
 }
 
 :host ::ng-deep .form-field__password .p-password-input {
   width: 100%;
+  padding: 0.65rem 2.5rem 0.65rem 0.875rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  border: 1.5px solid var(--sedh-border);
+  background: var(--sedh-bg);
+  color: var(--sedh-text);
+  transition: border-color 0.25s, background 0.35s, color 0.35s, box-shadow 0.25s;
 }
 
-/* ── Botón submit — colores SEDH institucionales ── */
-:host ::ng-deep .login__submit-btn {
+:host ::ng-deep .form-field__password .p-password-input:focus {
+  border-color: var(--sedh-login-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sedh-login-focus) 20%, transparent);
+}
+
+:host ::ng-deep .form-field__password .p-password-input::placeholder {
+  color: var(--sedh-text-muted);
+  font-size: 0.875rem;
+}
+
+/* ── Ojo: el SVG con clase p-password-toggle-mask-icon, absoluto centrado ── */
+:host ::ng-deep .form-field__password .p-password-toggle-mask-icon {
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  color: var(--sedh-login-toggle-color);
+  fill: var(--sedh-login-toggle-color);
+  transition: color 0.35s, fill 0.35s;
+  display: block;
+}
+
+/* ── Mensajes de error de campo ── */
+.form-field__error {
+  font-size: 0.78rem;
+  color: var(--sedh-danger);
+  font-weight: 500;
+}
+
+/* ── Alerta de error general ── */
+.login__error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: var(--sedh-danger-light);
+  color: var(--sedh-danger);
+  border: 1px solid color-mix(in srgb, var(--sedh-danger) 25%, transparent);
+  font-size: 0.9rem;
+}
+
+/* =============================================
+   Botón principal (p-button)
+   ============================================= */
+:host ::ng-deep .login__submit-btn.p-button {
   width: 100%;
-  margin-top: var(--sedh-space-sm);
-  background: var(--sedh-primary-500);
-  border-color: var(--sedh-primary-500);
-  color: #ffffff;
-  padding-block: 0.75rem;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.9375rem;
-  letter-spacing: 0.02em;
-  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  font-size: 1rem;
+  background: var(--sedh-login-btn-bg);
+  border-color: var(--sedh-login-btn-bg);
+  color: var(--sedh-white);
+  margin-top: var(--sedh-space-xs);
+  transition: background 0.25s, border-color 0.25s, transform 0.2s, box-shadow 0.25s;
 }
 
-:host ::ng-deep .login__submit-btn:not(:disabled):hover {
-  background: var(--sedh-primary-700);
-  border-color: var(--sedh-primary-700);
-  box-shadow: 0 4px 12px rgba(38, 77, 160, 0.35);
+:host ::ng-deep .login__submit-btn.p-button:not(:disabled):hover {
+  background: var(--sedh-login-btn-hover);
+  border-color: var(--sedh-login-btn-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px var(--sedh-login-btn-shadow);
 }
 
-:host ::ng-deep .login__submit-btn:focus-visible {
-  outline: 2px solid var(--sedh-primary-300);
+:host ::ng-deep .login__submit-btn.p-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+:host ::ng-deep .login__submit-btn.p-button:focus-visible {
+  outline: 2px solid var(--sedh-login-focus);
   outline-offset: 2px;
 }
 
-/* ── Responsive ── */
-@media (max-width: 575px) {
-  .login__card {
+/* =============================================
+   Dark mode — logo blanco sobre fondo oscuro
+   ============================================= */
+
+/* =============================================
+   Responsive
+   ============================================= */
+@media (max-width: 480px) {
+  .login-box {
     padding: var(--sedh-space-xl) var(--sedh-space-md);
+    border-radius: 16px;
+  }
+
+  .login__title {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-container {
+    padding: var(--sedh-space-md);
+  }
+
+  .login-box {
+    padding: var(--sedh-space-lg) var(--sedh-space-sm);
   }
 }

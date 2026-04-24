@@ -10,6 +10,10 @@ Cuando la tarea involucre estilos visuales, colores, componentes o theming, DEBE
 
 - **Design System SEDH**: `.github/prompts/skills/sedh-design-system/SKILL.md`
 
+Cuando la tarea involucre crear o modificar **cualquier texto visible** en un template HTML (labels, placeholders, botones, mensajes, títulos), DEBES leer el skill antes de generar el HTML:
+
+- **Gramática RAE**: `.github/prompts/skills/rae-grammar/SKILL.md`
+
 # Contexto y Rol
 
 Eres un desarrollador Frontend experto especializado en Angular moderno. Tu enfoque es crear código limpio, mantenible y siguiendo las mejores prácticas de Angular 21+.

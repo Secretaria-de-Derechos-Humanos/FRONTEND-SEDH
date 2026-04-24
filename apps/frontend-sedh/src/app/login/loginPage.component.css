@@ -1,30 +1,25 @@
-:host {
+﻿:host {
   display: block;
-  min-height: 100vh;
+  min-block-size: 100vh;
 }
 
-/* =============================================
-   Fondo de página — cambia con el tema
-   ============================================= */
+/* — claro — */
 .login-page {
   position: relative;
-  min-height: 100vh;
+  min-block-size: 100vh;
   background: var(--sedh-login-bg);
   transition: background 0.35s ease;
 }
 
-/* =============================================
-   Botón de tema — esquina superior derecha
-   ============================================= */
 .login__theme-btn {
   position: absolute;
-  top: var(--sedh-space-md);
-  right: var(--sedh-space-md);
+  inset-block-start: var(--sedh-space-md);
+  inset-inline-end: var(--sedh-space-md);
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: var(--sedh-white);
-  width: 40px;
-  height: 40px;
+  inline-size: 40px;
+  block-size: 40px;
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -38,24 +33,18 @@
   background: rgba(255, 255, 255, 0.28);
 }
 
-/* =============================================
-   Contenedor central
-   ============================================= */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-block-size: 100vh;
   padding: var(--sedh-space-lg);
 }
 
-/* =============================================
-   Stack de cartas
-   ============================================= */
 .card-stack {
   position: relative;
-  width: 100%;
-  max-width: 460px;
+  inline-size: 100%;
+  max-inline-size: 460px;
 }
 
 .card-ghost {
@@ -89,15 +78,12 @@
   z-index: 0;
 }
 
-/* =============================================
-   Tarjeta principal
-   ============================================= */
 .login-box {
   background: var(--sedh-login-card-bg);
   border: 1.5px solid var(--sedh-border);
   border-radius: 20px;
   padding: var(--sedh-space-2xl) var(--sedh-space-xl);
-  width: 100%;
+  inline-size: 100%;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
   animation: fadeUp 0.45s ease-out;
@@ -111,19 +97,16 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* =============================================
-   Header institucional
-   ============================================= */
 .login__header {
   text-align: center;
-  margin-bottom: var(--sedh-space-xl);
+  margin-block-end: var(--sedh-space-xl);
 }
 
 .login__logo {
   display: block;
-  width: 100%;
-  max-width: min(320px, 100%);
-  height: auto;
+  inline-size: 100%;
+  max-inline-size: min(320px, 100%);
+  block-size: auto;
   margin: 0 auto var(--sedh-space-md);
   object-fit: contain;
   filter: var(--logo-filter);
@@ -138,15 +121,6 @@
   transition: color 0.35s;
 }
 
-/* — Modo oscuro — */
-.dark-theme .login__subtitle {
-  color: var(--sedh-secondary-500);
-}
-
-
-/* =============================================
-   Formulario
-   ============================================= */
 .login__form {
   display: flex;
   flex-direction: column;
@@ -166,9 +140,8 @@
   transition: color 0.35s;
 }
 
-/* ── Input de texto (usuario) ── */
 .form-field__input {
-  width: 100%;
+  inline-size: 100%;
   padding: 0.65rem 0.875rem;
   font-size: 0.95rem;
   border-radius: 10px;
@@ -190,21 +163,19 @@
   font-size: 0.875rem;
 }
 
-/* PrimeNG InputText — forzar mismo padding */
 :host ::ng-deep input.p-inputtext.form-field__input {
   padding: 0.65rem 0.875rem;
 }
-
 
 :host ::ng-deep .form-field__password,
 :host ::ng-deep .form-field__password.p-password {
   display: block;
   position: relative;
-  width: 100%;
+  inline-size: 100%;
 }
 
 :host ::ng-deep .form-field__password .p-password-input {
-  width: 100%;
+  inline-size: 100%;
   padding: 0.65rem 2.5rem 0.65rem 0.875rem;
   font-size: 0.95rem;
   border-radius: 10px;
@@ -224,14 +195,13 @@
   font-size: 0.875rem;
 }
 
-/* ── Ojo: el SVG con clase p-password-toggle-mask-icon, absoluto centrado ── */
 :host ::ng-deep .form-field__password .p-password-toggle-mask-icon {
   position: absolute;
-  right: 0.65rem;
-  top: 50%;
+  inset-inline-end: 0.65rem;
+  inset-block-start: 50%;
   transform: translateY(-50%);
-  width: 1rem;
-  height: 1rem;
+  inline-size: 1rem;
+  block-size: 1rem;
   cursor: pointer;
   color: var(--sedh-login-toggle-color);
   fill: var(--sedh-login-toggle-color);
@@ -239,14 +209,12 @@
   display: block;
 }
 
-/* ── Mensajes de error de campo ── */
 .form-field__error {
   font-size: 0.78rem;
   color: var(--sedh-danger);
   font-weight: 500;
 }
 
-/* ── Alerta de error general ── */
 .login__error-alert {
   display: flex;
   align-items: center;
@@ -259,11 +227,8 @@
   font-size: 0.9rem;
 }
 
-/* =============================================
-   Botón principal (p-button)
-   ============================================= */
 :host ::ng-deep .login__submit-btn.p-button {
-  width: 100%;
+  inline-size: 100%;
   justify-content: center;
   padding: 0.75rem 1rem;
   border-radius: 10px;
@@ -272,7 +237,7 @@
   background: var(--sedh-login-btn-bg);
   border-color: var(--sedh-login-btn-bg);
   color: var(--sedh-white);
-  margin-top: var(--sedh-space-xs);
+  margin-block-start: var(--sedh-space-xs);
   transition: background 0.25s, border-color 0.25s, transform 0.2s, box-shadow 0.25s;
 }
 
@@ -293,18 +258,16 @@
   outline-offset: 2px;
 }
 
+/* — oscuro — */
+.dark-theme .login__subtitle {
+  color: var(--sedh-white);
+}
 
-/* =============================================
-   Responsive
-   ============================================= */
+/* — movil — */
 @media (max-width: 480px) {
   .login-box {
     padding: var(--sedh-space-xl) var(--sedh-space-md);
     border-radius: 16px;
-  }
-
-  .login__title {
-    font-size: 1.6rem;
   }
 }
 

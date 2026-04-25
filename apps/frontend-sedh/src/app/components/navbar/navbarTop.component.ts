@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
@@ -15,9 +15,6 @@ import { ThemeToggleComponent } from '../themeToggle/themeToggle.component';
 export class NavbarTopComponent {
   protected readonly authService = inject(AuthService);
 
-  sidebarCollapsed = input<boolean>(false);
-  toggleSidebar = output<void>();
-
   protected readonly userMenuItems: MenuItem[] = [
     {
       label: 'Perfil',
@@ -32,15 +29,12 @@ export class NavbarTopComponent {
     {
       label: 'Cerrar Sesión',
       icon: 'pi pi-sign-out',
+      styleClass: 'menu-item-logout',
       command: () => {
         this.onLogout();
       }
     }
   ];
-
-  onToggleSidebar(): void {
-    this.toggleSidebar.emit();
-  }
 
   onLogout(): void {
     this.authService.logout();

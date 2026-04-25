@@ -42,7 +42,7 @@
 
 /* Variante: Botón navbar */
 .theme-toggle--navbar {
-  background: none;
+  background: transparent;
   color: var(--sedh-text-muted);
   inline-size: 36px;
   block-size: 36px;
@@ -55,7 +55,12 @@
 }
 
 /* Dark theme adjustments */
+:host-context(.dark-theme) .theme-toggle--navbar {
+  background: var(--sedh-secondary-600);
+  color: var(--sedh-white);
+}
+
 :host-context(.dark-theme) .theme-toggle--navbar:hover {
-  background: var(--sedh-primary-900);
-  color: var(--sedh-primary-300);
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-white);
 }

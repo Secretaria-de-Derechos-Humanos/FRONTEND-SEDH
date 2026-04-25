@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { NavItem } from '../../models/navigation.model';
+
+interface NavItem {
+  label: string;
+  icon: 'home' | 'pending';
+  route: string;
+}
 
 @Component({
   selector: 'sedh-sidebar-left',
@@ -11,10 +16,8 @@ import { NavItem } from '../../models/navigation.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarLeftComponent {
-  collapsed = input<boolean>(false);
-
   readonly navItems: NavItem[] = [
-    { label: 'Dashboard', icon: 'pi pi-home', route: '/app/dashboard' },
-    { label: 'Recursos Humanos', icon: 'pi pi-users', route: '/app/recursosHumanos' },
+    { label: 'Inicio', icon: 'home', route: '/app/dashboard' },
+    { label: 'Pendientes', icon: 'pending', route: '/app/recursosHumanos' },
   ];
 }

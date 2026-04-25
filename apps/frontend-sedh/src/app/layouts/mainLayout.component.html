@@ -1,16 +1,13 @@
 <div class="layout">
 
-  <sedh-sidebar-left [collapsed]="sidebarCollapsed()" />
+  <sedh-navbar-top />
 
-  <div class="layout__main">
-
-    <sedh-navbar-top
-      [sidebarCollapsed]="sidebarCollapsed()"
-      (toggleSidebar)="toggleSidebar()" />
+  <div class="layout__body">
+    <sedh-sidebar-left />
 
     <main class="layout__content">
       <router-outlet />
     </main>
-
   </div>
+
 </div>

@@ -5,13 +5,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { ThemeService } from '../services/theme.service';
+import { ThemeToggleComponent } from '../components/themeToggle/themeToggle.component';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'sedh-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, MessageModule],
+  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, MessageModule, ThemeToggleComponent],
   templateUrl: './loginPage.component.html',
   styleUrl: './loginPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +20,6 @@ export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
-  protected readonly themeService = inject(ThemeService);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal('');

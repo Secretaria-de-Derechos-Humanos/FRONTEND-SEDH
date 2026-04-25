@@ -12,13 +12,7 @@
   </div>
 
   <div class="navbar__actions">
-    <button
-      class="navbar__action-btn"
-      type="button"
-      (click)="onToggleTheme()"
-      [title]="themeService.themeLabel()">
-      <i [class]="'pi ' + (themeService.isDark() ? 'pi-sun' : 'pi-moon')"></i>
-    </button>
+    <sedh-theme-toggle variant="navbar" />
 
     <div class="navbar__user-menu">
       <button

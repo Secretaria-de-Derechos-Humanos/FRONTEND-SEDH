@@ -1,0 +1,61 @@
+:host {
+  display: contents;
+}
+
+/* Estilos base para el botón */
+.theme-toggle {
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(15deg);
+}
+
+/* Variante: Botón flotante (Login) */
+.theme-toggle--floating {
+  position: absolute;
+  inset-block-start: var(--sedh-space-md);
+  inset-inline-end: var(--sedh-space-md);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--sedh-white);
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.theme-toggle--floating:hover {
+  background: rgba(255, 255, 255, 0.28);
+  transform: scale(1.05);
+}
+
+/* Variante: Botón navbar */
+.theme-toggle--navbar {
+  background: none;
+  color: var(--sedh-text-muted);
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: var(--sedh-radius);
+}
+
+.theme-toggle--navbar:hover {
+  background: var(--sedh-primary-50);
+  color: var(--sedh-primary-500);
+}
+
+/* Dark theme adjustments */
+:host-context(.dark-theme) .theme-toggle--navbar:hover {
+  background: var(--sedh-primary-900);
+  color: var(--sedh-primary-300);
+}

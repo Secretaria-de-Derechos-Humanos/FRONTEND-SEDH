@@ -1,19 +1,18 @@
 import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
-import { ThemeService } from '../../services/theme.service';
 import { AuthService } from '../../services/auth.service';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
+import { ThemeToggleComponent } from '../themeToggle/themeToggle.component';
 
 @Component({
   selector: 'sedh-navbar-top',
   standalone: true,
-  imports: [MenuModule],
+  imports: [MenuModule, ThemeToggleComponent],
   templateUrl: './navbarTop.component.html',
   styleUrl: './navbarTop.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NavbarTopComponent {
-  protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthService);
 
   sidebarCollapsed = input<boolean>(false);
@@ -41,10 +40,6 @@ export class NavbarTopComponent {
 
   onToggleSidebar(): void {
     this.toggleSidebar.emit();
-  }
-
-  onToggleTheme(): void {
-    this.themeService.toggleTheme();
   }
 
   onLogout(): void {

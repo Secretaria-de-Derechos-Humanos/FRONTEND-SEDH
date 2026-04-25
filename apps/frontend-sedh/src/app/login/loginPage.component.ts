@@ -6,12 +6,21 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ThemeToggleComponent } from '../components/themeToggle/themeToggle.component';
+import { SystemPreloaderComponent } from '../components/preloader/systemPreloader.component';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'sedh-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, MessageModule, ThemeToggleComponent],
+  imports: [
+    ReactiveFormsModule,
+    InputTextModule,
+    PasswordModule,
+    ButtonModule,
+    MessageModule,
+    ThemeToggleComponent,
+    SystemPreloaderComponent
+  ],
   templateUrl: './loginPage.component.html',
   styleUrl: './loginPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +30,7 @@ export class LoginPageComponent {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
 
+  protected readonly showPreloader = signal(true);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal('');
 
@@ -35,6 +45,10 @@ export class LoginPageComponent {
 
   get passwordCtrl() {
     return this.loginForm.get('password');
+  }
+
+  onPreloaderComplete(): void {
+    this.showPreloader.set(false);
   }
 
   onSubmit(): void {

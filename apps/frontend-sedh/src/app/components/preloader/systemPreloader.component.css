@@ -1,0 +1,388 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100vh;
+}
+
+.preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--sedh-primary-900) 0%, var(--sedh-primary-800) 50%, var(--sedh-primary-900) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+/* Efecto de partículas/estrellas de fondo */
+.preloader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(255, 255, 255, 0.15), transparent),
+    radial-gradient(2px 2px at 60% 70%, rgba(255, 255, 255, 0.1), transparent),
+    radial-gradient(1px 1px at 50% 50%, rgba(255, 255, 255, 0.1), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(255, 255, 255, 0.15), transparent),
+    radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.1), transparent),
+    radial-gradient(1px 1px at 33% 80%, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200% 200%;
+  animation: particleFloat 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+}
+
+.preloader__container {
+  max-width: 900px;
+  width: 90%;
+  text-align: center;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ══════════════════════════════════════
+   Header - Logo institucional
+   ══════════════════════════════════════ */
+
+.preloader__header {
+  margin-bottom: var(--sedh-space-lg);
+  animation: fadeIn 1s ease-out 0.2s backwards;
+}
+
+.preloader__logo {
+  height: 80px;
+  width: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ══════════════════════════════════════
+   Institución
+   ══════════════════════════════════════ */
+
+.preloader__institution {
+  margin-bottom: var(--sedh-space-sm);
+  animation: fadeIn 1s ease-out 0.4s backwards;
+}
+
+.preloader__institution-line {
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--sedh-primary-200);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ══════════════════════════════════════
+   Sistema título
+   ══════════════════════════════════════ */
+
+.preloader__system-title {
+  margin-bottom: var(--sedh-space-xl);
+  animation: fadeIn 1s ease-out 0.6s backwards;
+}
+
+.preloader__system-title p {
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: var(--sedh-primary-100);
+  margin: 0;
+}
+
+/* ══════════════════════════════════════
+   Versión - Elemento principal
+   ══════════════════════════════════════ */
+
+.preloader__version {
+  margin: var(--sedh-space-2xl) 0;
+  animation: versionPulse 2s ease-in-out infinite, fadeIn 1s ease-out 0.8s backwards;
+}
+
+@keyframes versionPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+.preloader__version-text {
+  font-size: clamp(5rem, 15vw, 12rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  letter-spacing: -0.03em;
+
+  /* Gradiente azul a celeste claro con brillo dorado */
+  background: linear-gradient(
+    135deg,
+    var(--sedh-primary-100) 0%,
+    var(--sedh-primary-200) 20%,
+    var(--sedh-primary-300) 40%,
+    var(--sedh-secondary-200) 60%,
+    var(--sedh-primary-300) 80%,
+    var(--sedh-primary-200) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+
+  /* Sombra de texto para efecto 3D */
+  filter: drop-shadow(0 4px 20px rgba(173, 132, 17, 0.4))
+          drop-shadow(0 8px 40px rgba(38, 77, 160, 0.3));
+
+  /* Efecto de reflejo */
+  position: relative;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* ══════════════════════════════════════
+   Descripción y tagline
+   ══════════════════════════════════════ */
+
+.preloader__description {
+  margin-bottom: var(--sedh-space-2xl);
+  animation: fadeIn 1s ease-out 1s backwards;
+}
+
+.preloader__tagline {
+  font-size: 1.125rem;
+  color: var(--sedh-primary-100);
+  margin: 0 0 var(--sedh-space-sm) 0;
+  font-weight: 400;
+}
+
+.preloader__features {
+  font-size: 1rem;
+  color: var(--sedh-primary-200);
+  margin: 0;
+  font-weight: 300;
+}
+
+/* ══════════════════════════════════════
+   Progress bar
+   ══════════════════════════════════════ */
+
+.preloader__progress-section {
+  max-width: 500px;
+  margin: 0 auto var(--sedh-space-xl);
+  animation: fadeIn 1s ease-out 1.2s backwards;
+}
+
+.preloader__progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: var(--sedh-primary-700);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: var(--sedh-space-sm);
+  position: relative;
+}
+
+/* Efecto de brillo en la barra de fondo */
+.preloader__progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+.preloader__progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--sedh-secondary-500),
+    var(--sedh-secondary-300),
+    var(--sedh-secondary-500)
+  );
+  background-size: 200% 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+  animation: progressGlow 1.5s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brillo animado en la barra de progreso */
+.preloader__progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: progressShimmer 1s infinite;
+}
+
+@keyframes progressGlow {
+  0%, 100% {
+    background-position: 0% 0%;
+    box-shadow: 0 0 8px rgba(173, 132, 17, 0.6);
+  }
+  50% {
+    background-position: 100% 0%;
+    box-shadow: 0 0 16px rgba(173, 132, 17, 0.8);
+  }
+}
+
+@keyframes progressShimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.preloader__progress-text {
+  font-size: 0.875rem;
+  color: var(--sedh-primary-200);
+  margin: 0;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* ══════════════════════════════════════
+   Footer
+   ══════════════════════════════════════ */
+
+.preloader__footer {
+  position: absolute;
+  bottom: var(--sedh-space-lg);
+  left: 0;
+  right: 0;
+  animation: fadeIn 1s ease-out 1.4s backwards;
+}
+
+.preloader__footer-text {
+  font-size: 0.75rem;
+  color: var(--sedh-primary-400);
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.preloader__footer-link {
+  color: var(--sedh-primary-300);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.preloader__footer-link:hover {
+  color: var(--sedh-secondary-300);
+  text-decoration: underline;
+}
+
+/* ══════════════════════════════════════
+   Responsive
+   ══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .preloader__logo {
+    height: 60px;
+  }
+
+  .preloader__institution-line {
+    font-size: 0.625rem;
+  }
+
+  .preloader__system-title p {
+    font-size: 1.125rem;
+  }
+
+  .preloader__tagline {
+    font-size: 1rem;
+  }
+
+  .preloader__features {
+    font-size: 0.875rem;
+  }
+
+  .preloader__footer-text {
+    font-size: 0.625rem;
+    padding: 0 var(--sedh-space-sm);
+  }
+
+  .preloader__footer-link {
+    display: inline-block;
+    margin: 0 var(--sedh-space-xs);
+  }
+}
+
+@media (max-width: 576px) {
+  .preloader__logo {
+    height: 50px;
+  }
+
+  .preloader__institution-line {
+    font-size: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .preloader__system-title p {
+    font-size: 0.875rem;
+  }
+
+  .preloader__tagline {
+    font-size: 0.875rem;
+  }
+
+  .preloader__features {
+    font-size: 0.75rem;
+  }
+}

@@ -1,10 +1,17 @@
 <div class="login-page">
 
-  <!-- Toggle de tema -->
-  <sedh-theme-toggle variant="floating" />
+  <!-- Preloader del sistema -->
+  @if (showPreloader()) {
+    <sedh-system-preloader (loadComplete)="onPreloaderComplete()" />
+  }
 
-  <!-- Contenedor centrado -->
-  <div class="login-container">
+  <!-- Login form -->
+  @if (!showPreloader()) {
+    <!-- Toggle de tema -->
+    <sedh-theme-toggle variant="floating" />
+
+    <!-- Contenedor centrado -->
+    <div class="login-container">
     <div class="card-stack">
 
       <!-- Tarjetas fantasma (efecto visual) -->
@@ -32,7 +39,7 @@
               type="email"
               pInputText
               formControlName="email"
-              placeholder="usuario@sedh.gob.mx"
+              placeholder="usuario@sedh.gob.hn"
               autocomplete="username"
               class="form-field__input" />
             @if (emailCtrl?.invalid && emailCtrl?.touched) {
@@ -84,5 +91,6 @@
       </div><!-- /login-box -->
     </div><!-- /card-stack -->
   </div><!-- /login-container -->
+  }
 
 </div><!-- /login-page -->

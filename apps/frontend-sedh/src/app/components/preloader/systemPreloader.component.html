@@ -1,0 +1,46 @@
+<div class="preloader">
+  <div class="preloader__container">
+
+    <!-- Logo institucional -->
+    <div class="preloader__header">
+      <img
+        src="/LogoOficialSEDH.png"
+        alt="Gobierno de la Secretaría de Estado de Derechos Humanos"
+        class="preloader__logo">
+    </div>
+
+    <!-- Título institucional -->
+    <div class="preloader__institution">
+      <p class="preloader__institution-line">Secretaria de Estado de Derechos Humanos</p>
+    </div>
+
+    <!-- Sistema -->
+    <div class="preloader__system-title">
+      <p>Sistema Electrónico de Datos</p>
+    </div>
+
+    <!-- Versión grande -->
+    <div class="preloader__version">
+      <h1 class="preloader__version-text">v{{ version }}</h1>
+    </div>
+
+    <!-- Tagline y descripción -->
+    <div class="preloader__description">
+      <p class="preloader__tagline">La actualización más grande de nuestra historia.</p>
+      <p class="preloader__features">Más rápido. Más seguro. Más poderoso.</p>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="preloader__progress-section">
+      <div class="preloader__progress-bar">
+        <div
+          class="preloader__progress-fill"
+          [style.width.%]="progress()">
+        </div>
+      </div>
+      <p class="preloader__progress-text">
+        Preparando despliegue... {{ progress() | number:'1.0-0' }}%
+      </p>
+    </div>
+  </div>
+</div>

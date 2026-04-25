@@ -1,22 +1,23 @@
 ﻿:host {
   display: block;
-  min-block-size: 100vh;
+  block-size: 100vh;
+  overflow: hidden;
 }
 
-/* — claro — */
+/* ─ claro ─ */
 .login-page {
   position: relative;
-  min-block-size: 100vh;
+  block-size: 100%;
   background: var(--sedh-login-bg);
   transition: background 0.35s ease;
+  overflow: hidden;
 }
 
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-block-size: 100vh;
-  padding: var(--sedh-space-lg);
+  block-size: 100%;
 }
 
 .card-stack {

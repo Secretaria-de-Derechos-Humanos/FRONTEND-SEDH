@@ -10,7 +10,8 @@
   background: var(--sedh-primary-800);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: hidden;
+  overflow-x: visible;
   flex-shrink: 0;
   position: relative;
   z-index: 50;
@@ -28,7 +29,7 @@
   flex: 1;
   padding: var(--sedh-space-md) var(--sedh-space-xs);
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   display: flex;
   flex-direction: column;
   gap: var(--sedh-space-xs);
@@ -76,6 +77,37 @@
   flex-shrink: 0;
   transition: all 0.2s;
   color: inherit;
+}
+
+/* ── Tooltip ── */
+.nav-item__tooltip {
+  position: absolute;
+  left: calc(100% + var(--sedh-space-sm));
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  background: var(--sedh-primary-500);
+  color: var(--sedh-white);
+  padding: var(--sedh-space-xs) var(--sedh-space-sm);
+  border-radius: var(--sedh-radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+  box-shadow: var(--sedh-shadow-md);
+}
+
+.nav-item:hover .nav-item__tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Modo dark: dorado */
+:host-context(.dark-theme) .nav-item__tooltip {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
 }
 
 /* ── Footer: versión ── */

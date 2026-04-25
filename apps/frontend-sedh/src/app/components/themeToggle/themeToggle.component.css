@@ -11,6 +11,7 @@
   justify-content: center;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  position: relative;
 }
 
 .theme-toggle svg {
@@ -21,11 +22,42 @@
   transform: rotate(15deg);
 }
 
+/* ── Tooltip ── */
+.theme-toggle__tooltip {
+  position: absolute;
+  top: calc(100% + var(--sedh-space-xs));
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: var(--sedh-primary-500);
+  color: var(--sedh-white);
+  padding: var(--sedh-space-xs) var(--sedh-space-sm);
+  border-radius: var(--sedh-radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+  box-shadow: var(--sedh-shadow-sm);
+}
+
+.theme-toggle:hover .theme-toggle__tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Modo dark: dorado */
+:host-context(.dark-theme) .theme-toggle__tooltip {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
+}
+
 /* Variante: Botón flotante (Login) */
 .theme-toggle--floating {
   position: absolute;
   inset-block-start: var(--sedh-space-md);
-  inset-inline-end: var(--sedh-space-md);
+  inset-inline-end: var(--sedh-space-xl);
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: var(--sedh-white);

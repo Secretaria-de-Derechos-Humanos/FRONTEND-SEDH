@@ -2,10 +2,10 @@
   "users": [
     {
       "id": 1,
-      "emailInstitucional": "admin@sedh.gob.mx",
+      "emailInstitucional": "luis.cardona@sedh.gob.hn",
       "password": "Admin123",
-      "nombre": "Administrador",
-      "apellido": "Sistema",
+      "nombre": "Luis",
+      "apellido": "Cardona",
       "rol": "admin"
     }
   ]

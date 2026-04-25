@@ -70,20 +70,48 @@
   color: var(--sedh-primary-500);
 }
 
+.navbar__user-menu {
+  position: relative;
+}
+
 .navbar__user-avatar {
-  width: 36px;
-  height: 36px;
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sedh-space-xs);
+  padding: var(--sedh-space-xs) var(--sedh-space-sm);
+  border-radius: var(--sedh-radius);
+  cursor: pointer;
+  transition: background 0.2s;
+  color: var(--sedh-text);
+}
+
+.navbar__user-avatar:hover {
+  background: var(--sedh-primary-50);
+}
+
+.navbar__user-avatar i {
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--sedh-primary-100);
   color: var(--sedh-primary-600);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  font-size: 0.875rem;
 }
 
-.navbar__user-avatar:hover {
-  background: var(--sedh-primary-200);
+.navbar__user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--sedh-text);
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .navbar__user-name {
+    display: block;
+  }
 }

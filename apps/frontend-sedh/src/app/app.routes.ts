@@ -1,4 +1,5 @@
 import { Route } from '@angular/router';
+import { authGuard, loginGuard } from './guards/auth.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -8,6 +9,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'login',
+    canActivate: [loginGuard],
     loadComponent: () =>
       import('./login/loginPage.component').then(
         (m) => m.LoginPageComponent
@@ -15,6 +17,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'app',
+    canActivate: [authGuard],
     loadComponent: () =>
       import('./layouts/mainLayout.component').then(
         (m) => m.MainLayoutComponent

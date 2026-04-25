@@ -52,21 +52,21 @@
         <!-- Formulario -->
         <form class="login__form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
-          <!-- Usuario -->
+          <!-- Email Institucional -->
           <div class="form-field">
-            <label class="form-field__label" for="username">Usuario</label>
+            <label class="form-field__label" for="email">Email Institucional</label>
             <input
-              id="username"
-              type="text"
+              id="email"
+              type="email"
               pInputText
-              formControlName="username"
-              placeholder="Ingrese su usuario"
+              formControlName="email"
+              placeholder="usuario@sedh.gob.mx"
               autocomplete="username"
               class="form-field__input" />
-            @if (usernameCtrl?.invalid && usernameCtrl?.touched) {
+            @if (emailCtrl?.invalid && emailCtrl?.touched) {
               <small class="form-field__error">
-                @if (usernameCtrl?.errors?.['required']) { El usuario es requerido. }
-                @if (usernameCtrl?.errors?.['minlength']) { Mínimo 3 caracteres. }
+                @if (emailCtrl?.errors?.['required']) { El email es requerido. }
+                @if (emailCtrl?.errors?.['email']) { Email inválido. }
               </small>
             }
           </div>

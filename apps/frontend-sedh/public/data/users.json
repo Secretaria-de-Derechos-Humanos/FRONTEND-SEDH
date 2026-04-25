@@ -1,0 +1,12 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "emailInstitucional": "admin@sedh.gob.mx",
+      "password": "Admin123",
+      "nombre": "Administrador",
+      "apellido": "Sistema",
+      "rol": "admin"
+    }
+  ]
+}

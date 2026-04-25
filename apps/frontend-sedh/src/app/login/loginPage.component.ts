@@ -6,6 +6,7 @@ import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ThemeService } from '../services/theme.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'sedh-login-page',
@@ -18,18 +19,19 @@ import { ThemeService } from '../services/theme.service';
 export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   protected readonly themeService = inject(ThemeService);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal('');
 
   protected readonly loginForm = this.fb.group({
-    username: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  get usernameCtrl() {
-    return this.loginForm.get('username');
+  get emailCtrl() {
+    return this.loginForm.get('email');
   }
 
   get passwordCtrl() {
@@ -45,10 +47,18 @@ export class LoginPageComponent {
     this.loading.set(true);
     this.errorMessage.set('');
 
-    // TODO: conectar con AuthService real
-    setTimeout(() => {
-      this.loading.set(false);
-      this.router.navigate(['/app/dashboard']);
-    }, 1000);
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email!, password!).subscribe({
+      next: (user) => {
+        this.loading.set(false);
+        console.log('Login exitoso:', user);
+        this.router.navigate(['/app/dashboard']);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.message || 'Error al iniciar sesión');
+      }
+    });
   }
 }

@@ -20,8 +20,18 @@
       <i [class]="'pi ' + (themeService.isDark() ? 'pi-sun' : 'pi-moon')"></i>
     </button>
 
-    <div class="navbar__user-avatar" title="Usuario">
-      <i class="pi pi-user"></i>
+    <div class="navbar__user-menu">
+      <button
+        class="navbar__user-avatar"
+        type="button"
+        (click)="menu.toggle($event)"
+        [title]="authService.currentUser()?.nombre || 'Usuario'">
+        <i class="pi pi-user"></i>
+        @if (authService.currentUser()) {
+          <span class="navbar__user-name">{{ authService.currentUser()!.nombre }}</span>
+        }
+      </button>
+      <p-menu #menu [model]="userMenuItems" [popup]="true" />
     </div>
   </div>
 </header>

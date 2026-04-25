@@ -20,7 +20,6 @@
           }
         ],
         "styles": [
-          "primeicons/primeicons.css",
           "apps/frontend-sedh/src/styles.css"
         ],
         "server": "apps/frontend-sedh/src/main.server.ts",

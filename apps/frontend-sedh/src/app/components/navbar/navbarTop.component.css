@@ -19,8 +19,8 @@
 
 /* Modo dark */
 :host-context(.dark-theme) .navbar {
-  background: var(--sedh-primary-900);
-  border-bottom-color: var(--sedh-primary-700);
+  background: var(--sedh-gray-800);
+  border-bottom-color: var(--sedh-gray-700);
 }
 
 .navbar__brand {

@@ -50,17 +50,17 @@
 }
 
 .theme-toggle--navbar:hover {
-  background: var(--sedh-primary-50);
-  color: var(--sedh-primary-500);
+  background: transparent;
+  color: var(--sedh-secondary-500);
 }
 
 /* Dark theme adjustments */
 :host-context(.dark-theme) .theme-toggle--navbar {
-  background: var(--sedh-secondary-600);
-  color: var(--sedh-white);
+  background: transparent;
+  color: var(--sedh-text-muted);
 }
 
 :host-context(.dark-theme) .theme-toggle--navbar:hover {
-  background: var(--sedh-secondary-500);
-  color: var(--sedh-white);
+  background: transparent;
+  color: var(--sedh-secondary-500);
 }

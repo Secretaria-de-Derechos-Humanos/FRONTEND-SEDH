@@ -10,6 +10,10 @@ Cuando la tarea involucre crear o modificar **cualquier texto visible** en un te
 
 - **Gramática RAE**: `.github/skills/rae-grammar/SKILL.md`
 
+**DESPUÉS de completar CUALQUIER cambio** que cree, modifique o elimine archivos del proyecto, DEBES leer y ejecutar el skill de versionado:
+
+- **Auto Version Bump**: `.github/skills/auto-version-bump/SKILL.md`
+
 ---
 
 # Contexto y Rol

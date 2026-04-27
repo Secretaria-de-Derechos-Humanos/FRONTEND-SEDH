@@ -37,118 +37,147 @@
   padding: 0;
 }
 
-/* ── Module Item - Solo imagen con efecto Mica al hover ── */
+/* ── Module Item - Card con estilo navbar/sidebar ── */
 .module-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease;
 }
 
 .module-item:hover {
-  transform: translateY(-8px);
+  transform: translateY(-4px);
 }
 
-.module-item__wrapper {
+.module-item__card {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 250px;
   aspect-ratio: 1;
-  border-radius: 20px;
-  overflow: visible;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Imagen base */
-.module-item__image {
+/* Modo dark */
+:host-context(.dark-theme) .module-item__card {
+  background: var(--sedh-gray-800);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.module-item:hover .module-item__card {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.12);
+  border-color: rgba(173, 132, 17, 0.3);
+}
+
+:host-context(.dark-theme) .module-item:hover .module-item__card {
+  border-color: rgba(173, 132, 17, 0.4);
+}
+
+/* SVG Container con animación de apertura */
+.module-item__svg-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  z-index: 2;
+}
+
+/* Imagen SVG */
+.module-item__image {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: var(--sedh-space-xl);
+  transition: transform 0.3s ease;
+  transform-origin: left center;
 }
 
-/* Control de visibilidad según tema */
-.module-item__image--light {
-  display: block;
-}
-
-.module-item__image--dark {
-  display: none;
-}
-
-:host-context(.dark-theme) .module-item__image--light {
-  display: none;
-}
-
-:host-context(.dark-theme) .module-item__image--dark {
-  display: block;
-}
-
-/* Overlay con efecto Mica/Glassmorphism - detrás de la imagen */
-.module-item__overlay {
+/* Puerta que tapa la imagen */
+.module-item__door {
   position: absolute;
-  z-index: 1;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(
     135deg,
-    rgba(173, 132, 17, 0.2) 0%,
-    rgba(173, 132, 17, 0.12) 50%,
-    rgba(173, 132, 17, 0.2) 100%
+    var(--sedh-primary-500) 0%,
+    var(--sedh-primary-700) 100%
   );
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 3px solid rgba(173, 132, 17, 0.5);
-  border-radius: 20px;
-  opacity: 0;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+  transform: scaleX(0);
   box-shadow:
-    0 8px 24px rgba(173, 132, 17, 0.12),
-    0 4px 12px rgba(173, 132, 17, 0.08),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.08);
-  pointer-events: none;
+    inset 0 2px 4px rgba(255, 255, 255, 0.2),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+    4px 0 12px rgba(0, 0, 0, 0.3);
 }
 
-:host-context(.dark-theme) .module-item__overlay {
+:host-context(.dark-theme) .module-item__door {
   background: linear-gradient(
     135deg,
-    rgba(173, 132, 17, 0.25) 0%,
-    rgba(173, 132, 17, 0.15) 50%,
-    rgba(173, 132, 17, 0.25) 100%
+    var(--sedh-secondary-500) 0%,
+    var(--sedh-secondary-700) 100%
   );
-  border-color: rgba(173, 132, 17, 0.7);
-  box-shadow:
-    0 10px 32px rgba(173, 132, 17, 0.18),
-    0 5px 16px rgba(173, 132, 17, 0.12),
-    inset 0 1px 2px rgba(255, 255, 255, 0.12),
-    inset 0 -1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Efecto Mica al hover */
-.module-item:hover .module-item__overlay {
-  opacity: 1;
+/* Título en la puerta */
+.module-item__door-title {
+  color: var(--sedh-white);
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  margin: 0;
+  padding: var(--sedh-space-lg);
+  letter-spacing: 0.02em;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
 }
 
-.module-item:hover .module-item__wrapper {
-  box-shadow:
-    0 16px 48px rgba(173, 132, 17, 0.15),
-    0 8px 24px rgba(173, 132, 17, 0.1);
+/* Animación de cierre completo de puerta al hacer clic */
+@keyframes swingDoorClose {
+  0% {
+    transform: scaleX(0.75);
+  }
+  100% {
+    transform: scaleX(0);
+  }
 }
 
-:host-context(.dark-theme) .module-item:hover .module-item__wrapper {
-  box-shadow:
-    0 20px 56px rgba(173, 132, 17, 0.2),
-    0 10px 28px rgba(173, 132, 17, 0.15);
+/* Hover: mostrar la puerta cubriendo el 70% */
+.module-item:hover .module-item__door {
+  transform: scaleX(0.75);
 }
 
-/* Efecto de escala en la imagen al hover */
+/* Aplicar animaciones cuando se está abriendo (click) */
+.module-item--opening .module-item__card {
+  border-color: var(--sedh-primary-500);
+  box-shadow: 0 12px 48px rgba(38, 77, 160, 0.3), 0 4px 16px rgba(38, 77, 160, 0.2);
+}
+
+:host-context(.dark-theme) .module-item--opening .module-item__card {
+  border-color: var(--sedh-secondary-500);
+  box-shadow: 0 12px 48px rgba(173, 132, 17, 0.4), 0 4px 16px rgba(173, 132, 17, 0.3);
+}
+
+/* La puerta se cierra completamente al hacer clic */
+.module-item--opening .module-item__door {
+  animation: swingDoorClose 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Efecto hover en la imagen cuando no hay puerta */
 .module-item:hover .module-item__image {
   transform: scale(1.05);
 }
@@ -170,7 +199,7 @@
     gap: var(--sedh-space-xl);
   }
 
-  .module-item__wrapper {
+  .module-item__card {
     max-width: 320px;
   }
 }
@@ -197,7 +226,7 @@
     font-size: 1rem;
   }
 
-  .module-item__wrapper {
+  .module-item__card {
     max-width: 100%;
   }
 }

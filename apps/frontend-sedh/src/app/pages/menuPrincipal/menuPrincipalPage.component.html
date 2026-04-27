@@ -8,22 +8,24 @@
     @for (option of menuOptions; track option.route) {
       <div
         class="module-item"
+        [class.module-item--opening]="option.isOpening"
         (click)="navigateTo(option.route)"
         (keydown.enter)="navigateTo(option.route)"
         (keydown.space)="navigateTo(option.route)"
         tabindex="0"
         role="button"
         [attr.aria-label]="option.title">
-        <div class="module-item__wrapper">
-          <img
-            class="module-item__image module-item__image--light"
-            [src]="option.imageLight"
-            [alt]="option.title">
-          <img
-            class="module-item__image module-item__image--dark"
-            [src]="option.imageDark"
-            [alt]="option.title">
-          <div class="module-item__overlay"></div>
+        <div class="module-item__card">
+          <div class="module-item__svg-container">
+            <img
+              class="module-item__image"
+              [src]="option.imageLight"
+              [alt]="option.title">
+          </div>
+          <!-- Puerta que tapa la imagen -->
+          <div class="module-item__door">
+            <h2 class="module-item__door-title">{{ option.title }}</h2>
+          </div>
         </div>
       </div>
     }

@@ -109,8 +109,8 @@
   height: 100%;
   background: linear-gradient(
     135deg,
-    var(--sedh-primary-500) 0%,
-    var(--sedh-primary-700) 100%
+    var(--sedh-primary-600) 0%,
+    var(--sedh-primary-900) 100%
   );
   display: flex;
   align-items: center;

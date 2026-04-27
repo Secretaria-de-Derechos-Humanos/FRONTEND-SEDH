@@ -16,14 +16,6 @@ export const appRoutes: Route[] = [
       ),
   },
   {
-    path: 'menuPrincipal',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/menuPrincipal/menuPrincipalPage.component').then(
-        (m) => m.MenuPrincipalPageComponent
-      ),
-  },
-  {
     path: 'app',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -33,8 +25,15 @@ export const appRoutes: Route[] = [
     children: [
       {
         path: '',
-        redirectTo: '/menuPrincipal',
+        redirectTo: 'menu-principal',
         pathMatch: 'full',
+      },
+      {
+        path: 'menu-principal',
+        loadComponent: () =>
+          import('./pages/menuPrincipal/menuPrincipalPage.component').then(
+            (m) => m.MenuPrincipalPageComponent
+          ),
       },
       {
         path: 'configuracion-usuario',

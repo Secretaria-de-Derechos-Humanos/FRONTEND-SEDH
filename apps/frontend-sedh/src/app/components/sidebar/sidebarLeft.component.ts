@@ -21,6 +21,6 @@ export class SidebarLeftComponent {
   protected readonly version = APP_CONFIG.version;
 
   readonly navItems: NavItem[] = [
-    { label: 'Inicio', icon: 'home', route: '/menuPrincipal' },
+    { label: 'Inicio', icon: 'home', route: '/app/menu-principal' },
   ];
 }

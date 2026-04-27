@@ -66,7 +66,7 @@ export class LoginPageComponent {
       next: (user) => {
         this.loading.set(false);
         console.log('Login exitoso:', user);
-        this.router.navigate(['/menuPrincipal']);
+        this.router.navigate(['/app']);
       },
       error: (error) => {
         this.loading.set(false);

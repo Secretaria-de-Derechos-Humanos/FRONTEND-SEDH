@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 interface MenuOption {
   title: string;
   description: string;
-  icon: string;
+  imageLight: string;
+  imageDark: string;
   route: string;
   color: 'primary' | 'secondary';
 }
@@ -22,9 +23,10 @@ export class MenuPrincipalPageComponent {
     {
       title: 'Recursos humanos',
       description: 'Gestión de personal, nómina y expedientes de empleados',
-      icon: 'users',
+      imageLight: '/LogoMenuLight-RRHH.png',
+      imageDark: '/LogoMenuDark-RRHH.png',
       route: '/recursos-humanos',
-      color: 'primary'
+      color: 'secondary'
     },
   ];
 

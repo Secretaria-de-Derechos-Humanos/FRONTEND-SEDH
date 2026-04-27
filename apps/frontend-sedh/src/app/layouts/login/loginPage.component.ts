@@ -1,10 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { ButtonModule } from 'primeng/button';
-import { MessageModule } from 'primeng/message';
 import { ThemeToggleComponent } from '../../components/themeToggle/themeToggle.component';
 import { SystemPreloaderComponent } from '../../components/preloader/systemPreloader.component';
 import { AuthService } from '../../services/auth.service';
@@ -14,10 +10,6 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    InputTextModule,
-    PasswordModule,
-    ButtonModule,
-    MessageModule,
     ThemeToggleComponent,
     SystemPreloaderComponent
   ],
@@ -33,6 +25,7 @@ export class LoginPageComponent {
   protected readonly showPreloader = signal(true);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal('');
+  protected showPassword = false;
 
   protected readonly loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],

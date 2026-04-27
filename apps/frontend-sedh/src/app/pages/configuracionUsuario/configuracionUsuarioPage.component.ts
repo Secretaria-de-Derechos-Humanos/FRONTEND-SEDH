@@ -2,23 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
-import { InputTextModule } from 'primeng/inputtext';
-import { PasswordModule } from 'primeng/password';
-import { DividerModule } from 'primeng/divider';
 
 @Component({
   selector: 'sedh-configuracion-usuario-page',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
-    CardModule,
-    ButtonModule,
-    InputTextModule,
-    PasswordModule,
-    DividerModule
+    FormsModule
   ],
   templateUrl: './configuracionUsuarioPage.component.html',
   styleUrl: './configuracionUsuarioPage.component.css',
@@ -30,6 +20,11 @@ export class ConfiguracionUsuarioPageComponent {
   // Estado del formulario
   protected readonly isEditingProfile = signal(false);
   protected readonly isChangingPassword = signal(false);
+
+  // Control de visibilidad de contraseñas
+  protected showCurrentPassword = false;
+  protected showNewPassword = false;
+  protected showConfirmPassword = false;
 
   // Datos del perfil (editable)
   protected readonly profileForm = signal({

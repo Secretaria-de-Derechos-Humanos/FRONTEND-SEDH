@@ -23,7 +23,7 @@
       </div>
 
       <!-- Formulario de perfil -->
-      <p-card styleClass="profile-section__card">
+      <div class="profile-section__card">
         <div class="profile-form">
           <div class="profile-form__row">
             <div class="profile-form__field">
@@ -31,7 +31,6 @@
               <input
                 id="nombre"
                 type="text"
-                pInputText
                 [(ngModel)]="profileForm().nombre"
                 [disabled]="!isEditingProfile()"
                 class="profile-form__input" />
@@ -42,7 +41,6 @@
               <input
                 id="apellido"
                 type="text"
-                pInputText
                 [(ngModel)]="profileForm().apellido"
                 [disabled]="!isEditingProfile()"
                 class="profile-form__input" />
@@ -54,7 +52,6 @@
             <input
               id="email"
               type="email"
-              pInputText
               [(ngModel)]="profileForm().emailInstitucional"
               [disabled]="!isEditingProfile()"
               class="profile-form__input" />
@@ -62,112 +59,193 @@
 
           <div class="profile-form__actions">
             @if (!isEditingProfile()) {
-              <p-button
-                label="Editar perfil"
-                icon="pi pi-pencil"
-                (onClick)="onEditProfile()" />
+              <button
+                class="button button--primary"
+                (click)="onEditProfile()">
+                <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                </svg>
+                <span>Editar perfil</span>
+              </button>
             } @else {
-              <p-button
-                label="Guardar cambios"
-                icon="pi pi-check"
-                (onClick)="onSaveProfile()" />
-              <p-button
-                label="Cancelar"
-                icon="pi pi-times"
-                severity="secondary"
-                (onClick)="onCancelEditProfile()" />
+              <button
+                class="button button--primary"
+                (click)="onSaveProfile()">
+                <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Guardar cambios</span>
+              </button>
+              <button
+                class="button button--secondary"
+                (click)="onCancelEditProfile()">
+                <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span>Cancelar</span>
+              </button>
             }
           </div>
         </div>
-      </p-card>
+      </div>
     </section>
 
-    <p-divider />
+    <div class="divider"></div>
 
     <!-- Sección: Seguridad -->
     <section class="security-section">
       <h2 class="section-title">Seguridad</h2>
 
-      <p-card styleClass="security-section__card">
+      <div class="security-section__card">
         <h3 class="security-section__title">Cambiar contraseña</h3>
         <p class="security-section__description">
           Actualice su contraseña para mantener su cuenta segura
         </p>
 
         @if (!isChangingPassword()) {
-          <p-button
-            label="Cambiar contraseña"
-            icon="pi pi-shield"
-            (onClick)="onStartChangePassword()" />
+          <button
+            class="button button--primary"
+            (click)="onStartChangePassword()">
+            <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>Cambiar contraseña</span>
+          </button>
         } @else {
           <div class="security-form">
             <div class="security-form__field">
               <label for="currentPassword" class="security-form__label">Contraseña actual</label>
-              <p-password
-                id="currentPassword"
-                [(ngModel)]="passwordForm().currentPassword"
-                [feedback]="false"
-                [toggleMask]="true"
-                styleClass="security-form__password"
-                inputStyleClass="security-form__input" />
+              <div class="password-input">
+                <input
+                  id="currentPassword"
+                  [type]="showCurrentPassword ? 'text' : 'password'"
+                  [(ngModel)]="passwordForm().currentPassword"
+                  class="security-form__input" />
+                <button
+                  type="button"
+                  class="password-input__toggle"
+                  (click)="showCurrentPassword = !showCurrentPassword">
+                  @if (showCurrentPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
 
             <div class="security-form__field">
               <label for="newPassword" class="security-form__label">Nueva contraseña</label>
-              <p-password
-                id="newPassword"
-                [(ngModel)]="passwordForm().newPassword"
-                [toggleMask]="true"
-                styleClass="security-form__password"
-                inputStyleClass="security-form__input" />
+              <div class="password-input">
+                <input
+                  id="newPassword"
+                  [type]="showNewPassword ? 'text' : 'password'"
+                  [(ngModel)]="passwordForm().newPassword"
+                  class="security-form__input" />
+                <button
+                  type="button"
+                  class="password-input__toggle"
+                  (click)="showNewPassword = !showNewPassword">
+                  @if (showNewPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
 
             <div class="security-form__field">
               <label for="confirmPassword" class="security-form__label">Confirmar nueva contraseña</label>
-              <p-password
-                id="confirmPassword"
-                [(ngModel)]="passwordForm().confirmPassword"
-                [feedback]="false"
-                [toggleMask]="true"
-                styleClass="security-form__password"
-                inputStyleClass="security-form__input" />
+              <div class="password-input">
+                <input
+                  id="confirmPassword"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  [(ngModel)]="passwordForm().confirmPassword"
+                  class="security-form__input" />
+                <button
+                  type="button"
+                  class="password-input__toggle"
+                  (click)="showConfirmPassword = !showConfirmPassword">
+                  @if (showConfirmPassword) {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  }
+                </button>
+              </div>
             </div>
 
             <div class="security-form__actions">
-              <p-button
-                label="Actualizar contraseña"
-                icon="pi pi-check"
-                (onClick)="onChangePassword()" />
-              <p-button
-                label="Cancelar"
-                icon="pi pi-times"
-                severity="secondary"
-                (onClick)="onCancelChangePassword()" />
+              <button
+                class="button button--primary"
+                (click)="onChangePassword()">
+                <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Actualizar contraseña</span>
+              </button>
+              <button
+                class="button button--secondary"
+                (click)="onCancelChangePassword()">
+                <svg class="button__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+                <span>Cancelar</span>
+              </button>
             </div>
           </div>
         }
-      </p-card>
+      </div>
 
       <!-- Información adicional de seguridad -->
-      <p-card styleClass="security-section__card">
+      <div class="security-section__card">
         <h3 class="security-section__title">Información de seguridad</h3>
         <div class="security-info">
           <div class="security-info__item">
-            <i class="pi pi-calendar security-info__icon"></i>
+            <svg class="security-info__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
             <div class="security-info__content">
               <span class="security-info__label">Último acceso</span>
               <span class="security-info__value">Hoy a las 09:30 AM</span>
             </div>
           </div>
           <div class="security-info__item">
-            <i class="pi pi-shield security-info__icon"></i>
+            <svg class="security-info__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
             <div class="security-info__content">
               <span class="security-info__label">Estado de seguridad</span>
               <span class="security-info__value security-info__value--success">Segura</span>
             </div>
           </div>
         </div>
-      </p-card>
+      </div>
     </section>
   </div>
 </div>

@@ -14,15 +14,46 @@
       <button
         class="navbar__user-avatar"
         type="button"
-        (click)="menu.toggle($event)">
+        (click)="toggleMenu()">
         <span class="navbar__user-initials">{{ userInitials() }}</span>
       </button>
-      <p-menu
-        #menu
-        [model]="userMenuItems"
-        [popup]="true"
-        [appendTo]="'body'"
-        styleClass="navbar__user-dropdown" />
+
+      @if (isMenuOpen()) {
+        <div class="navbar__dropdown-overlay" (click)="closeMenu()"></div>
+        <div class="navbar__dropdown">
+          <button
+            class="navbar__dropdown-item"
+            (click)="navigateTo('/app/configuracion-usuario')">
+            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span class="navbar__dropdown-text">Ver perfil</span>
+          </button>
+
+          <button
+            class="navbar__dropdown-item"
+            (click)="navigateTo('/app/configuracion-usuario', 'seguridad')">
+            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span class="navbar__dropdown-text">Seguridad</span>
+          </button>
+
+          <div class="navbar__dropdown-separator"></div>
+
+          <button
+            class="navbar__dropdown-item navbar__dropdown-item--logout"
+            (click)="onLogout()">
+            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span class="navbar__dropdown-text">Cerrar sesión</span>
+          </button>
+        </div>
+      }
     </div>
   </div>
 </header>

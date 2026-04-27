@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
-import { MenuModule } from 'primeng/menu';
-import { MenuItem } from 'primeng/api';
 import { ThemeToggleComponent } from '../themeToggle/themeToggle.component';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'sedh-navbar-top',
   standalone: true,
-  imports: [MenuModule, ThemeToggleComponent],
+  imports: [ThemeToggleComponent],
   templateUrl: './navbarTop.component.html',
   styleUrl: './navbarTop.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,7 +15,8 @@ export class NavbarTopComponent {
   protected readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  // Iniciales del usuario
+  protected readonly isMenuOpen = signal(false);
+
   protected readonly userInitials = computed(() => {
     const user = this.authService.currentUser();
     if (!user) return 'U';
@@ -28,35 +27,25 @@ export class NavbarTopComponent {
     return `${nombreInicial}${apellidoInicial}` || 'U';
   });
 
-  protected readonly userMenuItems: MenuItem[] = [
-    {
-      label: 'Ver perfil',
-      icon: 'pi pi-user',
-      command: () => {
-        this.router.navigate(['/app/configuracion-usuario']);
-      }
-    },
-    {
-      label: 'Seguridad',
-      icon: 'pi pi-shield',
-      command: () => {
-        this.router.navigate(['/app/configuracion-usuario'], { fragment: 'seguridad' });
-      }
-    },
-    {
-      separator: true
-    },
-    {
-      label: 'Cerrar sesión',
-      icon: 'pi pi-sign-out',
-      styleClass: 'menu-item-logout',
-      command: () => {
-        this.onLogout();
-      }
+  toggleMenu(): void {
+    this.isMenuOpen.update(value => !value);
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen.set(false);
+  }
+
+  navigateTo(route: string, fragment?: string): void {
+    this.closeMenu();
+    if (fragment) {
+      this.router.navigate([route], { fragment });
+    } else {
+      this.router.navigate([route]);
     }
-  ];
+  }
 
   onLogout(): void {
+    this.closeMenu();
     this.authService.logout();
   }
 }

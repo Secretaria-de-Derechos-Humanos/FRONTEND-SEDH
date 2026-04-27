@@ -8,19 +8,30 @@
     @for (option of menuOptions; track option.route) {
       <div class="menu-card" [class.menu-card--secondary]="option.color === 'secondary'">
         <div class="menu-card__icon">
-          <i [class]="'pi ' + option.icon"></i>
+          @if (option.icon === 'users') {
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          }
         </div>
         <div class="menu-card__content">
           <h2 class="menu-card__title">{{ option.title }}</h2>
           <p class="menu-card__description">{{ option.description }}</p>
         </div>
         <div class="menu-card__footer">
-          <p-button
-            label="Acceder"
-            icon="pi pi-arrow-right"
-            iconPos="right"
-            [severity]="option.color === 'primary' ? 'primary' : 'secondary'"
-            (onClick)="navigateTo(option.route)" />
+          <button
+            class="menu-card__button"
+            [class.menu-card__button--secondary]="option.color === 'secondary'"
+            (click)="navigateTo(option.route)">
+            <span class="menu-card__button-text">Acceder</span>
+            <svg class="menu-card__button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
         </div>
       </div>
     }

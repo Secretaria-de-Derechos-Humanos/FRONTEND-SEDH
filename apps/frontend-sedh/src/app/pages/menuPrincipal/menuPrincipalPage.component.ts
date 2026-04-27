@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { CardModule } from 'primeng/card';
-import { ButtonModule } from 'primeng/button';
 
 interface MenuOption {
   title: string;
@@ -14,7 +12,7 @@ interface MenuOption {
 @Component({
   selector: 'sedh-menu-principal-page',
   standalone: true,
-  imports: [CardModule, ButtonModule],
+  imports: [],
   templateUrl: './menuPrincipalPage.component.html',
   styleUrl: './menuPrincipalPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,11 +22,10 @@ export class MenuPrincipalPageComponent {
     {
       title: 'Recursos humanos',
       description: 'Gestión de personal, nómina y expedientes de empleados',
-      icon: 'pi-users',
+      icon: 'users',
       route: '/recursos-humanos',
       color: 'primary'
     },
-    // Aquí se pueden agregar más módulos en el futuro
   ];
 
   constructor(private router: Router) {}

@@ -141,8 +141,45 @@
   font-weight: 600;
 }
 
-.profile-form__input {
+.profile-form__input,
+.security-form__input {
   width: 100%;
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  background: var(--sedh-bg);
+  color: var(--sedh-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.profile-form__input:hover,
+.security-form__input:hover {
+  border-color: var(--sedh-primary-300);
+}
+
+.profile-form__input:focus,
+.security-form__input:focus {
+  outline: none;
+  border-color: var(--sedh-primary-500);
+  box-shadow: 0 0 0 3px var(--sedh-primary-100);
+}
+
+.profile-form__input:disabled {
+  background: var(--sedh-gray-100);
+  color: var(--sedh-text-muted);
+  cursor: not-allowed;
+  border-color: var(--sedh-border);
+}
+
+:host-context(.dark-theme) .profile-form__input:disabled {
+  background: var(--sedh-gray-800);
+}
+
+:host-context(.dark-theme) .profile-form__input:focus,
+:host-context(.dark-theme) .security-form__input:focus {
+  box-shadow: 0 0 0 3px var(--sedh-primary-900);
 }
 
 .profile-form__actions {
@@ -151,6 +188,117 @@
   justify-content: flex-start;
   padding-top: var(--sedh-space-md);
   border-top: 1px solid var(--sedh-border);
+}
+
+/* ── Cards ── */
+.profile-section__card,
+.security-section__card {
+  padding: var(--sedh-space-lg) var(--sedh-space-xl);
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius);
+  border: 1px solid var(--sedh-border);
+}
+
+/* ── Divider ── */
+.divider {
+  height: 1px;
+  background: var(--sedh-border);
+  margin: var(--sedh-space-xl) 0;
+}
+
+/* ── Buttons ── */
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sedh-space-sm);
+  padding: var(--sedh-space-sm) var(--sedh-space-lg);
+  border: none;
+  border-radius: var(--sedh-radius);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.button__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.button--primary {
+  background: var(--sedh-primary-500);
+  color: var(--sedh-white);
+}
+
+.button--primary:hover {
+  background: var(--sedh-primary-400);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(38, 77, 160, 0.3);
+}
+
+.button--primary:active {
+  background: var(--sedh-primary-600);
+  transform: translateY(0);
+}
+
+.button--secondary {
+  background: var(--sedh-gray-200);
+  color: var(--sedh-text);
+}
+
+.button--secondary:hover {
+  background: var(--sedh-gray-300);
+}
+
+.button--secondary:active {
+  background: var(--sedh-gray-400);
+}
+
+:host-context(.dark-theme) .button--secondary {
+  background: var(--sedh-gray-700);
+  color: var(--sedh-text);
+}
+
+:host-context(.dark-theme) .button--secondary:hover {
+  background: var(--sedh-gray-600);
+}
+
+/* ── Password Input ── */
+.password-input {
+  position: relative;
+  width: 100%;
+}
+
+.password-input input {
+  padding-right: 48px;
+}
+
+.password-input__toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--sedh-text-muted);
+  transition: color 0.2s ease;
+}
+
+.password-input__toggle:hover {
+  color: var(--sedh-primary-500);
+}
+
+.password-input__toggle svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* ── Security Section ── */
@@ -197,14 +345,6 @@
   font-weight: 600;
 }
 
-.security-form__password {
-  width: 100%;
-}
-
-.security-form__input {
-  width: 100%;
-}
-
 .security-form__actions {
   display: flex;
   gap: var(--sedh-space-sm);
@@ -232,7 +372,8 @@
 }
 
 .security-info__icon {
-  font-size: 1.25rem;
+  width: 24px;
+  height: 24px;
   color: var(--sedh-primary-500);
   flex-shrink: 0;
 }

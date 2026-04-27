@@ -142,50 +142,39 @@
   font-size: 0.875rem;
 }
 
-:host ::ng-deep input.p-inputtext.form-field__input {
-  padding: 0.65rem 0.875rem;
-}
-
-:host ::ng-deep .form-field__password,
-:host ::ng-deep .form-field__password.p-password {
-  display: block;
+/* ── Password Input ── */
+.password-input {
   position: relative;
   inline-size: 100%;
 }
 
-:host ::ng-deep .form-field__password .p-password-input {
-  inline-size: 100%;
-  padding: 0.65rem 2.5rem 0.65rem 0.875rem;
-  font-size: 0.95rem;
-  border-radius: 10px;
-  border: 1.5px solid var(--sedh-border);
-  background: var(--sedh-bg);
-  color: var(--sedh-text);
-  transition: border-color 0.25s, background 0.35s, color 0.35s, box-shadow 0.25s;
+.password-input input {
+  padding-inline-end: 2.5rem;
 }
 
-:host ::ng-deep .form-field__password .p-password-input:focus {
-  border-color: var(--sedh-login-focus);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sedh-login-focus) 20%, transparent);
-}
-
-:host ::ng-deep .form-field__password .p-password-input::placeholder {
-  color: var(--sedh-text-muted);
-  font-size: 0.875rem;
-}
-
-:host ::ng-deep .form-field__password .p-password-toggle-mask-icon {
+.password-input__toggle {
   position: absolute;
-  inset-inline-end: 0.65rem;
-  inset-block-start: 50%;
-  transform: translateY(-50%);
-  inline-size: 1rem;
-  block-size: 1rem;
+  inset-inline-end: 0;
+  inset-block-start: 0;
+  block-size: 100%;
+  inline-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
   cursor: pointer;
   color: var(--sedh-login-toggle-color);
-  fill: var(--sedh-login-toggle-color);
-  transition: color 0.35s, fill 0.35s;
-  display: block;
+  transition: color 0.2s ease;
+}
+
+.password-input__toggle:hover {
+  color: var(--sedh-login-focus);
+}
+
+.password-input__toggle svg {
+  inline-size: 20px;
+  block-size: 20px;
 }
 
 .form-field__error {
@@ -206,35 +195,65 @@
   font-size: 0.9rem;
 }
 
-:host ::ng-deep .login__submit-btn.p-button {
+.login__error-icon {
+  inline-size: 20px;
+  block-size: 20px;
+  flex-shrink: 0;
+}
+
+/* ── Submit Button ── */
+.login__submit-btn {
   inline-size: 100%;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  gap: var(--sedh-space-sm);
   padding: 0.75rem 1rem;
   border-radius: 10px;
   font-weight: 600;
   font-size: 1rem;
+  font-family: inherit;
   background: var(--sedh-login-btn-bg);
-  border-color: var(--sedh-login-btn-bg);
+  border: 1.5px solid var(--sedh-login-btn-bg);
   color: var(--sedh-white);
   margin-block-start: var(--sedh-space-xs);
+  cursor: pointer;
   transition: background 0.25s, border-color 0.25s, transform 0.2s, box-shadow 0.25s;
 }
 
-:host ::ng-deep .login__submit-btn.p-button:not(:disabled):hover {
+.login__submit-btn:not(:disabled):hover {
   background: var(--sedh-login-btn-hover);
   border-color: var(--sedh-login-btn-hover);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px var(--sedh-login-btn-shadow);
 }
 
-:host ::ng-deep .login__submit-btn.p-button:disabled {
+.login__submit-btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
 
-:host ::ng-deep .login__submit-btn.p-button:focus-visible {
+.login__submit-btn:focus-visible {
   outline: 2px solid var(--sedh-login-focus);
   outline-offset: 2px;
+}
+
+.login__submit-icon {
+  inline-size: 20px;
+  block-size: 20px;
+  flex-shrink: 0;
+}
+
+.login__submit-spinner {
+  inline-size: 24px;
+  block-size: 24px;
+  flex-shrink: 0;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* — oscuro — */

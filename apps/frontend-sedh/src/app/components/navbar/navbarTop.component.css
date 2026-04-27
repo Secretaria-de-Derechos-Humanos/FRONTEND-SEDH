@@ -5,13 +5,12 @@
 }
 
 .navbar {
-  height: 70px;
+  height: 60px;
   background: var(--sedh-primary-800);
-  border-bottom: 1px solid var(--sedh-border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--sedh-space-lg);
+  padding: 0 var(--sedh-space-md);
   gap: var(--sedh-space-lg);
   box-shadow: var(--sedh-shadow-sm);
   position: relative;
@@ -27,19 +26,18 @@
 
 :host-context(.dark-theme) .navbar {
   background: var(--sedh-gray-800);
-  border-bottom-color: var(--sedh-gray-700);
 }
 
 .navbar__brand {
   display: flex;
   align-items: center;
-  gap: var(--sedh-space-md);
+  gap: var(--sedh-space-xs);
   flex: 1;
   min-width: 0;
 }
 
 .navbar__logo {
-  height: 50px;
+  height: 40px;
   width: auto;
   object-fit: contain;
   filter: var(--logo-filter) !important;
@@ -91,21 +89,23 @@
   border: none;
   display: flex;
   align-items: center;
-  gap: var(--sedh-space-xs);
-  padding: var(--sedh-space-xs) var(--sedh-space-sm);
-  border-radius: var(--sedh-radius);
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   color: var(--sedh-text);
+  width: 40px;
+  height: 40px;
 }
 
 .navbar__user-avatar:hover {
-  background: var(--sedh-primary-50);
+  transform: scale(1.05);
 }
 
-.navbar__user-avatar i {
-  width: 32px;
-  height: 32px;
+.navbar__user-initials {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--sedh-primary-100);
   color: var(--sedh-primary-600);
@@ -113,13 +113,25 @@
   align-items: center;
   justify-content: center;
   font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
 }
 
-.navbar__user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--sedh-text);
-  display: none;
+.navbar__user-avatar:hover .navbar__user-initials {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
+}
+
+/* Modo dark */
+:host-context(.dark-theme) .navbar__user-initials {
+  background: var(--sedh-gray-700);
+  color: var(--sedh-secondary-400);
+}
+
+:host-context(.dark-theme) .navbar__user-avatar:hover .navbar__user-initials {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
 }
 
 /* Estilos globales para el menú de usuario */
@@ -163,12 +175,6 @@
 
 :host-context(.dark-theme) ::ng-deep .navbar__user-dropdown .menu-item-logout .p-menuitem-icon {
   color: #f87171;
-}
-
-@media (min-width: 768px) {
-  .navbar__user-name {
-    display: block;
-  }
 }
 
 @media (max-width: 768px) {

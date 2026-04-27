@@ -11,28 +11,36 @@ export const appRoutes: Route[] = [
     path: 'login',
     canActivate: [loginGuard],
     loadComponent: () =>
-      import('./login/loginPage.component').then(
+      import('./layouts/login/loginPage.component').then(
         (m) => m.LoginPageComponent
+      ),
+  },
+  {
+    path: 'menuPrincipal',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./pages/menuPrincipal/menuPrincipalPage.component').then(
+        (m) => m.MenuPrincipalPageComponent
       ),
   },
   {
     path: 'app',
     canActivate: [authGuard],
     loadComponent: () =>
-      import('./layouts/mainLayout.component').then(
+      import('./layouts/mainLayout/mainLayout.component').then(
         (m) => m.MainLayoutComponent
       ),
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
+        redirectTo: '/menuPrincipal',
         pathMatch: 'full',
       },
       {
-        path: 'dashboard',
+        path: 'configuracion-usuario',
         loadComponent: () =>
-          import('./dashboard/dashboardPage.component').then(
-            (m) => m.DashboardPageComponent
+          import('./layouts/configuracionUsuario/configuracionUsuarioPage.component').then(
+            (m) => m.ConfiguracionUsuarioPageComponent
           ),
       },
     ],

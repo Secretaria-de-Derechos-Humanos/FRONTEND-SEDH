@@ -10,8 +10,7 @@
   background: var(--sedh-primary-800);
   display: flex;
   flex-direction: column;
-  overflow-y: hidden;
-  overflow-x: visible;
+  overflow: visible;
   flex-shrink: 0;
   position: relative;
   z-index: 50;
@@ -21,15 +20,13 @@
 /* Modo dark */
 :host-context(.dark-theme) .sidebar {
   background: var(--sedh-gray-800);
-  border-right: 1px solid var(--sedh-gray-700);
 }
 
 /* ── Navegación ── */
 .sidebar__nav {
   flex: 1;
   padding: var(--sedh-space-md) var(--sedh-space-xs);
-  overflow-y: auto;
-  overflow-x: visible;
+  overflow: visible;
   display: flex;
   flex-direction: column;
   gap: var(--sedh-space-xs);
@@ -82,7 +79,7 @@
 /* ── Tooltip ── */
 .nav-item__tooltip {
   position: absolute;
-  left: calc(100% + var(--sedh-space-sm));
+  left: calc(70% + var(--sedh-space-sm));
   top: 50%;
   transform: translateY(-50%) translateX(-4px);
   background: var(--sedh-primary-500);
@@ -115,13 +112,11 @@
   padding: var(--sedh-space-xs) var(--sedh-space-xs);
   border-top: 1px solid var(--sedh-primary-700);
   flex-shrink: 0;
-  background: var(--sedh-primary-900);
-  transition: background 0.3s ease;
+  transition: border-color 0.3s ease;
 }
 
 /* Modo dark footer */
 :host-context(.dark-theme) .sidebar__footer {
-  background: var(--sedh-gray-900);
   border-top-color: var(--sedh-gray-700);
 }
 
@@ -133,58 +128,14 @@
 }
 
 .sidebar__version-number {
-  color: var(--sedh-white);
+  color: var(--sedh-text-muted);
   font-size: 0.625rem;
   font-weight: 700;
   font-family: 'Courier New', monospace;
   text-align: center;
-  opacity: 0.7;
-  transition: all 0.2s;
+  opacity: 0.6;
+  transition: opacity 0.2s;
   padding: var(--sedh-space-xs) var(--sedh-space-sm);
-  border-radius: var(--sedh-radius);
-  cursor: pointer;
 }
 
-.sidebar__version-number:hover {
-  opacity: 1;
-  background: var(--sedh-primary-500);
-  color: var(--sedh-white);
-}
 
-/* Modo dark hover */
-:host-context(.dark-theme) .sidebar__version-number:hover {
-  background: var(--sedh-secondary-500);
-  color: var(--sedh-white);
-}
-
-/* ── Scrollbar personalizado ── */
-.sidebar__nav::-webkit-scrollbar {
-  width: 3px;
-}
-
-.sidebar__nav::-webkit-scrollbar-track {
-  background: var(--sedh-primary-900);
-  border-radius: 2px;
-}
-
-.sidebar__nav::-webkit-scrollbar-thumb {
-  background: var(--sedh-primary-600);
-  border-radius: 2px;
-}
-
-.sidebar__nav::-webkit-scrollbar-thumb:hover {
-  background: var(--sedh-primary-500);
-}
-
-/* Modo dark scrollbar */
-:host-context(.dark-theme) .sidebar__nav::-webkit-scrollbar-track {
-  background: var(--sedh-gray-900);
-}
-
-:host-context(.dark-theme) .sidebar__nav::-webkit-scrollbar-thumb {
-  background: var(--sedh-gray-700);
-}
-
-:host-context(.dark-theme) .sidebar__nav::-webkit-scrollbar-thumb:hover {
-  background: var(--sedh-gray-600);
-}

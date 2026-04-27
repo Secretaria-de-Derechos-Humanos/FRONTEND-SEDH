@@ -15,11 +15,8 @@
         class="navbar__user-avatar"
         type="button"
         (click)="menu.toggle($event)"
-        [title]="authService.currentUser()?.nombre || 'Usuario'">
-        <i class="pi pi-user"></i>
-        @if (authService.currentUser()) {
-          <span class="navbar__user-name">{{ authService.currentUser()!.nombre }}</span>
-        }
+        [title]="authService.currentUser()?.nombre + ' ' + authService.currentUser()?.apellido || 'Usuario'">
+        <span class="navbar__user-initials">{{ userInitials() }}</span>
       </button>
       <p-menu #menu [model]="userMenuItems" [popup]="true" styleClass="navbar__user-dropdown" />
     </div>

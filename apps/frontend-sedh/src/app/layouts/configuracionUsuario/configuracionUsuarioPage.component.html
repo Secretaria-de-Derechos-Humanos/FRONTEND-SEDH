@@ -1,0 +1,173 @@
+<div class="configuracion-usuario">
+  <div class="configuracion-usuario__header">
+    <h1 class="configuracion-usuario__title">Configuración de usuario</h1>
+    <p class="configuracion-usuario__subtitle">Administre su información personal y configuración de seguridad</p>
+  </div>
+
+  <div class="configuracion-usuario__content">
+    <!-- Sección: Perfil -->
+    <section class="profile-section">
+      <h2 class="section-title">Perfil</h2>
+
+      <!-- Avatar y datos básicos -->
+      <div class="profile-section__avatar-container">
+        <div class="profile-section__avatar">
+          <span class="profile-section__initials">{{ userInitials() }}</span>
+        </div>
+        <div class="profile-section__user-info">
+          <h3 class="profile-section__name">
+            {{ authService.currentUser()?.nombre }} {{ authService.currentUser()?.apellido }}
+          </h3>
+          <p class="profile-section__role">{{ authService.currentUser()?.rol }}</p>
+        </div>
+      </div>
+
+      <!-- Formulario de perfil -->
+      <p-card styleClass="profile-section__card">
+        <div class="profile-form">
+          <div class="profile-form__row">
+            <div class="profile-form__field">
+              <label for="nombre" class="profile-form__label">Nombre</label>
+              <input
+                id="nombre"
+                type="text"
+                pInputText
+                [(ngModel)]="profileForm().nombre"
+                [disabled]="!isEditingProfile()"
+                class="profile-form__input" />
+            </div>
+
+            <div class="profile-form__field">
+              <label for="apellido" class="profile-form__label">Apellido</label>
+              <input
+                id="apellido"
+                type="text"
+                pInputText
+                [(ngModel)]="profileForm().apellido"
+                [disabled]="!isEditingProfile()"
+                class="profile-form__input" />
+            </div>
+          </div>
+
+          <div class="profile-form__field">
+            <label for="email" class="profile-form__label">Correo electrónico institucional</label>
+            <input
+              id="email"
+              type="email"
+              pInputText
+              [(ngModel)]="profileForm().emailInstitucional"
+              [disabled]="!isEditingProfile()"
+              class="profile-form__input" />
+          </div>
+
+          <div class="profile-form__actions">
+            @if (!isEditingProfile()) {
+              <p-button
+                label="Editar perfil"
+                icon="pi pi-pencil"
+                (onClick)="onEditProfile()" />
+            } @else {
+              <p-button
+                label="Guardar cambios"
+                icon="pi pi-check"
+                (onClick)="onSaveProfile()" />
+              <p-button
+                label="Cancelar"
+                icon="pi pi-times"
+                severity="secondary"
+                (onClick)="onCancelEditProfile()" />
+            }
+          </div>
+        </div>
+      </p-card>
+    </section>
+
+    <p-divider />
+
+    <!-- Sección: Seguridad -->
+    <section class="security-section">
+      <h2 class="section-title">Seguridad</h2>
+
+      <p-card styleClass="security-section__card">
+        <h3 class="security-section__title">Cambiar contraseña</h3>
+        <p class="security-section__description">
+          Actualice su contraseña para mantener su cuenta segura
+        </p>
+
+        @if (!isChangingPassword()) {
+          <p-button
+            label="Cambiar contraseña"
+            icon="pi pi-shield"
+            (onClick)="onStartChangePassword()" />
+        } @else {
+          <div class="security-form">
+            <div class="security-form__field">
+              <label for="currentPassword" class="security-form__label">Contraseña actual</label>
+              <p-password
+                id="currentPassword"
+                [(ngModel)]="passwordForm().currentPassword"
+                [feedback]="false"
+                [toggleMask]="true"
+                styleClass="security-form__password"
+                inputStyleClass="security-form__input" />
+            </div>
+
+            <div class="security-form__field">
+              <label for="newPassword" class="security-form__label">Nueva contraseña</label>
+              <p-password
+                id="newPassword"
+                [(ngModel)]="passwordForm().newPassword"
+                [toggleMask]="true"
+                styleClass="security-form__password"
+                inputStyleClass="security-form__input" />
+            </div>
+
+            <div class="security-form__field">
+              <label for="confirmPassword" class="security-form__label">Confirmar nueva contraseña</label>
+              <p-password
+                id="confirmPassword"
+                [(ngModel)]="passwordForm().confirmPassword"
+                [feedback]="false"
+                [toggleMask]="true"
+                styleClass="security-form__password"
+                inputStyleClass="security-form__input" />
+            </div>
+
+            <div class="security-form__actions">
+              <p-button
+                label="Actualizar contraseña"
+                icon="pi pi-check"
+                (onClick)="onChangePassword()" />
+              <p-button
+                label="Cancelar"
+                icon="pi pi-times"
+                severity="secondary"
+                (onClick)="onCancelChangePassword()" />
+            </div>
+          </div>
+        }
+      </p-card>
+
+      <!-- Información adicional de seguridad -->
+      <p-card styleClass="security-section__card">
+        <h3 class="security-section__title">Información de seguridad</h3>
+        <div class="security-info">
+          <div class="security-info__item">
+            <i class="pi pi-calendar security-info__icon"></i>
+            <div class="security-info__content">
+              <span class="security-info__label">Último acceso</span>
+              <span class="security-info__value">Hoy a las 09:30 AM</span>
+            </div>
+          </div>
+          <div class="security-info__item">
+            <i class="pi pi-shield security-info__icon"></i>
+            <div class="security-info__content">
+              <span class="security-info__label">Estado de seguridad</span>
+              <span class="security-info__value security-info__value--success">Segura</span>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </section>
+  </div>
+</div>

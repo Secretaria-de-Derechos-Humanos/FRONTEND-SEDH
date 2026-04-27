@@ -1,0 +1,28 @@
+<div class="menu-principal">
+  <div class="menu-principal__header">
+    <h1 class="menu-principal__title">Menú principal</h1>
+    <p class="menu-principal__subtitle">Seleccione el módulo al que desea acceder</p>
+  </div>
+
+  <div class="menu-principal__grid">
+    @for (option of menuOptions; track option.route) {
+      <div class="menu-card" [class.menu-card--secondary]="option.color === 'secondary'">
+        <div class="menu-card__icon">
+          <i [class]="'pi ' + option.icon"></i>
+        </div>
+        <div class="menu-card__content">
+          <h2 class="menu-card__title">{{ option.title }}</h2>
+          <p class="menu-card__description">{{ option.description }}</p>
+        </div>
+        <div class="menu-card__footer">
+          <p-button
+            label="Acceder"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            [severity]="option.color === 'primary' ? 'primary' : 'secondary'"
+            (onClick)="navigateTo(option.route)" />
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -5,9 +5,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
-import { ThemeToggleComponent } from '../components/themeToggle/themeToggle.component';
-import { SystemPreloaderComponent } from '../components/preloader/systemPreloader.component';
-import { AuthService } from '../services/auth.service';
+import { ThemeToggleComponent } from '../../components/themeToggle/themeToggle.component';
+import { SystemPreloaderComponent } from '../../components/preloader/systemPreloader.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'sedh-login-page',
@@ -66,7 +66,7 @@ export class LoginPageComponent {
       next: (user) => {
         this.loading.set(false);
         console.log('Login exitoso:', user);
-        this.router.navigate(['/app/dashboard']);
+        this.router.navigate(['/menuPrincipal']);
       },
       error: (error) => {
         this.loading.set(false);

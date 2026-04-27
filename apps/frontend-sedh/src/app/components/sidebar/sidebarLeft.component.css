@@ -8,18 +8,24 @@
   width: 56px;
   height: 100%;
   background: var(--sedh-primary-800);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-right-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow: visible;
   flex-shrink: 0;
   position: relative;
   z-index: 50;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
+  margin: 4px 2px 0px 2px;
 }
+
 
 /* Modo dark */
 :host-context(.dark-theme) .sidebar {
   background: var(--sedh-gray-800);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ── Navegación ── */

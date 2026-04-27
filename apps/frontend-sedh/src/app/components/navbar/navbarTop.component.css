@@ -7,15 +7,19 @@
 .navbar {
   height: 60px;
   background: var(--sedh-primary-800);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--sedh-space-md);
   gap: var(--sedh-space-lg);
-  box-shadow: var(--sedh-shadow-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 100;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  margin: 2px;
 }
 
 /* Modo dark */
@@ -26,6 +30,7 @@
 
 :host-context(.dark-theme) .navbar {
   background: var(--sedh-gray-800);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .navbar__brand {

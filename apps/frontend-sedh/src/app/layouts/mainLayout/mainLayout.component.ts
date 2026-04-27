@@ -4,7 +4,7 @@ import { SidebarLeftComponent } from '../../components/sidebar/sidebarLeft.compo
 import { NavbarTopComponent } from '../../components/navbar/navbarTop.component';
 
 @Component({
-  selector: 'sedh-main-layout',
+  selector: 'app-main-layout',
   standalone: true,
   imports: [RouterOutlet, SidebarLeftComponent, NavbarTopComponent],
   templateUrl: './mainLayout.component.html',

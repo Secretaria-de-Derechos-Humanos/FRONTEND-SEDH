@@ -6,7 +6,7 @@ import { SystemPreloaderComponent } from '../../components/preloader/systemPrelo
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'sedh-login-page',
+  selector: 'app-login-page',
   standalone: true,
   imports: [
     ReactiveFormsModule,

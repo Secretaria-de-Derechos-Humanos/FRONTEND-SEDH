@@ -6,7 +6,14 @@
 
   <div class="menu-principal__grid">
     @for (option of menuOptions; track option.route) {
-      <div class="module-item" (click)="navigateTo(option.route)">
+      <div
+        class="module-item"
+        (click)="navigateTo(option.route)"
+        (keydown.enter)="navigateTo(option.route)"
+        (keydown.space)="navigateTo(option.route)"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="option.title">
         <div class="module-item__wrapper">
           <img
             class="module-item__image module-item__image--light"

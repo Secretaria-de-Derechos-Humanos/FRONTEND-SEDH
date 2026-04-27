@@ -21,7 +21,6 @@
 .layout__content {
   flex: 1;
   overflow-y: auto;
-  padding: var(--sedh-space-lg);
   background: var(--sedh-bg);
 }
 

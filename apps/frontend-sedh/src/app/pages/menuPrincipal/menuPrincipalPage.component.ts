@@ -11,7 +11,7 @@ interface MenuOption {
 }
 
 @Component({
-  selector: 'sedh-menu-principal-page',
+  selector: 'app-menu-principal-page',
   standalone: true,
   imports: [],
   templateUrl: './menuPrincipalPage.component.html',

@@ -1,0 +1,16 @@
+<header class="encabezado-pagina" [ngClass]="claseAlineacion()">
+  <!-- Título dinámico con nivel de heading configurable -->
+  <ng-container [ngSwitch]="nivelEncabezado()">
+    <h1 *ngSwitchCase="1" class="titulo">{{ titulo() }}</h1>
+    <h2 *ngSwitchCase="2" class="titulo">{{ titulo() }}</h2>
+    <h3 *ngSwitchCase="3" class="titulo">{{ titulo() }}</h3>
+    <h4 *ngSwitchCase="4" class="titulo">{{ titulo() }}</h4>
+    <h5 *ngSwitchCase="5" class="titulo">{{ titulo() }}</h5>
+    <h6 *ngSwitchCase="6" class="titulo">{{ titulo() }}</h6>
+  </ng-container>
+
+  <!-- Subtítulo opcional -->
+  @if (subtitulo()) {
+    <p class="subtitulo">{{ subtitulo() }}</p>
+  }
+</header>

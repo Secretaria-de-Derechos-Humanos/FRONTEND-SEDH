@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'sedh-configuracion-usuario-page',
+  selector: 'app-configuracion-usuario-page',
   standalone: true,
   imports: [
     CommonModule,

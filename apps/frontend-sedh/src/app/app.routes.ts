@@ -39,7 +39,7 @@ export const appRoutes: Route[] = [
       {
         path: 'configuracion-usuario',
         loadComponent: () =>
-          import('./layouts/configuracionUsuario/configuracionUsuarioPage.component').then(
+          import('./pages/configuracionUsuario/configuracionUsuarioPage.component').then(
             (m) => m.ConfiguracionUsuarioPageComponent
           ),
       },

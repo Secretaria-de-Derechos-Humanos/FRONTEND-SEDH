@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SidebarLeftComponent } from '../components/sidebar/sidebarLeft.component';
-import { NavbarTopComponent } from '../components/navbar/navbarTop.component';
+import { SidebarLeftComponent } from '../../components/sidebar/sidebarLeft.component';
+import { NavbarTopComponent } from '../../components/navbar/navbarTop.component';
 
 @Component({
   selector: 'sedh-main-layout',

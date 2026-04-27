@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
 
 interface MenuOption {
   title: string;
@@ -13,7 +14,7 @@ interface MenuOption {
 @Component({
   selector: 'app-menu-principal-page',
   standalone: true,
-  imports: [],
+  imports: [EncabezadosPaginaComponent],
   templateUrl: './menuPrincipalPage.component.html',
   styleUrl: './menuPrincipalPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,28 +6,9 @@
 .menu-principal {
   max-width: 1800px;
   margin: 0 auto;
-  padding: var(--sedh-space-xl) var(--sedh-space-2xl);
+  padding: var(--sedh-space-md) var(--sedh-space-md);
 }
 
-.menu-principal__header {
-  margin-bottom: var(--sedh-space-2xl);
-  text-align: center;
-}
-
-.menu-principal__title {
-  color: var(--sedh-text);
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 var(--sedh-space-sm);
-  letter-spacing: -0.02em;
-}
-
-.menu-principal__subtitle {
-  color: var(--sedh-text-muted);
-  font-size: 1.125rem;
-  margin: 0;
-  font-weight: 400;
-}
 
 /* ── Grid de opciones ── */
 .menu-principal__grid {
@@ -216,14 +197,6 @@
 
   .menu-principal__header {
     margin-bottom: var(--sedh-space-lg);
-  }
-
-  .menu-principal__title {
-    font-size: 1.75rem;
-  }
-
-  .menu-principal__subtitle {
-    font-size: 1rem;
   }
 
   .module-item__card {

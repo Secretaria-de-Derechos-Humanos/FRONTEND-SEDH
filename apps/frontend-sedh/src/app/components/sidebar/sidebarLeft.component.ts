@@ -22,5 +22,6 @@ export class SidebarLeftComponent {
 
   readonly navItems: NavItem[] = [
     { label: 'Inicio', icon: 'home', route: '/app/menu-principal' },
+    { label: 'Pendientes', icon: 'pending', route: '/app/pendientes' },
   ];
 }

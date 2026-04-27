@@ -14,11 +14,15 @@
       <button
         class="navbar__user-avatar"
         type="button"
-        (click)="menu.toggle($event)"
-        [title]="authService.currentUser()?.nombre + ' ' + authService.currentUser()?.apellido || 'Usuario'">
+        (click)="menu.toggle($event)">
         <span class="navbar__user-initials">{{ userInitials() }}</span>
       </button>
-      <p-menu #menu [model]="userMenuItems" [popup]="true" styleClass="navbar__user-dropdown" />
+      <p-menu
+        #menu
+        [model]="userMenuItems"
+        [popup]="true"
+        [appendTo]="'body'"
+        styleClass="navbar__user-dropdown" />
     </div>
   </div>
 </header>

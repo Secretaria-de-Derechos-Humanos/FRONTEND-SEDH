@@ -716,6 +716,15 @@ textarea.form-control {
   color: var(--sedh-text);
 }
 
+:host-context(.dark-theme) select.form-control {
+  background: var(--sedh-gray-800);
+}
+
+:host-context(.dark-theme) select.form-control option {
+  background: var(--sedh-gray-800);
+  color: var(--sedh-text);
+}
+
 :host-context(.dark-theme) .form-control:focus {
   border-color: var(--sedh-secondary-300);
   box-shadow: 0 0 0 3px rgba(173, 132, 17, 0.2);

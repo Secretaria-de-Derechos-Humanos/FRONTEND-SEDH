@@ -2,13 +2,13 @@
 
   <!-- Preloader del sistema -->
   @if (showPreloader()) {
-    <sedh-system-preloader (loadComplete)="onPreloaderComplete()" />
+    <app-system-preloader (loadComplete)="onPreloaderComplete()" />
   }
 
   <!-- Login form -->
   @if (!showPreloader()) {
     <!-- Toggle de tema -->
-    <sedh-theme-toggle variant="floating" />
+    <app-theme-toggle variant="floating" />
 
     <!-- Contenedor centrado -->
     <div class="login-container">

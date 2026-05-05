@@ -9,7 +9,7 @@ interface NavItem {
 }
 
 @Component({
-  selector: 'sedh-sidebar-left',
+  selector: 'app-sidebar-left',
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebarLeft.component.html',

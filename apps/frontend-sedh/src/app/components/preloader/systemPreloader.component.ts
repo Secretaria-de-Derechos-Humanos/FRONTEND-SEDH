@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { APP_CONFIG } from '../../config/app.config.constants';
 
 @Component({
-  selector: 'sedh-system-preloader',
+  selector: 'app-system-preloader',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './systemPreloader.component.html',

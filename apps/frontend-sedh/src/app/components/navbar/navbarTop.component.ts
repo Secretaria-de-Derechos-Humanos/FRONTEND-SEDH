@@ -4,7 +4,7 @@ import { ThemeToggleComponent } from '../themeToggle/themeToggle.component';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'sedh-navbar-top',
+  selector: 'app-navbar-top',
   standalone: true,
   imports: [ThemeToggleComponent],
   templateUrl: './navbarTop.component.html',

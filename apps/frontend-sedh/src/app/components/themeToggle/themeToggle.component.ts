@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core
 import { ThemeService } from '../../services/theme.service';
 
 @Component({
-  selector: 'sedh-theme-toggle',
+  selector: 'app-theme-toggle',
   standalone: true,
   imports: [],
   templateUrl: './themeToggle.component.html',

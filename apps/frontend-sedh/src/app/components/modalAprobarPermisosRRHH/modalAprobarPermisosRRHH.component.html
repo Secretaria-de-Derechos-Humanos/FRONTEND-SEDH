@@ -1,0 +1,54 @@
+@if (visible()) {
+  <div class="modal-backdrop" (click)="onCerrar()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div class="modal-header-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="modal-header-text">
+          <h2 id="modal-titulo" class="modal-titulo">Aprobar permiso personal</h2>
+          <p class="modal-subtitulo">Solicitud #{{ solicitud().id }}</p>
+        </div>
+        <button class="btn-cerrar" type="button" aria-label="Cerrar modal" (click)="onCerrar()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Empleado</span>
+            <span class="info-valor">{{ solicitud().empleado }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Tipo de solicitud</span>
+            <span class="info-valor">
+              <span class="badge-tipo">{{ solicitud().tipoSolicitud }}</span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Dependencia</span>
+            <span class="info-valor">{{ solicitud().dependencia }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Fecha de solicitud</span>
+            <span class="info-valor">{{ formatearFecha(solicitud().fechaSolicitud) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-cancelar" type="button" (click)="onCerrar()">Cancelar</button>
+        <button class="btn btn-rechazar" type="button" (click)="onRechazar()">Rechazar</button>
+        <button class="btn btn-aprobar" type="button" (click)="onAprobar()">Aprobar permiso</button>
+      </div>
+
+    </div>
+  </div>
+}

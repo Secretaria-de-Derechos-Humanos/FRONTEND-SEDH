@@ -5,7 +5,7 @@
 /* — Contenedor principal — */
 .pendientes-container {
   padding: var(--sedh-space-lg);
-  width: 100%;
+  inline-size: 100%;
   margin: 0;
 }
 
@@ -20,13 +20,13 @@
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
+  inline-size: 48px;
+  block-size: 48px;
   border: 4px solid var(--sedh-primary-100);
-  border-top-color: var(--sedh-primary-500);
+  border-block-start-color: var(--sedh-primary-500);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: var(--sedh-space-md);
+  margin-block-end: var(--sedh-space-md);
 }
 
 @keyframes spin {
@@ -68,10 +68,10 @@
 }
 
 .empty-icon {
-  width: 64px;
-  height: 64px;
+  inline-size: 64px;
+  block-size: 64px;
   color: var(--sedh-text-muted);
-  margin-bottom: var(--sedh-space-md);
+  margin-block-end: var(--sedh-space-md);
 }
 
 .empty-message {
@@ -91,7 +91,7 @@
 }
 
 .table {
-  width: 100%;
+  inline-size: 100%;
   border-collapse: collapse;
 }
 
@@ -102,7 +102,7 @@
 .table th {
   color: white;
   padding: var(--sedh-space-sm) var(--sedh-space-md);
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -117,11 +117,11 @@
 
 .th-label {
   display: block;
-  margin-bottom: 2px;
+  margin-block-end: 2px;
 }
 
 .filter-input {
-  width: 100%;
+  inline-size: 100%;
   padding: 4px 8px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 4px;
@@ -164,12 +164,12 @@
 
 .table th.th-actions {
   text-align: center;
-  width: 200px;
+  inline-size: 200px;
 }
 
 .table td {
   padding: var(--sedh-space-sm) var(--sedh-space-md);
-  border-bottom: 1px solid var(--sedh-border);
+  border-block-end: 1px solid var(--sedh-border);
   color: var(--sedh-text);
   font-size: 0.875rem;
 }
@@ -197,7 +197,7 @@
 }
 
 .table tbody tr:last-child td {
-  border-bottom: none;
+  border-block-end: none;
 }
 
 /* — Modo oscuro para tabla — */
@@ -225,7 +225,7 @@
 
 :host-context(.dark-theme) .spinner {
   border-color: var(--sedh-gray-700);
-  border-top-color: var(--sedh-secondary-500);
+  border-block-start-color: var(--sedh-secondary-500);
 }
 
 /* — Columnas específicas — */
@@ -236,7 +236,7 @@
 }
 
 .td-empleado {
-  min-width: 200px;
+  min-inline-size: 200px;
 }
 
 .empleado-info {
@@ -250,7 +250,7 @@
 }
 
 .td-tipo {
-  min-width: 180px;
+  min-inline-size: 180px;
 }
 
 .badge {
@@ -302,13 +302,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  inline-size: 36px;
+  block-size: 36px;
 }
 
 .btn-icon svg {
-  width: 18px;
-  height: 18px;
+  inline-size: 18px;
+  block-size: 18px;
 }
 
 .btn-success {
@@ -346,7 +346,7 @@
 
 /* — Footer de tabla — */
 .table-footer {
-  margin-top: var(--sedh-space-md);
+  margin-block-start: var(--sedh-space-md);
   padding: var(--sedh-space-md);
   background: var(--sedh-surface);
   border-radius: var(--sedh-radius);
@@ -373,7 +373,7 @@
   }
 
   .table {
-    min-width: 900px;
+    min-inline-size: 900px;
   }
 }
 
@@ -383,7 +383,7 @@
   }
 
   .pendientes-header {
-    margin-bottom: var(--sedh-space-lg);
+    margin-block-end: var(--sedh-space-lg);
   }
 
   .page-title {
@@ -402,13 +402,13 @@
   }
 
   .btn-icon {
-    width: 32px;
-    height: 32px;
+    inline-size: 32px;
+    block-size: 32px;
   }
 
   .btn-icon svg {
-    width: 16px;
-    height: 16px;
+    inline-size: 16px;
+    block-size: 16px;
   }
 }
 

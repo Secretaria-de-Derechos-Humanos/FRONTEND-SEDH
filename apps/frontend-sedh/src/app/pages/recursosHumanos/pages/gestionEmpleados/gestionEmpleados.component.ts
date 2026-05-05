@@ -1,6 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
 
 interface Empleado {
   emailInstitucional: string;
@@ -31,7 +30,7 @@ interface CatalogoItem {
 @Component({
   selector: 'app-gestion-empleados',
   standalone: true,
-  imports: [FormsModule, EncabezadosPaginaComponent],
+  imports: [FormsModule],
   templateUrl: './gestionEmpleados.component.html',
   styleUrls: ['./gestionEmpleados.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush

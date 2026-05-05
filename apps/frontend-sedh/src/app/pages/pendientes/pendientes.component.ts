@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActionButtonComponent } from '../../components/actionButton/actionButton.component';
 import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
+import { ModalAprobarPermisosRRHHComponent, SolicitudPermiso } from '../../components/modalAprobarPermisosRRHH/modalAprobarPermisosRRHH.component';
 
 interface SolicitudPendiente {
   id: string;
@@ -16,7 +17,7 @@ interface SolicitudPendiente {
 @Component({
   selector: 'app-pendientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ActionButtonComponent, EncabezadosPaginaComponent],
+  imports: [CommonModule, FormsModule, ActionButtonComponent, EncabezadosPaginaComponent, ModalAprobarPermisosRRHHComponent],
   templateUrl: './pendientes.component.html',
   styleUrls: ['./pendientes.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -89,6 +90,19 @@ export class PendientesComponent {
 
   cargando = signal<boolean>(false);
 
+  modalPermisoVisible = signal<boolean>(false);
+  solicitudSeleccionada = signal<SolicitudPermiso | null>(null);
+
+  abrirModalPermiso(solicitud: SolicitudPermiso): void {
+    this.solicitudSeleccionada.set(solicitud);
+    this.modalPermisoVisible.set(true);
+  }
+
+  cerrarModalPermiso(): void {
+    this.modalPermisoVisible.set(false);
+    this.solicitudSeleccionada.set(null);
+  }
+
   aprobarSolicitud(id: string): void {
     console.log('Aprobar solicitud:', id);
     // TODO: Implementar lógica de aprobación
@@ -100,8 +114,12 @@ export class PendientesComponent {
   }
 
   verDetalles(id: string): void {
-    console.log('Ver detalles de solicitud:', id);
-    // TODO: Implementar navegación a detalles
+    const solicitud = this.solicitudesOriginales().find(s => s.id === id);
+    if (!solicitud) return;
+
+    if (solicitud.tipoSolicitud.toLowerCase() === 'permiso personal') {
+      this.abrirModalPermiso(solicitud);
+    }
   }
 
   /**

@@ -102,3 +102,13 @@
     </div>
   }
 </div>
+
+@if (solicitudSeleccionada(); as solicitudActual) {
+  <app-modal-aprobar-permisos-rrhh
+    [solicitud]="solicitudActual"
+    [visible]="modalPermisoVisible()"
+    (cerrar)="cerrarModalPermiso()"
+    (aprobar)="aprobarSolicitud($event)"
+    (rechazar)="rechazarSolicitud($event)"
+  />
+}

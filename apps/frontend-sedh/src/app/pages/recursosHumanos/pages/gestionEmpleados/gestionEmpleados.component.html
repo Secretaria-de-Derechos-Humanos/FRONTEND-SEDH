@@ -1,0 +1,274 @@
+<div class="gestion-empleados-container">
+  <!-- Búsqueda de empleado -->
+  <section class="seccion-busqueda">
+    <div class="grupo-busqueda">
+      <input
+        type="text"
+        class="campo-busqueda"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event)"
+        placeholder="Ingrese el correo institucional (ejemplo@sedh.gob.hn)"
+        (keyup.enter)="buscarEmpleado()"
+        aria-label="Correo institucional del empleado"
+      />
+      <button
+        class="btn btn-primary"
+        (click)="buscarEmpleado()"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="spinner" role="status" aria-hidden="true"></span>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+        }
+        Buscar
+      </button>
+    </div>
+    @if (errorMessage()) {
+      <div class="alerta alerta-error" role="alert">{{ errorMessage() }}</div>
+    }
+  </section>
+
+  <!-- Perfil del empleado -->
+  @if (empleado()) {
+    <div class="tarjeta">
+      <div class="tarjeta-encabezado">
+        <h3 class="tarjeta-titulo">Perfil del empleado</h3>
+        <div class="tarjeta-acciones">
+          @if (mensajeEdicion()) {
+            <span class="alerta alerta-inline"
+                  [class.alerta-exito]="!errorEdicion()"
+                  [class.alerta-error]="errorEdicion()">
+              {{ mensajeEdicion() }}
+            </span>
+          }
+          <button
+            class="btn btn-secondary"
+            (click)="toggleEdicion()"
+            [disabled]="guardandoCambios()"
+          >
+            @if (guardandoCambios()) {
+              <span class="spinner" role="status" aria-hidden="true"></span>
+            }
+            {{ modoEdicion() ? 'Guardar cambios' : 'Editar perfil' }}
+          </button>
+          @if (modoEdicion()) {
+            <button class="btn btn-neutral" (click)="cancelarEdicion()">Cancelar</button>
+          }
+        </div>
+      </div>
+
+      <div class="tarjeta-cuerpo">
+        <div class="grid-dos-columnas">
+
+          <!-- Columna izquierda -->
+          <div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-email">Correo institucional</label>
+              <input id="emp-email" type="text" class="campo-input"
+                     [ngModel]="empleado()?.emailInstitucional" disabled />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-nombre">Nombre completo</label>
+              <input id="emp-nombre" type="text" class="campo-input"
+                     [ngModel]="empleado()?.nombre" disabled />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-fecha">Fecha de ingreso</label>
+              <input id="emp-fecha" type="date" class="campo-input"
+                     [ngModel]="empleado()?.fechaIngreso" disabled />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-dni">DNI</label>
+              <input id="emp-dni" type="text" class="campo-input"
+                     [ngModel]="empleado()?.dni" disabled />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-act-laboral">Estado laboral</label>
+              @if (!modoEdicion()) {
+                <input id="emp-act-laboral" type="text" class="campo-input"
+                       [ngModel]="empleado()?.actLaboral === 1 ? 'Activo' : 'Inactivo'" disabled />
+              } @else {
+                <select id="emp-act-laboral" class="campo-input campo-select"
+                        [ngModel]="empleado()?.actLaboral"
+                        (ngModelChange)="actualizarCampo('actLaboral', $event)">
+                  <option [value]="1">Activo</option>
+                  <option [value]="0">Inactivo</option>
+                </select>
+              }
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-telefono">Teléfono</label>
+              <input id="emp-telefono" type="text" class="campo-input"
+                     [ngModel]="empleado()?.telefono"
+                     (ngModelChange)="actualizarCampo('telefono', $event)"
+                     [disabled]="!modoEdicion()" />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-tipo-contrato">Tipo de contratación</label>
+              @if (!modoEdicion()) {
+                <input id="emp-tipo-contrato" type="text" class="campo-input"
+                       [ngModel]="empleado()?.tipoContrato" disabled />
+              } @else {
+                <select id="emp-tipo-contrato" class="campo-input campo-select"
+                        [ngModel]="empleado()?.idTipoContrato"
+                        (ngModelChange)="actualizarCampo('idTipoContrato', $event)">
+                  <option [value]="null" disabled>Seleccione un tipo</option>
+                  @for (tipo of tiposContrataciones(); track tipo.id) {
+                    <option [value]="tipo.id">{{ tipo.descripcion }}</option>
+                  }
+                </select>
+              }
+            </div>
+          </div>
+
+          <!-- Columna derecha -->
+          <div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-dependencia">Dependencia</label>
+              @if (!modoEdicion()) {
+                <input id="emp-dependencia" type="text" class="campo-input"
+                       [ngModel]="empleado()?.dependencia" disabled />
+              } @else {
+                <select id="emp-dependencia" class="campo-input campo-select"
+                        [ngModel]="empleado()?.idDependencia"
+                        (ngModelChange)="onSelectDependencia($event)">
+                  <option [value]="null" disabled>Seleccione una dependencia</option>
+                  @for (dep of dependencias(); track dep.id) {
+                    <option [value]="dep.id">{{ dep.descripcion }}</option>
+                  }
+                </select>
+              }
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-cargo">Cargo</label>
+              @if (!modoEdicion()) {
+                <input id="emp-cargo" type="text" class="campo-input"
+                       [ngModel]="empleado()?.cargo" disabled />
+              } @else {
+                <select id="emp-cargo" class="campo-input campo-select"
+                        [ngModel]="empleado()?.idCargo"
+                        (ngModelChange)="actualizarCampo('idCargo', $event)">
+                  <option [value]="null" disabled>Seleccione un cargo</option>
+                  @for (cargo of filteredCargosEdicion(); track cargo.id) {
+                    <option [value]="cargo.id">{{ cargo.descripcion }}</option>
+                  }
+                </select>
+              }
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-jefe">Jefe inmediato</label>
+              <input id="emp-jefe" type="text" class="campo-input"
+                     [ngModel]="empleado()?.jefeInmediato"
+                     (ngModelChange)="actualizarCampo('jefeInmediato', $event)"
+                     [disabled]="!modoEdicion()" />
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-sexo">Sexo</label>
+              <select id="emp-sexo" class="campo-input campo-select" [ngModel]="empleado()?.sexo" disabled>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-estado-civil">Estado civil</label>
+              @if (!modoEdicion()) {
+                <input id="emp-estado-civil" type="text" class="campo-input"
+                       [ngModel]="empleado()?.estadoCivil" disabled />
+              } @else {
+                <select id="emp-estado-civil" class="campo-input campo-select"
+                        [ngModel]="empleado()?.idEstadoCivil"
+                        (ngModelChange)="actualizarCampo('idEstadoCivil', $event)">
+                  <option [value]="null" disabled>Seleccione estado civil</option>
+                  @for (estado of estadosCiviles(); track estado.id) {
+                    <option [value]="estado.id">{{ estado.descripcion }}</option>
+                  }
+                </select>
+              }
+            </div>
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="emp-horas">Horas disponibles</label>
+              <div class="grupo-horas">
+                <input id="emp-horas" type="text" class="campo-input"
+                       [ngModel]="empleado()?.horasDisponibles" disabled />
+                <button class="btn btn-neutral" (click)="abrirModalHoras()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  Editar horas
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- Modal: editar horas disponibles -->
+@if (mostrarModal()) {
+  <div class="modal-overlay"
+       role="button"
+       tabindex="0"
+       aria-label="Cerrar modal"
+       (click)="cerrarModalHoras()"
+       (keydown.enter)="cerrarModalHoras()"
+       (keydown.space)="cerrarModalHoras()"></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo-horas">
+    <div class="modal-contenido">
+      <div class="modal-encabezado">
+        <h5 class="modal-titulo" id="modal-titulo-horas">Editar horas disponibles</h5>
+        <button class="modal-cerrar" (click)="cerrarModalHoras()" aria-label="Cerrar modal">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-cuerpo">
+        <div class="campo-grupo">
+          <label class="campo-etiqueta" for="modal-email">Correo institucional</label>
+          <input id="modal-email" type="text" class="campo-input"
+                 [ngModel]="empleado()?.emailInstitucional" disabled />
+        </div>
+        <div class="campo-grupo">
+          <label class="campo-etiqueta" for="modal-horas-actuales">Horas disponibles actuales</label>
+          <input id="modal-horas-actuales" type="text" class="campo-input"
+                 [ngModel]="empleado()?.horasDisponibles" disabled />
+        </div>
+        <div class="campo-grupo">
+          <label class="campo-etiqueta" for="modal-nuevas-horas">Nuevas horas disponibles</label>
+          <input id="modal-nuevas-horas" type="text" class="campo-input"
+                 [ngModel]="nuevasHoras()"
+                 (ngModelChange)="nuevasHoras.set($event)"
+                 placeholder="HH:MM" />
+        </div>
+        @if (mensajeHoras()) {
+          <div class="alerta"
+               [class.alerta-exito]="!errorHoras()"
+               [class.alerta-error]="errorHoras()"
+               role="alert">
+            {{ mensajeHoras() }}
+          </div>
+        }
+      </div>
+      <div class="modal-pie">
+        <button class="btn btn-neutral" (click)="cerrarModalHoras()">Cancelar</button>
+        <button class="btn btn-primary" (click)="actualizarHoras()" [disabled]="actualizandoHoras()">
+          @if (actualizandoHoras()) {
+            <span class="spinner" role="status" aria-hidden="true"></span>
+          }
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -36,6 +36,18 @@ export class RecursosHumanosMainComponent {
       imageUrl: 'LogoControlAsistencia-RRHH.png',
       route: '',
       rolesPermitidos: [1, 5]
+    },
+    {
+      label: 'Reporte de permisos',
+      imageUrl: 'LogoReportePermisos-RRHH.png',
+      route: '/rrhh/reporte-permisos',
+      rolesPermitidos: [1, 5]
+    },
+    {
+      label: 'Gestión de empleados',
+      imageUrl: 'LogoGestionEmpleados-RRHH.png',
+      route: '/rrhh/gestion-empleados',
+      rolesPermitidos: [1, 5]
     }
   ]);
 

@@ -86,6 +86,20 @@ export const appRoutes: Route[] = [
             (m) => m.BuscarEditarEmpleadosComponent
           ),
       },
+      {
+        path: 'rrhh/reporte-permisos',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/reportePermisos/reportePermisos.component').then(
+            (m) => m.ReportePermisosComponent
+          ),
+      },
+      {
+        path: 'rrhh/gestion-empleados',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/gestionEmpleados/gestionEmpleados.component').then(
+            (m) => m.GestionEmpleadosComponent
+          ),
+      },
     ],
   },
   {

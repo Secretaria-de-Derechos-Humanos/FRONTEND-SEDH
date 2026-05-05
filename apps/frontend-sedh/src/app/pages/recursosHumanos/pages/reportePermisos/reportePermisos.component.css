@@ -1,0 +1,391 @@
+/* =============================================
+   Reporte de permisos — variables mapeadas
+   al Design System SEDH (--sedh-*)
+   ============================================= */
+:host {
+  display: block;
+  min-block-size: 100vh;
+  /* ── Tokens locales (sobrescritos en dark mode) ── */
+  --re-card-shadow:        0 1px 4px rgba(0, 0, 0, 0.06);
+  --re-card-shadow-hover:  0 6px 20px rgba(0, 0, 0, 0.13);
+  --re-modal-shadow:       0 20px 60px rgba(0, 0, 0, 0.3);
+  --re-btn-shadow:         0 2px 8px rgba(38, 77, 160, 0.25);
+  --re-btn-shadow-hover:   0 4px 14px rgba(38, 77, 160, 0.35);
+  --re-focus-ring:         rgba(38, 77, 160, 0.2);
+}
+
+:host-context(.dark-theme) {
+  --re-card-shadow:        0 1px 6px rgba(0, 0, 0, 0.45);
+  --re-card-shadow-hover:  0 6px 24px rgba(0, 0, 0, 0.55);
+  --re-modal-shadow:       0 20px 60px rgba(0, 0, 0, 0.7);
+  --re-btn-shadow:         0 2px 10px rgba(38, 77, 160, 0.45);
+  --re-btn-shadow-hover:   0 4px 18px rgba(38, 77, 160, 0.6);
+  --re-focus-ring:         rgba(95, 127, 208, 0.35);
+}
+
+.re-page {
+  min-block-size: 100vh;
+  background: var(--sedh-bg);
+  transition: background 0.35s ease;
+}
+
+.re-container {
+  padding: 2rem 1.5rem;
+}
+
+/* ── Encabezado ── */
+.re-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block-start: 15px;
+  margin-block-end: 2rem;
+}
+
+.re-filtros {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ── Selects ── */
+.form-select {
+  appearance: auto;
+  background-color: var(--sedh-surface);
+  color: var(--sedh-text);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  block-size: 38px;
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--sedh-primary-400);
+  box-shadow: 0 0 0 0.2rem var(--re-focus-ring);
+}
+
+/* ── Botones ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.375rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--sedh-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  block-size: 38px;
+  white-space: nowrap;
+  transition: background 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+
+.btn-primary {
+  background-color: var(--sedh-primary-500);
+  border-color: var(--sedh-primary-500);
+  color: var(--sedh-white);
+  box-shadow: var(--re-btn-shadow);
+}
+
+.btn-primary:hover {
+  background-color: var(--sedh-primary-600);
+  border-color: var(--sedh-primary-600);
+  box-shadow: var(--re-btn-shadow-hover);
+}
+
+.btn-secondary {
+  background-color: var(--sedh-surface);
+  border-color: var(--sedh-border);
+  color: var(--sedh-text);
+}
+
+.btn-secondary:hover {
+  background-color: var(--sedh-border);
+}
+
+.btn-icon {
+  flex-shrink: 0;
+}
+
+/* ── Sin resultados ── */
+.re-empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--sedh-text-muted);
+}
+
+.re-empty-icon {
+  display: block;
+  margin-block-end: 1rem;
+  opacity: 0.4;
+}
+
+/* ── Grid de cards ── */
+.re-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  gap: 0.6rem;
+  max-block-size: calc(100vh - 160px);
+  overflow-y: auto;
+  padding-inline-end: 4px;
+}
+
+/* ── Card ── */
+.re-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  background: var(--sedh-surface);
+  border: 1px solid var(--sedh-border);
+  border-radius: 8px;
+  box-shadow: var(--re-card-shadow);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.re-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--re-card-shadow-hover);
+  border-color: var(--sedh-primary-400);
+}
+
+.re-card:focus-visible {
+  outline: 2px solid var(--sedh-primary-400);
+  outline-offset: 3px;
+}
+
+.re-card-icon {
+  flex-shrink: 0;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 8px;
+  background: var(--sedh-primary-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sedh-white);
+}
+
+.re-card-body {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.re-card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sedh-text);
+  margin: 0 0 0.2rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.re-card-stats {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.74rem;
+  color: var(--sedh-text-muted);
+  align-items: center;
+}
+
+.re-card-stats span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.re-card-arrow {
+  flex-shrink: 0;
+  color: var(--sedh-text-muted);
+  display: flex;
+  align-items: center;
+  transition: transform 0.18s;
+}
+
+.re-card:hover .re-card-arrow {
+  transform: translateX(4px);
+  color: var(--sedh-primary-400);
+}
+
+/* ── Modal overlay (sin Bootstrap) ── */
+.re-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: reModalFadeIn 0.2s ease;
+}
+
+@keyframes reModalFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.re-modal-dialog {
+  background: var(--sedh-surface);
+  border-radius: 10px;
+  inline-size: 100%;
+  max-inline-size: 90vw;
+  max-block-size: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--re-modal-shadow);
+  animation: reModalSlideUp 0.22s ease;
+}
+
+@keyframes reModalSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.re-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-block-end: 1px solid var(--sedh-border);
+  flex-shrink: 0;
+}
+
+.re-modal-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sedh-text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.re-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--sedh-text-muted);
+  padding: 0.25rem;
+  border-radius: var(--sedh-radius);
+  display: flex;
+  align-items: center;
+  transition: color 0.2s, background 0.2s;
+}
+
+.re-modal-close:hover {
+  color: var(--sedh-text);
+  background: var(--sedh-border);
+}
+
+/* ── Tabla dentro del modal ── */
+.re-modal-body {
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.re-modal-scroll {
+  max-block-size: 60vh;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.re-modal-table {
+  inline-size: 100%;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  border-collapse: collapse;
+}
+
+.re-modal-table td,
+.re-modal-table th {
+  border: 1px solid var(--sedh-border);
+  vertical-align: middle;
+  text-align: center;
+  padding: 8px 10px;
+}
+
+.re-modal-table thead tr {
+  background-color: var(--sedh-primary-700);
+}
+
+.re-modal-table thead th {
+  color: var(--sedh-white);
+  font-weight: 500;
+  background: var(--sedh-primary-700);
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+}
+
+.re-modal-table .emp-par td {
+  background-color: var(--sedh-surface);
+  color: var(--sedh-text);
+}
+
+.re-modal-table .emp-impar td {
+  background-color: var(--sedh-bg);
+  color: var(--sedh-text);
+}
+
+.re-modal-table tbody tr:hover td {
+  filter: brightness(0.94);
+}
+
+/* ── Footer del modal ── */
+.re-modal-footer {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  border-block-start: 1px solid var(--sedh-border);
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.re-modal-resumen {
+  font-size: 0.85rem;
+  color: var(--sedh-text-muted);
+  margin-inline-end: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .re-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .re-filtros {
+    justify-content: flex-end;
+  }
+
+  .re-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .re-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .re-modal-dialog {
+    max-inline-size: 100%;
+    border-radius: 10px 10px 0 0;
+    max-block-size: 95vh;
+  }
+}

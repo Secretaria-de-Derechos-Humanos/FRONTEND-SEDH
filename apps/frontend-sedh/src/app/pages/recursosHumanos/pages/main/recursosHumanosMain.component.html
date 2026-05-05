@@ -7,24 +7,11 @@
 
   <div class="modulos-grid">
     @for (opcion of opcionesDisponibles(); track opcion.route) {
-      <div
-        class="modulo-card"
-        (click)="navegarA(opcion.route)"
-        (keypress)="onKeyPress($event, opcion.route)"
-        tabindex="0"
-        role="button"
-        [attr.aria-label]="opcion.label">
-        <div class="card-icon">
-          <i [class]="opcion.icon"></i>
-        </div>
-        <div class="card-content">
-          <h3>{{ opcion.label }}</h3>
-          <p>{{ opcion.description }}</p>
-        </div>
-        <div class="card-arrow">
-          <i class="pi pi-chevron-right"></i>
-        </div>
-      </div>
+      <app-card
+        [title]="opcion.label"
+        [imageUrl]="opcion.imageUrl"
+        (cardClick)="navegarA(opcion.route)"
+      />
     }
   </div>
 

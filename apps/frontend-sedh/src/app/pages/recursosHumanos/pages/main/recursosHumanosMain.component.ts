@@ -3,11 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
 import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
+import { CardComponent } from '../../../../components/card/card.component';
 
 interface MenuOption {
   label: string;
-  description: string;
-  icon: string;
+  imageUrl: string;
   route: string;
   rolesPermitidos: number[];
 }
@@ -15,7 +15,7 @@ interface MenuOption {
 @Component({
   selector: 'app-recursos-humanos-main',
   standalone: true,
-  imports: [CommonModule, RouterModule, EncabezadosPaginaComponent],
+  imports: [CommonModule, RouterModule, EncabezadosPaginaComponent, CardComponent],
   templateUrl: './recursosHumanosMain.component.html',
   styleUrls: ['./recursosHumanosMain.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,10 +26,15 @@ export class RecursosHumanosMainComponent {
 
   private todasLasOpciones = signal<MenuOption[]>([
     {
-      label: 'Solicitudes de empleado',
-      description: 'Gestione las solicitudes de permisos de los empleados',
-      icon: 'pi pi-file-edit',
+      label: 'Solicitar algo a RRHH',
+      imageUrl: 'LogoSolicitarAlgo-RRHH.png',
       route: '/rrhh/mis-solicitudes',
+      rolesPermitidos: [1, 5]
+    },
+    {
+      label: 'Control de asistencia',
+      imageUrl: 'LogoControlAsistencia-RRHH.png',
+      route: '',
       rolesPermitidos: [1, 5]
     }
   ]);
@@ -46,7 +51,9 @@ export class RecursosHumanosMainComponent {
   });
 
   navegarA(ruta: string): void {
-    this.router.navigate([ruta]);
+    if (ruta && ruta !== '') {
+      this.router.navigate([ruta]);
+    }
   }
 
   onKeyPress(event: KeyboardEvent, ruta: string): void {

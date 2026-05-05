@@ -30,6 +30,13 @@ export class MenuPrincipalPageComponent {
       route: '/rrhh',
       color: 'secondary',
     },
+    {
+      title: 'Almacén',
+      description: 'Gestión de inventario, stock y control de almacén',
+      imageLight: '/LogoMenu-ALMACEN.png',
+      route: '/almacen',
+      color: 'primary',
+    },
   ];
 
   navigateTo(route: string): void {

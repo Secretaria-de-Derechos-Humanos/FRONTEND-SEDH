@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActionButtonComponent } from '../../components/actionButton/actionButton.component';
 import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
-import { ModalAprobarPermisosRRHHComponent, SolicitudPermiso } from '../../components/modalAprobarPermisosRRHH/modalAprobarPermisosRRHH.component';
+import { ModalAprobarPermisosRRHHComponent, SolicitudPermiso, RechazarPayload } from '../../components/modalAprobarPermisosRRHH/modalAprobarPermisosRRHH.component';
 
 interface SolicitudPendiente {
   id: string;
@@ -108,8 +108,8 @@ export class PendientesComponent {
     // TODO: Implementar lógica de aprobación
   }
 
-  rechazarSolicitud(id: string): void {
-    console.log('Rechazar solicitud:', id);
+  rechazarSolicitud(payload: RechazarPayload): void {
+    console.log('Rechazar solicitud:', payload.id, '| Motivo:', payload.motRechazo);
     // TODO: Implementar lógica de rechazo
   }
 
@@ -136,7 +136,7 @@ export class PendientesComponent {
         this.aprobarSolicitud(solicitudId);
         break;
       case 'delete':
-        this.rechazarSolicitud(solicitudId);
+        this.verDetalles(solicitudId);
         break;
     }
   }

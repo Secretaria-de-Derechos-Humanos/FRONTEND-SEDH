@@ -1,18 +1,15 @@
 @if (visible()) {
-  <div class="modal-backdrop" (click)="onCerrar()">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop"
+    tabindex="0"
+    (click)="onCerrar()"
+    (keydown.escape)="onCerrar()"
+    (keydown.enter)="onCerrar()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()">
 
       <div class="modal-header">
-        <div class="modal-header-icon">
-          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <div class="modal-header-text">
-          <h2 id="modal-titulo" class="modal-titulo">Aprobar permiso personal</h2>
-          <p class="modal-subtitulo">Solicitud #{{ solicitud().id }}</p>
-        </div>
+        <h2 id="modal-titulo" class="modal-titulo">{{ tipoSolicitud }}</h2>
         <button class="btn-cerrar" type="button" aria-label="Cerrar modal" (click)="onCerrar()">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -21,34 +18,72 @@
       </div>
 
       <div class="modal-body">
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">Empleado</span>
-            <span class="info-valor">{{ solicitud().empleado }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Tipo de solicitud</span>
-            <span class="info-valor">
-              <span class="badge-tipo">{{ solicitud().tipoSolicitud }}</span>
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Dependencia</span>
-            <span class="info-valor">{{ solicitud().dependencia }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">Fecha de solicitud</span>
-            <span class="info-valor">{{ formatearFecha(solicitud().fechaSolicitud) }}</span>
-          </div>
+
+        <div class="form-group">
+          <label class="form-label" for="campo-nombre">Nombre del empleado</label>
+          <input id="campo-nombre" type="text" class="form-control" [value]="nombreCompleto" readonly />
         </div>
+
+        <div class="form-group">
+          <label class="form-label" for="campo-dependencia">Dependencia</label>
+          <input id="campo-dependencia" type="text" class="form-control" [value]="solicitud().nom_dependencia ?? solicitud().dependencia" readonly />
+        </div>
+
+        @if (solicitud().nom_cargo) {
+          <div class="form-group">
+            <label class="form-label" for="campo-cargo">Cargo</label>
+            <input id="campo-cargo" type="text" class="form-control" [value]="solicitud().nom_cargo" readonly />
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label" for="campo-fecha">Fecha de solicitud</label>
+          <input id="campo-fecha" type="text" class="form-control"
+            [value]="formatearFecha(solicitud().fec_solicitud ?? solicitud().fechaSolicitud)" readonly />
+        </div>
+
+        @if (!esPermisoOficial && solicitud().hor_solicitadas) {
+          <div class="form-group">
+            <label class="form-label" for="campo-horas">Horas solicitadas</label>
+            <input id="campo-horas" type="text" class="form-control" [value]="solicitud().hor_solicitadas" readonly />
+          </div>
+        }
+
+        @if (solicitud().motivo) {
+          <div class="form-group">
+            <label class="form-label" for="campo-motivo">Motivo de salida</label>
+            <textarea id="campo-motivo" class="form-control" rows="2" [value]="solicitud().motivo" readonly></textarea>
+          </div>
+        }
+
+        @if (!esPermisoOficial && solicitud().cat_emergencia !== undefined) {
+          <div class="form-group">
+            @if (solicitud().cat_emergencia === true) {
+              <div class="emergencia emergencia--si">Este permiso sí es considerado una emergencia médica.</div>
+            } @else {
+              <div class="emergencia emergencia--no">Este permiso no es considerado una emergencia médica.</div>
+            }
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label" for="campo-rechazo">Motivo de rechazo</label>
+          <span class="aviso-rechazo">* Complete este campo solo si no va a aprobar la solicitud.</span>
+          <textarea id="campo-rechazo" class="form-control" rows="3"
+            [ngModel]="motRechazo()"
+            (ngModelChange)="motRechazo.set($event)"
+            name="motivoRechazo"
+            placeholder="Ingrese el motivo de rechazo..."></textarea>
+        </div>
+
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-cancelar" type="button" (click)="onCerrar()">Cancelar</button>
-        <button class="btn btn-rechazar" type="button" (click)="onRechazar()">Rechazar</button>
-        <button class="btn btn-aprobar" type="button" (click)="onAprobar()">Aprobar permiso</button>
+        <button class="btn btn-rechazar" type="button" (click)="onRechazar()">No aprobar este permiso</button>
+        <button class="btn btn-aprobar" type="button" (click)="onAprobar()">Aprobar este permiso</button>
       </div>
 
     </div>
   </div>
 }
+

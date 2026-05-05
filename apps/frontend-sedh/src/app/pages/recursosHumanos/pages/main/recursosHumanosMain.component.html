@@ -1,0 +1,30 @@
+<div class="rrhh-main-container">
+  <div class="header">
+    <h1>Recursos humanos</h1>
+    <p class="subtitle">Seleccione el módulo que desea gestionar</p>
+  </div>
+
+  <div class="modulos-grid">
+    @for (modulo of modulos(); track modulo.ruta) {
+      <div
+        class="modulo-card"
+        [class.card-primary]="modulo.color === 'primary'"
+        [class.card-secondary]="modulo.color === 'secondary'"
+        (click)="navegarA(modulo.ruta)">
+        <div class="card-icon-container">
+          <div class="card-icon">
+            <i [class]="modulo.icono"></i>
+          </div>
+        </div>
+        <div class="card-content">
+          <h2>{{ modulo.titulo }}</h2>
+          <p>{{ modulo.descripcion }}</p>
+        </div>
+        <div class="card-footer">
+          <span class="btn-text">Ingresar</span>
+          <i class="pi pi-arrow-right"></i>
+        </div>
+      </div>
+    }
+  </div>
+</div>

@@ -1,8 +1,9 @@
 <div class="rrhh-main-container">
-  <div class="header">
-    <h1>Permisos de empleados</h1>
-    <p class="subtitle">Gestione todos los aspectos relacionados con permisos y ausencias del personal</p>
-  </div>
+  <app-encabezados-pagina
+    titulo="Módulo de Recursos Humanos"
+    subtitulo="Gestione todo lo relacionado con recursos humanos."
+    alineacion="center"
+  />
 
   <div class="modulos-grid">
     @for (opcion of opcionesDisponibles(); track opcion.route) {

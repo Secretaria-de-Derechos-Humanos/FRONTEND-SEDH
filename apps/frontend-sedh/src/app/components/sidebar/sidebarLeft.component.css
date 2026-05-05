@@ -44,12 +44,14 @@
   justify-content: center;
   padding: var(--sedh-space-sm);
   color: var(--sedh-gray-500);
-  text-decoration: none;
+  background: transparent;
+  border: none;
   border-radius: var(--sedh-radius);
   transition: all 0.2s;
   cursor: pointer;
   min-height: 40px;
   position: relative;
+  width: 100%;
 }
 
 .nav-item:hover {

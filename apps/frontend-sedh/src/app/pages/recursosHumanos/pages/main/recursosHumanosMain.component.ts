@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@a
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../../services/auth.service';
+import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
 
 interface MenuOption {
   label: string;
@@ -14,7 +15,7 @@ interface MenuOption {
 @Component({
   selector: 'app-recursos-humanos-main',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, EncabezadosPaginaComponent],
   templateUrl: './recursosHumanosMain.component.html',
   styleUrls: ['./recursosHumanosMain.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -1,0 +1,21 @@
+<div
+  class="card-container"
+  [class.card-container--opening]="isOpening()"
+  (click)="handleClick()"
+  (keydown)="handleKeyDown($event)"
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="title()">
+  <div class="card">
+    <div class="card__image-container">
+      <img
+        class="card__image"
+        [src]="imageUrl()"
+        [alt]="altText() || title()">
+    </div>
+    <!-- Puerta que cubre la imagen -->
+    <div class="card__door">
+      <h2 class="card__title">{{ title() }}</h2>
+    </div>
+  </div>
+</div>

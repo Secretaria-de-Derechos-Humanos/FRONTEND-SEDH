@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
+import { CardComponent } from '../../components/card/card.component';
 
 interface MenuOption {
   title: string;
@@ -8,18 +9,19 @@ interface MenuOption {
   imageLight: string;
   route: string;
   color: 'primary' | 'secondary';
-  isOpening?: boolean;
 }
 
 @Component({
   selector: 'app-menu-principal-page',
   standalone: true,
-  imports: [EncabezadosPaginaComponent],
+  imports: [EncabezadosPaginaComponent, CardComponent],
   templateUrl: './menuPrincipalPage.component.html',
   styleUrl: './menuPrincipalPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MenuPrincipalPageComponent {
+  private readonly router = inject(Router);
+
   protected menuOptions: MenuOption[] = [
     {
       title: 'Recursos humanos',
@@ -27,24 +29,10 @@ export class MenuPrincipalPageComponent {
       imageLight: '/LogoMenuLight-RRHH.png',
       route: '/rrhh',
       color: 'secondary',
-      isOpening: false
     },
   ];
 
-  constructor(private router: Router) {}
-
   navigateTo(route: string): void {
-    // Encontrar la opción seleccionada
-    const selectedOption = this.menuOptions.find(opt => opt.route === route);
-
-    if (selectedOption) {
-      // Activar animación de cierre completo de la puerta
-      selectedOption.isOpening = true;
-
-      // Navegar después de que la puerta se cierre (600ms)
-      setTimeout(() => {
-        this.router.navigate([route]);
-      }, 600);
-    }
+    this.router.navigate([route]);
   }
 }

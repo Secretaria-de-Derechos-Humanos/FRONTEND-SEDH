@@ -2,13 +2,12 @@
   display: block;
 }
 
-/* ── Header ── */
+/* ── Contenedor principal ── */
 .menu-principal {
   max-width: 1800px;
   margin: 0 auto;
   padding: var(--sedh-space-md) var(--sedh-space-md);
 }
-
 
 /* ── Grid de opciones ── */
 .menu-principal__grid {
@@ -16,151 +15,6 @@
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: var(--sedh-space-2xl);
   padding: 0;
-}
-
-/* ── Module Item - Card con estilo navbar/sidebar ── */
-.module-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-}
-
-.module-item:hover {
-  transform: translateY(-4px);
-}
-
-.module-item__card {
-  position: relative;
-  width: 100%;
-  max-width: 250px;
-  aspect-ratio: 1;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Modo dark */
-:host-context(.dark-theme) .module-item__card {
-  background: var(--sedh-gray-800);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.module-item:hover .module-item__card {
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.12);
-  border-color: rgba(173, 132, 17, 0.3);
-}
-
-:host-context(.dark-theme) .module-item:hover .module-item__card {
-  border-color: rgba(173, 132, 17, 0.4);
-}
-
-/* SVG Container con animación de apertura */
-.module-item__svg-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-/* Imagen SVG */
-.module-item__image {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-  transform-origin: left center;
-}
-
-/* Puerta que tapa la imagen */
-.module-item__door {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    135deg,
-    var(--sedh-primary-600) 0%,
-    var(--sedh-primary-900) 100%
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 5;
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: left center;
-  transform: scaleX(0);
-  box-shadow:
-    inset 0 2px 4px rgba(255, 255, 255, 0.2),
-    inset 0 -2px 4px rgba(0, 0, 0, 0.2),
-    4px 0 12px rgba(0, 0, 0, 0.3);
-}
-
-:host-context(.dark-theme) .module-item__door {
-  background: linear-gradient(
-    135deg,
-    var(--sedh-secondary-500) 0%,
-    var(--sedh-secondary-700) 100%
-  );
-}
-
-/* Título en la puerta */
-.module-item__door-title {
-  color: var(--sedh-white);
-  font-size: 1.75rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0;
-  padding: var(--sedh-space-lg);
-  letter-spacing: 0.02em;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-  text-transform: uppercase;
-}
-
-/* Animación de cierre completo de puerta al hacer clic */
-@keyframes swingDoorClose {
-  0% {
-    transform: scaleX(0.75);
-  }
-  100% {
-    transform: scaleX(0);
-  }
-}
-
-/* Hover: mostrar la puerta cubriendo el 70% */
-.module-item:hover .module-item__door {
-  transform: scaleX(0.75);
-}
-
-/* Aplicar animaciones cuando se está abriendo (click) */
-.module-item--opening .module-item__card {
-  border-color: var(--sedh-primary-500);
-  box-shadow: 0 12px 48px rgba(38, 77, 160, 0.3), 0 4px 16px rgba(38, 77, 160, 0.2);
-}
-
-:host-context(.dark-theme) .module-item--opening .module-item__card {
-  border-color: var(--sedh-secondary-500);
-  box-shadow: 0 12px 48px rgba(173, 132, 17, 0.4), 0 4px 16px rgba(173, 132, 17, 0.3);
-}
-
-/* La puerta se cierra completamente al hacer clic */
-.module-item--opening .module-item__door {
-  animation: swingDoorClose 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-}
-
-/* Efecto hover en la imagen cuando no hay puerta */
-.module-item:hover .module-item__image {
-  transform: scale(1.05);
 }
 
 /* ── Responsive ── */
@@ -179,10 +33,6 @@
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: var(--sedh-space-xl);
   }
-
-  .module-item__card {
-    max-width: 320px;
-  }
 }
 
 @media (max-width: 768px) {
@@ -193,13 +43,5 @@
   .menu-principal__grid {
     grid-template-columns: 1fr;
     gap: var(--sedh-space-xl);
-  }
-
-  .menu-principal__header {
-    margin-bottom: var(--sedh-space-lg);
-  }
-
-  .module-item__card {
-    max-width: 100%;
   }
 }

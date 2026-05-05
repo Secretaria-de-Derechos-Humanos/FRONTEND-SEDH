@@ -1,14 +1,431 @@
-<div class="solicitudes-container">
-  <div class="header">
-    <h1>Solicitudes de empleado</h1>
-    <p class="subtitle">Gestione las solicitudes de permisos presentadas por los empleados</p>
-  </div>
+<div class="se-container">
 
-  <div class="content-card">
-    <div class="empty-state">
-      <i class="pi pi-inbox empty-icon"></i>
-      <h3>Módulo en desarrollo</h3>
-      <p>Esta funcionalidad estará disponible próximamente.</p>
+  <div class="se-page-header">
+    <app-encabezados-pagina
+      titulo="Mis solicitudes"
+      subtitulo="Consulte el estado de sus solicitudes de permisos y ausencias"
+    />
+    <div class="header-actions">
+      <button class="btn-nueva-solicitud" title="Solicitar un nuevo permiso" (click)="abrirModal()">
+        + Nueva solicitud
+      </button>
+      <button
+        class="btn-actualizar"
+        title="Actualizar solicitudes"
+        [disabled]="isActualizando()">
+        @if (!isActualizando()) {
+          <span>&#x21BB; Actualizar</span>
+        } @else {
+          <span class="spinner"></span>
+          <span>Cargando...</span>
+        }
+      </button>
     </div>
   </div>
+
+  @if (errorMessage()) {
+    <div class="se-error-alert">{{ errorMessage() }}</div>
+  }
+
+  <!-- ── Tabla: Solicitudes normales ── -->
+  @if (solicitudes().length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="empty-message">No hay solicitudes registradas en este momento.</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Fecha solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar fecha..."
+                  [ngModel]="filtroFecha()" (ngModelChange)="filtroFecha.set($event)" />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Tipo solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar tipo..."
+                  [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)" />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Estado solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar estado..."
+                  [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)" />
+              </div>
+            </th>
+            <th>Primer revisión</th>
+            <th>Segunda revisión</th>
+            <th>Motivo rechazo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (solicitudesFiltradas().length === 0) {
+            <tr>
+              <td colspan="6" class="empty-cell">Sin resultados para los filtros aplicados.</td>
+            </tr>
+          }
+          @for (s of solicitudesFiltradas(); track $index) {
+            <tr>
+              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
+              <td>{{ s.nom_tipo_solicitud }}</td>
+              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
+              <td>{{ primerRevision(s) }}</td>
+              <td>{{ segundaRevision(s) }}</td>
+              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <p class="results-count">
+        Mostrando <strong>{{ solicitudesFiltradas().length }}</strong> de
+        <strong>{{ solicitudes().length }}</strong>
+        solicitud{{ solicitudes().length !== 1 ? 'es' : '' }}
+      </p>
+    </div>
+  }
+
+  <!-- ── Sección: Solicitudes de emergencia ── -->
+  <div class="se-section">
+    <app-encabezados-pagina
+      titulo="Mis solicitudes de emergencia"
+      subtitulo="Solicitudes enviadas con carácter urgente"
+    />
+  </div>
+
+  @if (solicitudesEmergencia().length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="empty-message">No hay solicitudes de emergencia registradas en este momento.</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Fecha solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar fecha..."
+                  [ngModel]="filtroFechaE()" (ngModelChange)="filtroFechaE.set($event)" />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Tipo solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar tipo..."
+                  [ngModel]="filtroTipoE()" (ngModelChange)="filtroTipoE.set($event)" />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Estado solicitud</span>
+                <input class="filter-input" type="text" placeholder="Buscar estado..."
+                  [ngModel]="filtroEstadoE()" (ngModelChange)="filtroEstadoE.set($event)" />
+              </div>
+            </th>
+            <th>Primer revisión</th>
+            <th>Segunda revisión</th>
+            <th>Motivo rechazo</th>
+            <th>Evidencia</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (solicitudesEmergenciaFiltradas().length === 0) {
+            <tr>
+              <td colspan="7" class="empty-cell">Sin resultados para los filtros aplicados.</td>
+            </tr>
+          }
+          @for (s of solicitudesEmergenciaFiltradas(); track $index) {
+            <tr>
+              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
+              <td>{{ s.nom_tipo_solicitud }}</td>
+              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
+              <td>{{ primerRevision(s) }}</td>
+              <td>{{ segundaRevision(s) }}</td>
+              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
+              <td>—</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="table-footer">
+      <p class="results-count">
+        Mostrando <strong>{{ solicitudesEmergenciaFiltradas().length }}</strong> de
+        <strong>{{ solicitudesEmergencia().length }}</strong>
+        solicitud{{ solicitudesEmergencia().length !== 1 ? 'es' : '' }} de emergencia
+      </p>
+    </div>
+  }
+
 </div>
+
+<!-- ── Modal: Nueva solicitud ── -->
+@if (modalAbierto()) {
+  <div
+    class="modal-backdrop"
+    role="button"
+    tabindex="0"
+    aria-label="Cerrar modal"
+    (click)="cerrarModal()"
+    (keydown.enter)="cerrarModal()"
+    (keydown.escape)="cerrarModal()"></div>
+
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-header">
+      <h2 class="modal-titulo" id="modal-titulo">Nueva solicitud</h2>
+      <button class="modal-close" (click)="cerrarModal()" title="Cerrar">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Campos comunes -->
+      <div class="form-group">
+        <label class="form-label" for="nombreEmpleado">Nombre del empleado</label>
+        <input
+          id="nombreEmpleado"
+          class="form-control"
+          type="text"
+          placeholder="Ingrese el nombre del empleado"
+          [ngModel]="form().nombreEmpleado"
+          (ngModelChange)="onCampoChange('nombreEmpleado', $event)" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="dependencia">Dependencia</label>
+          <input
+            id="dependencia"
+            class="form-control"
+            type="text"
+            placeholder="Ingrese la dependencia"
+            [ngModel]="form().dependencia"
+            (ngModelChange)="onCampoChange('dependencia', $event)" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cargo">Cargo</label>
+          <input
+            id="cargo"
+            class="form-control"
+            type="text"
+            placeholder="Ingrese el cargo"
+            [ngModel]="form().cargo"
+            (ngModelChange)="onCampoChange('cargo', $event)" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="tipoSolicitud">Tipo de solicitud</label>
+        <select
+          id="tipoSolicitud"
+          class="form-control form-select"
+          [ngModel]="form().tipoSolicitud"
+          (ngModelChange)="onTipoChange($event)">
+          <option value="" disabled>Seleccione un tipo...</option>
+          <option value="permiso-personal">Permiso personal</option>
+          <option value="permiso-oficial">Permiso oficial</option>
+        </select>
+      </div>
+
+      <!-- Sección dinámica según tipo -->
+      @if (form().tipoSolicitud === 'permiso-personal') {
+        <div class="form-section">
+          <div class="form-section-title">Datos del permiso personal</div>
+
+          <!-- Fila: fecha + disponible -->
+          <div class="form-date">
+            <div class="form-group">
+              <label class="form-label" for="ppFecha">Fecha de salida</label>
+              <input
+                id="ppFecha"
+                class="form-control"
+                [class.field-invalido]="ppErrores().fecha"
+                type="date"
+                [min]="ppFechaMin"
+                [max]="ppFechaMax"
+                [ngModel]="ppFecha()"
+                (ngModelChange)="ppFecha.set($event)" />
+              @if (ppErrores().fecha) {
+                <span class="error-message">Seleccione una fecha entre hoy y 7 días.</span>
+              }
+            </div>
+
+            <div class="horas-disponibles">
+              <div class="horas-disponibles-value">{{ ppHorasDisponibles() }}</div>
+              <div class="horas-disponibles-text">Horas disponibles</div>
+            </div>
+
+            <div class="form-group tiempo-salida">
+              <span class="form-label">Tiempo que desea tomar</span>
+              <div class="time-row">
+                <div class="time-field">
+                  <input
+                    id="ppHoras"
+                    class="form-control time-input"
+                    [class.field-invalido]="ppErrores().horas"
+                    type="number"
+                    min="0"
+                    max="9"
+                    [ngModel]="ppHoras()"
+                    (ngModelChange)="ppHoras.set(+$event)" />
+                  <label class="form-label" for="ppHoras">Horas</label>
+                </div>
+                <div class="time-field">
+                  <input
+                    id="ppMinutos"
+                    class="form-control time-input"
+                    [class.field-invalido]="ppErrores().minutos"
+                    type="number"
+                    min="0"
+                    max="59"
+                    [ngModel]="ppMinutos()"
+                    (ngModelChange)="ppMinutos.set(+$event)" />
+                  <label class="form-label" for="ppMinutos">Minutos</label>
+                </div>
+              </div>
+              @if (ppErrores().horas || ppErrores().minutos) {
+                <span class="error-message">Horas: 0–9. Minutos: 0–59.</span>
+              }
+            </div>
+          </div>
+
+          <!-- Motivo -->
+          <div class="form-group">
+            <label class="form-label" for="ppMotivo">Motivo de la salida</label>
+            <textarea
+              id="ppMotivo"
+              class="form-control"
+              [class.field-invalido]="ppErrores().motivo"
+              rows="3"
+              placeholder="Describa el motivo de su salida"
+              [ngModel]="ppMotivo()"
+              (ngModelChange)="ppMotivo.set($event)"></textarea>
+            @if (ppErrores().motivo) {
+              <span class="error-message">El motivo es obligatorio.</span>
+            }
+          </div>
+
+          <!-- ¿Cita médica? -->
+          <div class="form-group">
+            <span class="form-label">¿Es cita médica?</span>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input
+                  type="radio"
+                  name="ppCitaMedica"
+                  [value]="1"
+                  [ngModel]="ppCitaMedica()"
+                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+                <span>Sí</span>
+              </label>
+              <label class="radio-option">
+                <input
+                  type="radio"
+                  name="ppCitaMedica"
+                  [value]="0"
+                  [ngModel]="ppCitaMedica()"
+                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+                <span>No</span>
+              </label>
+            </div>
+          </div>
+
+        </div>
+      }
+
+      @if (form().tipoSolicitud === 'permiso-oficial') {
+        <div class="form-section">
+          <div class="form-section-title">Datos del permiso oficial</div>
+
+          <!-- Fecha de salida -->
+          <div class="form-group">
+            <label class="form-label" for="poFecha">Fecha de salida</label>
+            <input
+              id="poFecha"
+              class="form-control"
+              [class.field-invalido]="poErrores().fecha"
+              type="date"
+              [min]="poFechaMin"
+              [max]="poFechaMax"
+              [ngModel]="poFecha()"
+              (ngModelChange)="poFecha.set($event)" />
+            @if (poErrores().fecha) {
+              <span class="error-message">Seleccione una fecha válida (máximo dos semanas a partir de hoy).</span>
+            }
+          </div>
+
+          <!-- Motivo -->
+          <div class="form-group">
+            <label class="form-label" for="poMotivo">Motivo de la salida</label>
+            <textarea
+              id="poMotivo"
+              class="form-control"
+              [class.field-invalido]="poErrores().motivo"
+              rows="3"
+              placeholder="Describa el motivo de su salida"
+              [ngModel]="poMotivo()"
+              (ngModelChange)="poMotivo.set($event)"></textarea>
+            @if (poErrores().motivo) {
+              <span class="error-message">Ingrese el motivo.</span>
+            }
+          </div>
+
+        </div>
+      }
+
+    </div>
+
+    <div class="modal-footer">
+      <div class="modal-footer-info">
+        @if (form().tipoSolicitud) {
+          <span class="modal-tipo-badge">
+            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
+            </svg>
+            {{ form().tipoSolicitud === 'permiso-personal' ? 'Permiso personal' : 'Permiso oficial' }}
+          </span>
+        }
+      </div>
+      <div class="modal-footer-actions">
+        <button class="btn-cancelar" type="button" (click)="cerrarModal()">Cancelar</button>
+        <button
+          class="btn-enviar"
+          type="button"
+          [disabled]="!form().tipoSolicitud ||
+            (form().tipoSolicitud === 'permiso-personal' && ppFormInvalido()) ||
+            (form().tipoSolicitud === 'permiso-oficial'  && poFormInvalido())"
+          (click)="enviarSolicitud()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+          @if (form().tipoSolicitud === 'permiso-personal' || form().tipoSolicitud === 'permiso-oficial') {
+            Enviar a jefe inmediato
+          } @else {
+            Enviar solicitud
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

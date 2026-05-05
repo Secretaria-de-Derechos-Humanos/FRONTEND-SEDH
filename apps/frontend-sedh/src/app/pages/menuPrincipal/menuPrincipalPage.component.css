@@ -2,11 +2,38 @@
   display: block;
 }
 
+/* ── Animaciones ── */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeInHeader {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ── Contenedor principal ── */
 .menu-principal {
   max-width: 1800px;
   margin: 0 auto;
   padding: var(--sedh-space-md) var(--sedh-space-md);
+}
+
+.menu-principal__header {
+  animation: fadeInHeader 0.5s ease-out;
 }
 
 /* ── Grid de opciones ── */
@@ -16,6 +43,25 @@
   gap: var(--sedh-space-2xl);
   padding: 0;
 }
+
+.menu-principal__grid app-card {
+  animation: fadeInScale 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+/* Animación escalonada para cada card */
+.menu-principal__grid app-card:nth-child(1) { animation-delay: 0.1s; }
+.menu-principal__grid app-card:nth-child(2) { animation-delay: 0.15s; }
+.menu-principal__grid app-card:nth-child(3) { animation-delay: 0.2s; }
+.menu-principal__grid app-card:nth-child(4) { animation-delay: 0.25s; }
+.menu-principal__grid app-card:nth-child(5) { animation-delay: 0.3s; }
+.menu-principal__grid app-card:nth-child(6) { animation-delay: 0.35s; }
+.menu-principal__grid app-card:nth-child(7) { animation-delay: 0.4s; }
+.menu-principal__grid app-card:nth-child(8) { animation-delay: 0.45s; }
+.menu-principal__grid app-card:nth-child(9) { animation-delay: 0.5s; }
+.menu-principal__grid app-card:nth-child(10) { animation-delay: 0.55s; }
+.menu-principal__grid app-card:nth-child(11) { animation-delay: 0.6s; }
+.menu-principal__grid app-card:nth-child(12) { animation-delay: 0.65s; }
 
 /* ── Responsive ── */
 @media (max-width: 1400px) {

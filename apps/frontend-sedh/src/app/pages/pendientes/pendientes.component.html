@@ -1,0 +1,104 @@
+<div class="pendientes-container">
+  <app-encabezados-pagina
+    titulo="Solicitudes pendientes"
+    subtitulo="Revise y gestione las solicitudes de permisos que requieren su aprobación"
+  />
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando solicitudes...</p>
+    </div>
+  } @else if (solicitudes().length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="empty-message">No hay solicitudes pendientes en este momento</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Fecha solicitud</span>
+                <input
+                  type="text"
+                  class="filter-input"
+                  placeholder="Buscar fecha..."
+                  [(ngModel)]="filtroFecha"
+                  (ngModelChange)="filtroFecha.set($event)"
+                />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Empleado</span>
+                <input
+                  type="text"
+                  class="filter-input"
+                  placeholder="Buscar empleado..."
+                  [(ngModel)]="filtroEmpleado"
+                  (ngModelChange)="filtroEmpleado.set($event)"
+                />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Tipo de solicitud</span>
+                <input
+                  type="text"
+                  class="filter-input"
+                  placeholder="Buscar tipo..."
+                  [(ngModel)]="filtroTipo"
+                  (ngModelChange)="filtroTipo.set($event)"
+                />
+              </div>
+            </th>
+            <th>
+              <div class="th-content">
+                <span class="th-label">Dependencia</span>
+                <input
+                  type="text"
+                  class="filter-input"
+                  placeholder="Buscar dependencia..."
+                  [(ngModel)]="filtroDependencia"
+                  (ngModelChange)="filtroDependencia.set($event)"
+                />
+              </div>
+            </th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of solicitudes(); track solicitud.id) {
+            <tr>
+              <td class="td-fecha">{{ formatearFecha(solicitud.fechaSolicitud) }}</td>
+              <td class="td-empleado">
+                <div class="empleado-info">
+                  <span class="empleado-nombre">{{ solicitud.empleado }}</span>
+                </div>
+              </td>
+              <td class="td-tipo">
+                <span class="badge badge-tipo">{{ solicitud.tipoSolicitud }}</span>
+              </td>
+              <td class="td-dependencia">{{ solicitud.dependencia }}</td>
+              <td class="td-actions">
+                <app-action-button
+                  (actionSelected)="handleAction($event, solicitud.id)" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="results-count">
+        Mostrando <strong>{{ solicitudes().length }}</strong> solicitud{{solicitudes().length !== 1 ? 'es' : ''}} pendiente{{solicitudes().length !== 1 ? 's' : ''}}
+      </p>
+    </div>
+  }
+</div>

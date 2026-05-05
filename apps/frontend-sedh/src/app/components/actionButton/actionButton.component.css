@@ -1,0 +1,282 @@
+:host {
+  display: block;
+  position: relative;
+}
+
+.action-button-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sedh-space-sm);
+}
+
+/* Backdrop para cerrar al hacer clic fuera */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
+  background: transparent;
+}
+
+/* Botón principal */
+.main-button {
+  position: relative;
+  z-index: 1000;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sedh-primary-500);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--sedh-shadow-sm);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-button:hover {
+  background: var(--sedh-primary-400);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(38, 77, 160, 0.3);
+}
+
+.main-button:active {
+  transform: scale(0.95);
+}
+
+.main-button.active {
+  background: var(--sedh-primary-700);
+}
+
+/* Modo dark: botón principal dorado */
+:host-context(.dark-theme) .main-button {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
+}
+
+:host-context(.dark-theme) .main-button:hover {
+  background: var(--sedh-secondary-400);
+  box-shadow: 0 6px 16px rgba(173, 132, 17, 0.4);
+}
+
+:host-context(.dark-theme) .main-button.active {
+  background: var(--sedh-secondary-600);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon.rotated {
+  transform: rotate(135deg);
+}
+
+/* Menú de acciones */
+.actions-menu {
+  position: absolute;
+  right: 42px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: row-reverse;
+  gap: var(--sedh-space-xs);
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.actions-menu.open {
+  pointer-events: all;
+  opacity: 1;
+}
+
+/* Items de acción */
+.action-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  transform: translateX(20px);
+  opacity: 0;
+  color: var(--sedh-text);
+}
+
+.actions-menu.open .action-item {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Animación escalonada para cada item */
+.actions-menu.open .action-item:nth-child(1) {
+  transition-delay: 0.05s;
+}
+
+.actions-menu.open .action-item:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.actions-menu.open .action-item:nth-child(3) {
+  transition-delay: 0.15s;
+}
+
+.actions-menu.open .action-item:nth-child(4) {
+  transition-delay: 0.2s;
+}
+
+/* Colores de acciones según el tipo */
+.action-info {
+  color: var(--sedh-info);
+}
+
+.action-info:hover {
+  color: var(--sedh-info-dark);
+  transform: scale(1.1);
+}
+
+.action-primary {
+  color: var(--sedh-primary-500);
+}
+
+.action-primary:hover {
+  color: var(--sedh-primary-400);
+  transform: scale(1.1);
+}
+
+.action-secondary {
+  color: var(--sedh-secondary-500);
+}
+
+.action-secondary:hover {
+  color: var(--sedh-secondary-700);
+  transform: scale(1.1);
+}
+
+.action-danger {
+  color: var(--sedh-danger);
+}
+
+.action-danger:hover {
+  color: var(--sedh-danger-dark);
+  transform: scale(1.1);
+}
+
+/* Modo dark: ajustes de color */
+:host-context(.dark-theme) .action-info {
+  color: var(--sedh-secondary-400);
+}
+
+:host-context(.dark-theme) .action-info:hover {
+  color: var(--sedh-secondary-300);
+}
+
+:host-context(.dark-theme) .action-primary {
+  color: var(--sedh-secondary-400);
+}
+
+:host-context(.dark-theme) .action-primary:hover {
+  color: var(--sedh-secondary-300);
+}
+
+:host-context(.dark-theme) .action-secondary:hover {
+  color: var(--sedh-secondary-300);
+}
+
+:host-context(.dark-theme) .action-danger:hover {
+  color: #FF5252;
+}
+
+.action-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Tooltip ── */
+.action-tooltip {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--sedh-primary-500);
+  color: var(--sedh-white);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1001;
+  box-shadow: var(--sedh-shadow-sm);
+}
+
+.action-item:hover .action-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Modo dark: dorado */
+:host-context(.dark-theme) .action-tooltip {
+  background: var(--sedh-secondary-500);
+  color: var(--sedh-gray-900);
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .main-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon {
+    font-size: 20px;
+  }
+
+  .action-item {
+    padding: var(--sedh-space-xs) var(--sedh-space-sm);
+    font-size: 13px;
+  }
+
+  .action-icon {
+    font-size: 16px;
+  }
+
+  .action-label {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 400px) {
+  /* En pantallas muy pequeñas, ocultar labels y solo mostrar iconos */
+  .action-label {
+    display: none;
+  }
+
+  .action-item {
+    width: 40px;
+    height: 40px;
+    padding: var(--sedh-space-xs);
+    justify-content: center;
+  }
+}

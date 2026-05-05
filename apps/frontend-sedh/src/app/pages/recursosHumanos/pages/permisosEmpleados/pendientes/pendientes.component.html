@@ -1,0 +1,88 @@
+<div class="pendientes-container">
+  <div class="pendientes-header">
+    <h1 class="page-title">Solicitudes pendientes</h1>
+    <p class="page-subtitle">Revise y gestione las solicitudes de permisos que requieren su aprobación</p>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando solicitudes...</p>
+    </div>
+  } @else if (solicitudes().length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+      <p class="empty-message">No hay solicitudes pendientes en este momento</p>
+    </div>
+  } @else {
+    <div class="table-container">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Fecha solicitud</th>
+            <th>Empleado</th>
+            <th>Tipo de solicitud</th>
+            <th>Dependencia</th>
+            <th class="th-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of solicitudes(); track solicitud.id) {
+            <tr>
+              <td class="td-fecha">{{ formatearFecha(solicitud.fechaSolicitud) }}</td>
+              <td class="td-empleado">
+                <div class="empleado-info">
+                  <span class="empleado-nombre">{{ solicitud.empleado }}</span>
+                </div>
+              </td>
+              <td class="td-tipo">
+                <span class="badge badge-tipo">{{ solicitud.tipoSolicitud }}</span>
+              </td>
+              <td class="td-dependencia">{{ solicitud.dependencia }}</td>
+              <td class="td-actions">
+                <div class="action-buttons">
+                  <button
+                    class="btn btn-icon btn-success"
+                    (click)="aprobarSolicitud(solicitud.id)"
+                    title="Aprobar solicitud"
+                    aria-label="Aprobar solicitud">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </button>
+                  <button
+                    class="btn btn-icon btn-danger"
+                    (click)="rechazarSolicitud(solicitud.id)"
+                    title="Rechazar solicitud"
+                    aria-label="Rechazar solicitud">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  <button
+                    class="btn btn-icon btn-info"
+                    (click)="verDetalles(solicitud.id)"
+                    title="Ver detalles"
+                    aria-label="Ver detalles de la solicitud">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <p class="results-count">
+        Mostrando <strong>{{ solicitudes().length }}</strong> solicitud{{solicitudes().length !== 1 ? 'es' : ''}} pendiente{{solicitudes().length !== 1 ? 's' : ''}}
+      </p>
+    </div>
+  }
+</div>

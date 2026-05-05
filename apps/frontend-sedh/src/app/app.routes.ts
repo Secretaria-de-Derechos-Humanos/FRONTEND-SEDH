@@ -38,6 +38,13 @@ export const appRoutes: Route[] = [
           ),
       },
       {
+        path: 'pendientes',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/pendientes/pendientes.component').then(
+            (m) => m.PendientesComponent
+          ),
+      },
+      {
         path: 'rrhh',
         loadComponent: () =>
           import('./pages/recursosHumanos/pages/main/recursosHumanosMain.component').then(

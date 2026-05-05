@@ -1,0 +1,326 @@
+:host {
+  display: block;
+}
+
+/* — Contenedor principal — */
+.pendientes-container {
+  padding: var(--sedh-space-lg);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* — Header — */
+.pendientes-header {
+  margin-bottom: var(--sedh-space-xl);
+}
+
+.page-title {
+  color: var(--sedh-primary-700);
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 var(--sedh-space-xs) 0;
+}
+
+.page-subtitle {
+  color: var(--sedh-text-muted);
+  font-size: 0.938rem;
+  margin: 0;
+}
+
+/* — Estados: Loading — */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sedh-space-2xl);
+  color: var(--sedh-text-muted);
+}
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--sedh-primary-100);
+  border-top-color: var(--sedh-primary-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: var(--sedh-space-md);
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* — Estados: Empty — */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sedh-space-2xl);
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius);
+  border: 1px solid var(--sedh-border);
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  color: var(--sedh-text-muted);
+  margin-bottom: var(--sedh-space-md);
+}
+
+.empty-message {
+  color: var(--sedh-text-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* — Tabla — */
+.table-container {
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius);
+  box-shadow: var(--sedh-shadow-sm);
+  overflow: hidden;
+  border: 1px solid var(--sedh-border);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: var(--sedh-primary-500);
+}
+
+.table th {
+  color: white;
+  padding: var(--sedh-space-md);
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.table th.th-actions {
+  text-align: center;
+  width: 200px;
+}
+
+.table td {
+  padding: var(--sedh-space-md);
+  border-bottom: 1px solid var(--sedh-border);
+  color: var(--sedh-text);
+  font-size: 0.875rem;
+}
+
+.table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background: var(--sedh-primary-50);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* — Columnas específicas — */
+.td-fecha {
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--sedh-text);
+}
+
+.td-empleado {
+  min-width: 200px;
+}
+
+.empleado-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.empleado-nombre {
+  font-weight: 500;
+  color: var(--sedh-text);
+}
+
+.td-tipo {
+  min-width: 180px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px var(--sedh-space-sm);
+  border-radius: var(--sedh-radius);
+  font-size: 0.813rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badge-tipo {
+  background: var(--sedh-info-light);
+  color: var(--sedh-info-dark);
+}
+
+.td-dependencia {
+  color: var(--sedh-text-muted);
+}
+
+.td-actions {
+  text-align: center;
+}
+
+/* — Botones de acción — */
+.action-buttons {
+  display: flex;
+  gap: var(--sedh-space-sm);
+  justify-content: center;
+}
+
+.btn {
+  border: none;
+  border-radius: var(--sedh-radius);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.btn:focus {
+  outline: 2px solid var(--sedh-primary-300);
+  outline-offset: 2px;
+}
+
+.btn-icon {
+  padding: var(--sedh-space-xs);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.btn-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-success {
+  background: var(--sedh-success);
+  color: white;
+}
+
+.btn-success:hover {
+  background: var(--sedh-success-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(173, 132, 17, 0.2);
+}
+
+.btn-danger {
+  background: var(--sedh-danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--sedh-danger-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(198, 40, 40, 0.2);
+}
+
+.btn-info {
+  background: var(--sedh-info);
+  color: white;
+}
+
+.btn-info:hover {
+  background: var(--sedh-info-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(38, 77, 160, 0.2);
+}
+
+/* — Footer de tabla — */
+.table-footer {
+  margin-top: var(--sedh-space-md);
+  padding: var(--sedh-space-md);
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius);
+  border: 1px solid var(--sedh-border);
+}
+
+.results-count {
+  color: var(--sedh-text-muted);
+  font-size: 0.875rem;
+  margin: 0;
+  text-align: center;
+}
+
+.results-count strong {
+  color: var(--sedh-text);
+  font-weight: 600;
+}
+
+/* — Responsive — */
+@media (max-width: 1024px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pendientes-container {
+    padding: var(--sedh-space-md);
+  }
+
+  .pendientes-header {
+    margin-bottom: var(--sedh-space-lg);
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .table th,
+  .table td {
+    padding: var(--sedh-space-sm);
+    font-size: 0.813rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: var(--sedh-space-xs);
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .btn-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* — Modo Oscuro — */
+.dark-theme .page-title {
+  color: var(--sedh-secondary-300);
+}
+
+.dark-theme .table tbody tr:hover {
+  background: var(--sedh-gray-800);
+}
+
+.dark-theme .badge-tipo {
+  background: rgba(38, 77, 160, 0.2);
+  color: var(--sedh-primary-300);
+}

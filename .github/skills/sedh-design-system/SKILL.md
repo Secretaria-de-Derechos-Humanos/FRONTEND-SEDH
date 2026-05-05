@@ -1,6 +1,6 @@
 ---
 name: sedh-design-system
-description: Sistema de diseño oficial SEDH. Paleta de colores institucional (azul y dorado), variables CSS, espaciado, theming oscuro/claro e integración con PrimeNG.
+description: Sistema de diseño oficial SEDH. Paleta de colores institucional (azul y dorado), variables CSS, espaciado, theming oscuro/claro y componentes personalizados con CSS puro.
 ---
 
 # SKILL: SEDH Design System
@@ -169,19 +169,80 @@ los fondos, superficies y textos semánticos.
 
 ---
 
-## Integración con PrimeNG
+## Componentes personalizados con CSS puro
 
-PrimeNG usa el preset **Aura** configurado con `darkModeSelector: '.dark-theme'`.
-Para sobrescribir tokens de PrimeNG, usa el layer `primeng`:
+Todos los componentes del sistema SEDH se construyen con **CSS puro**. 
+NO se usan librerías de componentes (ni PrimeNG ni Angular Material).
 
+### Patrones comunes
+
+**Botones:**
 ```css
-/* En el .css del componente */
-:host ::ng-deep .p-button {
-  background: var(--sedh-primary-500);
-  border-color: var(--sedh-primary-500);
+.btn {
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border-radius: var(--sedh-radius);
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
-:host ::ng-deep .p-button:hover {
+
+.btn-primary {
+  background: var(--sedh-primary-500);
+  color: white;
+}
+.btn-primary:hover {
   background: var(--sedh-primary-400);
+}
+
+.btn-secondary {
+  background: var(--sedh-secondary-500);
+  color: white;
+}
+.btn-secondary:hover {
+  background: var(--sedh-secondary-700);
+}
+```
+
+**Inputs:**
+```css
+.input {
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  background: var(--sedh-surface);
+  color: var(--sedh-text);
+  font-size: 0.875rem;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--sedh-primary-500);
+  box-shadow: 0 0 0 3px rgba(38, 77, 160, 0.1);
+}
+```
+
+**Tablas:**
+```css
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius);
+  overflow: hidden;
+}
+.table th {
+  background: var(--sedh-primary-500);
+  color: white;
+  padding: var(--sedh-space-md);
+  text-align: left;
+  font-weight: 600;
+}
+.table td {
+  padding: var(--sedh-space-md);
+  border-bottom: 1px solid var(--sedh-border);
+}
+.table tbody tr:hover {
+  background: var(--sedh-primary-50);
 }
 ```
 

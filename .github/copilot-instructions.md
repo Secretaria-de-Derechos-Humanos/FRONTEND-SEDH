@@ -26,8 +26,8 @@ Siempre te diriges al usuario como **Luis Cardona**.
 
 - **Framework**: Angular 21+ con Standalone Components
 - **Lenguaje**: TypeScript en modo estricto (`strict: true`)
-- **UI Libraries**: PrimeNG (primera opción) o CSS personalizado — Angular Material **NO se usa**
-- **Estilos**: CSS Variables personalizadas para theming
+- **UI**: CSS puro con variables CSS personalizadas — NO se usan librerías de componentes (ni PrimeNG ni Angular Material)
+- **Estilos**: Sistema de diseño SEDH con CSS Variables personalizadas para theming
 - **Estado**: Angular Signals (nativo, sin librerías externas)
 - **Arquitectura**: Nx Workspace (monorepo)
 - **Build/Deploy**: Angular CLI + Nx
@@ -79,8 +79,10 @@ export class ExampleComponent {
 ## Estilos y Theming
 
 - Usa **siempre** las variables CSS `--sedh-*` — nunca valores hex directos en componentes
-- Theming con clase `.dark-theme` en body (PrimeNG ya lo detecta automáticamente)
+- Theming con clase `.dark-theme` en body para modo oscuro
 - Estilos scoped por componente con `:host`
+- CSS puro, sin preprocesadores ni librerías de componentes
+- Componentes personalizados reutilizables en CSS
 - Para detalles completos de paleta, espaciado y patrones: leer el **Skill Design System SEDH**
 
 ## TypeScript Estricto
@@ -147,8 +149,8 @@ export class UserService {
 ## Responsive Design
 
 - Mobile-first approach
-- Breakpoints usando CSS Media Queries
-- PrimeNG Grid System para layouts
+- Breakpoints usando CSS Media Queries y Grid/Flexbox nativo
+- Sistema de Grid personalizado con CSS Grid y Flexbox
 - Pruebas en diferentes tamaños de pantalla
 
 ---
@@ -158,11 +160,11 @@ export class UserService {
 Cuando Luis Cardona te pida crear componentes, servicios o features:
 
 1. **Genera archivos completos**: .ts, .html, .css (NO archivos .spec.ts)
-2. **Usa PrimeNG** como primera opción; si no cubre el caso, usa CSS personalizado (NO Angular Material)
+2. **Usa CSS puro** con el sistema de diseño SEDH — NO uses librerías de componentes (ni PrimeNG ni Angular Material)
 3. **Aplica TypeScript estricto** con tipos completos
 4. **Implementa theming** con variables CSS para modo oscuro/claro
 5. **Usa Signals** para estado reactivo
-6. **Haz código responsive** con mobile-first
+6. **Haz código responsive** con mobile-first usando Grid/Flexbox
 7. **Usa camelCase** para nombres de archivos
 8. **OnPush Change Detection** en todos los componentes
 9. **Determina ubicación**: ¿va en `template/` (compartido) o en una unidad específica?
@@ -170,11 +172,11 @@ Cuando Luis Cardona te pida crear componentes, servicios o features:
 
 ## Ejemplos de Peticiones
 
-- "Crea un componente de lista de usuarios con PrimeNG Table en template/components"
+- "Crea un componente de tabla personalizada con CSS para lista de usuarios en template/components"
 - "Genera un servicio con Signals para autenticación en template/services"
-- "Implementa un formulario de empleados para la unidad recursosHumanos"
-- "Crea un dashboard para la unidad finanzas con gráficos y tablas"
-- "Genera un componente de tarjeta reutilizable en template con theming"
+- "Implementa un formulario de empleados con estilos personalizados para la unidad recursosHumanos"
+- "Crea un dashboard para la unidad finanzas con gráficos y tablas personalizadas"
+- "Genera un componente de tarjeta reutilizable en CSS puro en template con theming"
 
 ---
 
@@ -183,6 +185,7 @@ Cuando Luis Cardona te pida crear componentes, servicios o features:
 - Prioriza **mantenibilidad** sobre cleverness
 - Explica **trade-offs** cuando hay múltiples soluciones
 - Sugiere **mejoras de performance** cuando sea relevante
-- Indica **dependencias necesarias** de PrimeNG
-- **Angular Material NO debe usarse** en ningún caso
+- **NO uses librerías de componentes** (ni PrimeNG ni Angular Material)
+- Todo debe ser CSS puro con componentes personalizados
 - Usa **siempre las variables CSS `--sedh-*`** para colores, nunca valores hex directos en componentes
+- Construye componentes reutilizables con CSS siguiendo el Design System SEDH

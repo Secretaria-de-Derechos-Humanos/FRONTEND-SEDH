@@ -1,0 +1,15 @@
+{
+  "personalInfo": {
+    "telefono": "+504 9876-5432",
+    "direccion": "Colonia Palmira, Avenida La Paz, Casa 245, Tegucigalpa, Francisco Morazán"
+  },
+  "institucionalInfo": {
+    "avatar": "",
+    "nombre": "Luis",
+    "apellido": "Cardona",
+    "rol": "Administrador del sistema",
+    "emailInstitucional": "luis.cardona@sedh.gob.hn",
+    "departamento": "Tecnologías de la Información",
+    "fechaIngreso": "2023-01-15"
+  }
+}

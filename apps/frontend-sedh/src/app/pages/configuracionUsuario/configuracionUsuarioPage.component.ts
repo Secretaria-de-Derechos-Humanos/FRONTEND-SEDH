@@ -1,97 +1,193 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import { HttpClient } from '@angular/common/http';
+
+interface UserProfile {
+  personalInfo: {
+    telefono: string;
+    direccion: string;
+  };
+  institucionalInfo: {
+    avatar: string;
+    nombre: string;
+    apellido: string;
+    rol: string;
+    emailInstitucional: string;
+    departamento: string;
+    fechaIngreso: string;
+  };
+}
+
+interface ActivityData {
+  date: string;
+  count: number;
+}
+
+interface HeatmapWeek {
+  days: (ActivityData | null)[];
+}
 
 @Component({
   selector: 'app-configuracion-usuario-page',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './configuracionUsuarioPage.component.html',
   styleUrl: './configuracionUsuarioPage.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConfiguracionUsuarioPageComponent {
-  protected readonly authService = inject(AuthService);
+export class ConfiguracionUsuarioPageComponent implements OnInit {
+  protected readonly userProfile = signal<UserProfile | null>(null);
+  protected readonly activityData = signal<ActivityData[]>([]);
+  protected readonly heatmapWeeks = signal<HeatmapWeek[]>([]);
+  protected readonly isEditingPersonal = signal(false);
 
-  // Estado del formulario
-  protected readonly isEditingProfile = signal(false);
-  protected readonly isChangingPassword = signal(false);
-
-  // Control de visibilidad de contraseñas
-  protected showCurrentPassword = false;
-  protected showNewPassword = false;
-  protected showConfirmPassword = false;
-
-  // Datos del perfil (editable)
-  protected readonly profileForm = signal({
-    nombre: this.authService.currentUser()?.nombre || '',
-    apellido: this.authService.currentUser()?.apellido || '',
-    emailInstitucional: this.authService.currentUser()?.emailInstitucional || '',
+  protected readonly editableData = signal({
+    telefono: '',
+    direccion: ''
   });
 
-  // Datos de cambio de contraseña
-  protected readonly passwordForm = signal({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-
-  // Iniciales del usuario
   protected readonly userInitials = computed(() => {
-    const user = this.authService.currentUser();
-    if (!user) return 'U';
+    const profile = this.userProfile();
+    if (!profile) return 'U';
 
-    const nombreInicial = user.nombre?.charAt(0).toUpperCase() || '';
-    const apellidoInicial = user.apellido?.charAt(0).toUpperCase() || '';
+    const nombreInicial = profile.institucionalInfo.nombre?.charAt(0).toUpperCase() || '';
+    const apellidoInicial = profile.institucionalInfo.apellido?.charAt(0).toUpperCase() || '';
 
     return `${nombreInicial}${apellidoInicial}` || 'U';
   });
 
-  onEditProfile(): void {
-    this.isEditingProfile.set(true);
+  protected readonly totalActivities = computed(() => {
+    return this.activityData().reduce((sum, day) => sum + day.count, 0);
+  });
+
+  protected readonly weekDayLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
+
+  protected readonly monthLabels = computed(() => {
+    const months: { label: string; weeks: number }[] = [];
+    const totalWeeks = this.heatmapWeeks().length;
+
+    if (totalWeeks === 0) return months;
+
+    const startDate = new Date(2025, 3, 28);
+    let currentMonth = startDate.getMonth();
+
+    for (let i = 0; i < 12; i++) {
+      const weeksInMonth = Math.ceil(totalWeeks / 12);
+      const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+      months.push({
+        label: monthNames[currentMonth],
+        weeks: weeksInMonth
+      });
+
+      currentMonth = (currentMonth + 1) % 12;
+    }
+
+    return months;
+  });
+
+  private readonly http = inject(HttpClient);
+
+  ngOnInit(): void {
+    this.loadUserProfile();
+    this.loadActivityData();
   }
 
-  onCancelEditProfile(): void {
-    this.isEditingProfile.set(false);
-    // Restaurar datos originales
-    this.profileForm.set({
-      nombre: this.authService.currentUser()?.nombre || '',
-      apellido: this.authService.currentUser()?.apellido || '',
-      emailInstitucional: this.authService.currentUser()?.emailInstitucional || '',
+  private loadUserProfile(): void {
+    this.http.get<UserProfile>('/data/userProfile.json').subscribe({
+      next: (data) => {
+        this.userProfile.set(data);
+        this.editableData.set({
+          telefono: data.personalInfo.telefono,
+          direccion: data.personalInfo.direccion
+        });
+      },
+      error: (error) => console.error('Error cargando perfil:', error)
     });
   }
 
-  onSaveProfile(): void {
-    // TODO: Implementar guardado de perfil
-    console.log('Guardar perfil:', this.profileForm());
-    this.isEditingProfile.set(false);
-  }
-
-  onChangePassword(): void {
-    // TODO: Implementar cambio de contraseña
-    console.log('Cambiar contraseña');
-    this.passwordForm.set({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    });
-    this.isChangingPassword.set(false);
-  }
-
-  onCancelChangePassword(): void {
-    this.isChangingPassword.set(false);
-    this.passwordForm.set({
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
+  private loadActivityData(): void {
+    this.http.get<{ heatmapData: ActivityData[] }>('/data/userActivity.json').subscribe({
+      next: (data) => {
+        this.activityData.set(data.heatmapData);
+        this.generateHeatmapWeeks(data.heatmapData);
+      },
+      error: (error) => console.error('Error cargando actividad:', error)
     });
   }
 
-  onStartChangePassword(): void {
-    this.isChangingPassword.set(true);
+  private generateHeatmapWeeks(data: ActivityData[]): void {
+    const weeks: HeatmapWeek[] = [];
+    const today = new Date(2026, 3, 27);
+    const oneYearAgo = new Date(2026, 3, 27);
+    oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+    const dataMap = new Map(data.map(d => [d.date, d.count]));
+
+    const currentDate = new Date(oneYearAgo);
+
+    let currentWeek: (ActivityData | null)[] = [];
+    const startDayOfWeek = currentDate.getDay();
+
+    if (startDayOfWeek !== 1) {
+      const daysToMonday = startDayOfWeek === 0 ? 1 : (8 - startDayOfWeek) % 7;
+      currentDate.setDate(currentDate.getDate() + daysToMonday);
+    }
+
+    while (currentDate <= today) {
+      const dayOfWeek = currentDate.getDay();
+
+      if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+        const dateString = currentDate.toISOString().split('T')[0];
+        const count = dataMap.get(dateString) || 0;
+
+        currentWeek.push({ date: dateString, count });
+
+        if (dayOfWeek === 5) {
+          weeks.push({ days: currentWeek });
+          currentWeek = [];
+        }
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 5) {
+        currentWeek.push(null);
+      }
+      weeks.push({ days: currentWeek });
+    }
+
+    this.heatmapWeeks.set(weeks);
+  }
+
+  protected getActivityLevel(count: number): string {
+    if (count === 0) return 'level-0';
+    if (count <= 3) return 'level-1';
+    if (count <= 6) return 'level-2';
+    if (count <= 9) return 'level-3';
+    return 'level-4';
+  }
+
+  protected onEditPersonal(): void {
+    this.isEditingPersonal.set(true);
+  }
+
+  protected onSavePersonal(): void {
+    console.log('Guardar datos personales:', this.editableData());
+    this.isEditingPersonal.set(false);
+  }
+
+  protected onCancelEdit(): void {
+    const profile = this.userProfile();
+    if (profile) {
+      this.editableData.set({
+        telefono: profile.personalInfo.telefono,
+        direccion: profile.personalInfo.direccion
+      });
+    }
+    this.isEditingPersonal.set(false);
   }
 }

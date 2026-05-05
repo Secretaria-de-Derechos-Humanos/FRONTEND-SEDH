@@ -59,7 +59,7 @@ export class LoginPageComponent {
       next: (user) => {
         this.loading.set(false);
         console.log('Login exitoso:', user);
-        this.router.navigate(['/app']);
+        this.router.navigate(['/menu-principal']);
       },
       error: (error) => {
         this.loading.set(false);

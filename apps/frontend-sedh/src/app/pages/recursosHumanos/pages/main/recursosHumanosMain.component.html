@@ -1,30 +1,36 @@
 <div class="rrhh-main-container">
   <div class="header">
-    <h1>Recursos humanos</h1>
-    <p class="subtitle">Seleccione el módulo que desea gestionar</p>
+    <h1>Permisos de empleados</h1>
+    <p class="subtitle">Gestione todos los aspectos relacionados con permisos y ausencias del personal</p>
   </div>
 
   <div class="modulos-grid">
-    @for (modulo of modulos(); track modulo.ruta) {
+    @for (opcion of opcionesDisponibles(); track opcion.route) {
       <div
         class="modulo-card"
-        [class.card-primary]="modulo.color === 'primary'"
-        [class.card-secondary]="modulo.color === 'secondary'"
-        (click)="navegarA(modulo.ruta)">
-        <div class="card-icon-container">
-          <div class="card-icon">
-            <i [class]="modulo.icono"></i>
-          </div>
+        (click)="navegarA(opcion.route)"
+        (keypress)="onKeyPress($event, opcion.route)"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="opcion.label">
+        <div class="card-icon">
+          <i [class]="opcion.icon"></i>
         </div>
         <div class="card-content">
-          <h2>{{ modulo.titulo }}</h2>
-          <p>{{ modulo.descripcion }}</p>
+          <h3>{{ opcion.label }}</h3>
+          <p>{{ opcion.description }}</p>
         </div>
-        <div class="card-footer">
-          <span class="btn-text">Ingresar</span>
-          <i class="pi pi-arrow-right"></i>
+        <div class="card-arrow">
+          <i class="pi pi-chevron-right"></i>
         </div>
       </div>
     }
   </div>
+
+  @if (opcionesDisponibles().length === 0) {
+    <div class="no-permissions">
+      <i class="pi pi-lock"></i>
+      <p>No tiene permisos asignados para este módulo.</p>
+    </div>
+  }
 </div>

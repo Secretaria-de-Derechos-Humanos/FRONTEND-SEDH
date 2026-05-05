@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../../services/auth.service';
 
-interface ModuloOption {
-  titulo: string;
-  descripcion: string;
-  icono: string;
-  ruta: string;
-  color: 'primary' | 'secondary';
+interface MenuOption {
+  label: string;
+  description: string;
+  icon: string;
+  route: string;
+  rolesPermitidos: number[];
 }
 
 @Component({
@@ -19,26 +20,38 @@ interface ModuloOption {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RecursosHumanosMainComponent {
-  modulos = signal<ModuloOption[]>([
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  private todasLasOpciones = signal<MenuOption[]>([
     {
-      titulo: 'Permisos de empleados',
-      descripcion: 'Gestione solicitudes, aprobaciones, salidas y retornos del personal de la institución',
-      icono: 'pi pi-file-edit',
-      ruta: '/recursos-humanos/permisos',
-      color: 'primary'
-    },
-    {
-      titulo: 'Control de asistencia',
-      descripcion: 'Monitoree y administre la asistencia diaria del personal',
-      icono: 'pi pi-calendar-clock',
-      ruta: '/recursos-humanos/asistencia',
-      color: 'secondary'
+      label: 'Solicitudes de empleado',
+      description: 'Gestione las solicitudes de permisos de los empleados',
+      icon: 'pi pi-file-edit',
+      route: '/rrhh/mis-solicitudes',
+      rolesPermitidos: [1, 5]
     }
   ]);
 
-  constructor(private router: Router) {}
+  // Filtrar opciones según el rol del usuario actual
+  opcionesDisponibles = computed(() => {
+    const usuario = this.authService.currentUser();
+    if (!usuario) return [];
+
+    const rolUsuario = usuario.rol;
+    return this.todasLasOpciones().filter(opcion =>
+      opcion.rolesPermitidos.includes(rolUsuario)
+    );
+  });
 
   navegarA(ruta: string): void {
     this.router.navigate([ruta]);
+  }
+
+  onKeyPress(event: KeyboardEvent, ruta: string): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.navegarA(ruta);
+    }
   }
 }

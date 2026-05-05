@@ -6,7 +6,7 @@
       "password": "Admin123",
       "nombre": "Luis",
       "apellido": "Cardona",
-      "rol": "admin"
+      "rol": 5
     }
   ]
 }

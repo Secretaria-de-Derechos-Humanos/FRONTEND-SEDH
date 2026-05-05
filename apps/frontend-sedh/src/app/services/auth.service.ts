@@ -10,7 +10,7 @@ export interface User {
   emailInstitucional: string;
   nombre: string;
   apellido: string;
-  rol: string;
+  rol: number;
 }
 
 interface LoginResponse {

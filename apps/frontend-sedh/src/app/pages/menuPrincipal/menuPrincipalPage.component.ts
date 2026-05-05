@@ -25,7 +25,7 @@ export class MenuPrincipalPageComponent {
       title: 'Recursos humanos',
       description: 'Gestión de personal, nómina y expedientes de empleados',
       imageLight: '/LogoMenuLight-RRHH.png',
-      route: '/recursos-humanos',
+      route: '/rrhh',
       color: 'secondary',
       isOpening: false
     },

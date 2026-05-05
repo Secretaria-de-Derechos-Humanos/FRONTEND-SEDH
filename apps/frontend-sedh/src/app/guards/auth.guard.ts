@@ -31,7 +31,7 @@ export const loginGuard: CanActivateFn = (route, state) => {
     return true;
   }
 
-  // Redirigir al dashboard si ya está autenticado
-  router.navigate(['/app/dashboard']);
+  // Redirigir al menú principal si ya está autenticado
+  router.navigate(['/menu-principal']);
   return false;
 };

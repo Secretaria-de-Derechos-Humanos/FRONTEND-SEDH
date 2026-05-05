@@ -16,18 +16,13 @@ export const appRoutes: Route[] = [
       ),
   },
   {
-    path: 'app',
+    path: '',
     canActivate: [authGuard],
     loadComponent: () =>
       import('./layouts/mainLayout/mainLayout.component').then(
         (m) => m.MainLayoutComponent
       ),
     children: [
-      {
-        path: '',
-        redirectTo: 'menu-principal',
-        pathMatch: 'full',
-      },
       {
         path: 'menu-principal',
         loadComponent: () =>
@@ -36,10 +31,52 @@ export const appRoutes: Route[] = [
           ),
       },
       {
-        path: 'configuracion-usuario',
+        path: 'perfil-usuario',
         loadComponent: () =>
           import('./pages/configuracionUsuario/configuracionUsuarioPage.component').then(
             (m) => m.ConfiguracionUsuarioPageComponent
+          ),
+      },
+      {
+        path: 'rrhh',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/main/recursosHumanosMain.component').then(
+            (m) => m.RecursosHumanosMainComponent
+          ),
+      },
+      {
+        path: 'rrhh/mis-solicitudes',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component').then(
+            (m) => m.SolicitudesEmpleadoComponent
+          ),
+      },
+      {
+        path: 'rrhh/aprobaciones',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/aprobaciones/aprobaciones.component').then(
+            (m) => m.AprobacionesComponent
+          ),
+      },
+      {
+        path: 'rrhh/salidas-retornos',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/salidasRetornos/salidasRetornos.component').then(
+            (m) => m.SalidasRetornosComponent
+          ),
+      },
+      {
+        path: 'rrhh/reportes',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/reportes/reportes.component').then(
+            (m) => m.ReportesComponent
+          ),
+      },
+      {
+        path: 'rrhh/buscar-editar',
+        loadComponent: () =>
+          import('./pages/recursosHumanos/pages/permisosEmpleados/buscarEditarEmpleados/buscarEditarEmpleados.component').then(
+            (m) => m.BuscarEditarEmpleadosComponent
           ),
       },
     ],

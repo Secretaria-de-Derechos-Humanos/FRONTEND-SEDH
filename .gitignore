@@ -44,3 +44,8 @@ Thumbs.db
 .claude/settings.local.json
 
 .angular
+
+# Environment files (contienen URLs y configuración sensible)
+# Copiar los .example correspondientes y renombrarlos sin .example
+apps/**/src/environments/environment.ts
+apps/**/src/environments/environment.prod.ts

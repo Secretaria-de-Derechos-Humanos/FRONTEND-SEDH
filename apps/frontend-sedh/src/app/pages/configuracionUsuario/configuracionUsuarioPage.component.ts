@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
 
 interface UserProfile {
   personalInfo: {
@@ -88,6 +89,7 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
   });
 
   private readonly http = inject(HttpClient);
+  private readonly authService = inject(AuthService);
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -95,15 +97,28 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
   }
 
   private loadUserProfile(): void {
-    this.http.get<UserProfile>('/data/userProfile.json').subscribe({
-      next: (data) => {
-        this.userProfile.set(data);
-        this.editableData.set({
-          telefono: data.personalInfo.telefono,
-          direccion: data.personalInfo.direccion
-        });
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+
+    this.userProfile.set({
+      personalInfo: {
+        telefono: user.telefono ?? '',
+        direccion: '',
       },
-      error: (error) => console.error('Error cargando perfil:', error)
+      institucionalInfo: {
+        avatar: '',
+        nombre: user.nombre,
+        apellido: user.apellido,
+        rol: user.puesto,
+        emailInstitucional: user.email,
+        departamento: user.dependencia,
+        fechaIngreso: user.fechaIngreso,
+      },
+    });
+
+    this.editableData.set({
+      telefono: user.telefono ?? '',
+      direccion: '',
     });
   }
 

@@ -4,17 +4,35 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
-export interface User {
-  id: number;
-  emailInstitucional: string;
-  nombre: string;
-  apellido: string;
-  rol: number;
+export interface UserRol {
+  r: number;
+  m: number[];
 }
 
-interface LoginResponse {
-  users: Array<User & { password: string }>;
+export interface User {
+  sub: string;
+  email: string;
+  telefono: string;
+  nombre: string;
+  apellido: string;
+  puesto: string;
+  dependencia: string;
+  fechaIngreso: string;
+  roles: UserRol[];
+}
+
+interface LoginApiResponse {
+  success: boolean;
+  data: { accessToken: string };
+  message: string;
+}
+
+interface RefreshApiResponse {
+  success: boolean;
+  data: { accessToken: string };
+  message: string;
 }
 
 @Injectable({
@@ -26,113 +44,130 @@ export class AuthService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private readonly STORAGE_KEY = 'sedh_user';
-  public readonly currentUser = signal<User | null>(this.getUserFromStorage());
+  private readonly ACCESS_TOKEN_KEY = 'sedh_access_token';
+  public readonly currentUser = signal<User | null>(this.getUserFromToken());
 
-  constructor() {
-    // Verificar si hay usuario en sessionStorage al iniciar (solo en navegador)
-    this.currentUser.set(this.getUserFromStorage());
-  }
+  // ── JWT helpers ─────────────────────────────────────────────────────────────
 
-  /**
-   * Obtiene el usuario almacenado en sessionStorage
-   */
-  private getUserFromStorage(): User | null {
-    if (!this.isBrowser) {
-      return null;
-    }
-
+  private decodeJwtPayload(token: string): Record<string, unknown> | null {
     try {
-      const userJson = sessionStorage.getItem(this.STORAGE_KEY);
-      return userJson ? JSON.parse(userJson) : null;
-    } catch (error) {
-      console.error('Error al obtener usuario de sessionStorage:', error);
+      const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(atob(base64));
+    } catch {
       return null;
     }
   }
 
-  /**
-   * Guarda el usuario en sessionStorage
-   */
-  private saveUserToStorage(user: User): void {
-    if (!this.isBrowser) {
-      return;
-    }
-
-    try {
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
-    } catch (error) {
-      console.error('Error al guardar usuario en sessionStorage:', error);
-    }
+  private parseUser(token: string): User | null {
+    const p = this.decodeJwtPayload(token);
+    if (!p) return null;
+    return {
+      sub: p['sub'] as string,
+      email: p['email'] as string,
+      telefono: p['telefono'] as string,
+      nombre: p['nombre'] as string,
+      apellido: p['apellido'] as string,
+      puesto: p['puesto'] as string,
+      dependencia: p['dependencia'] as string,
+      fechaIngreso: p['fechaIngreso'] as string,
+      roles: p['roles'] as UserRol[],
+    };
   }
 
-  /**
-   * Elimina el usuario de sessionStorage
-   */
-  private removeUserFromStorage(): void {
-    if (!this.isBrowser) {
-      return;
-    }
-
-    try {
-      sessionStorage.removeItem(this.STORAGE_KEY);
-    } catch (error) {
-      console.error('Error al eliminar usuario de sessionStorage:', error);
-    }
+  private isExpired(token: string): boolean {
+    const p = this.decodeJwtPayload(token);
+    if (!p || typeof p['exp'] !== 'number') return true;
+    return Date.now() >= (p['exp'] as number) * 1000;
   }
 
-  /**
-   * Realiza el login validando contra el archivo JSON
-   */
-  login(email: string, password: string): Observable<User> {
-    return this.http.get<LoginResponse>('/data/users.json').pipe(
-      map(response => {
-        // Buscar usuario que coincida con email y password
-        const user = response.users.find(
-          u => u.emailInstitucional === email && u.password === password
-        );
+  // ── sessionStorage helpers ───────────────────────────────────────────────────
 
-        if (!user) {
-          throw new Error('Credenciales incorrectas');
-        }
+  private getStoredToken(): string | null {
+    if (!this.isBrowser) return null;
+    try { return sessionStorage.getItem(this.ACCESS_TOKEN_KEY); } catch { return null; }
+  }
 
-        // Crear objeto de usuario sin la contraseña
-        const { password: _, ...userWithoutPassword } = user;
+  private saveToken(token: string): void {
+    if (!this.isBrowser) return;
+    try { sessionStorage.setItem(this.ACCESS_TOKEN_KEY, token); } catch { /* no disponible */ }
+  }
 
-        // Guardar en sessionStorage
-        this.saveUserToStorage(userWithoutPassword);
-        this.currentUser.set(userWithoutPassword);
+  private clearToken(): void {
+    if (!this.isBrowser) return;
+    try { sessionStorage.removeItem(this.ACCESS_TOKEN_KEY); } catch { /* no disponible */ }
+  }
 
-        return userWithoutPassword;
-      }),
-      catchError(error => {
-        if (error.message === 'Credenciales incorrectas') {
+  private getUserFromToken(): User | null {
+    const token = this.getStoredToken();
+    if (!token || this.isExpired(token)) return null;
+    return this.parseUser(token);
+  }
+
+  // ── API pública ──────────────────────────────────────────────────────────────
+
+  getAccessTokenValue(): string | null {
+    return this.getStoredToken();
+  }
+
+  isAuthenticated(): boolean {
+    const token = this.getStoredToken();
+    return !!token && !this.isExpired(token);
+  }
+
+  hasExpiredToken(): boolean {
+    const token = this.getStoredToken();
+    return !!token && this.isExpired(token);
+  }
+
+  login(email: string, contrasena: string): Observable<User> {
+    return this.http
+      .post<LoginApiResponse>(
+        `${environment.apiBaseUrl}${environment.endpoints.login}`,
+        { email, contrasena },
+        { withCredentials: true }
+      )
+      .pipe(
+        map(response => {
+          const token = response.data.accessToken;
+          this.saveToken(token);
+          const user = this.parseUser(token)!;
+          this.currentUser.set(user);
+          return user;
+        }),
+        catchError(error => {
+          const msg: string = error.error?.message ?? 'Credenciales incorrectas';
+          return throwError(() => new Error(msg));
+        })
+      );
+  }
+
+  refreshToken(): Observable<string> {
+    return this.http
+      .post<RefreshApiResponse>(
+        `${environment.apiBaseUrl}${environment.endpoints.refreshToken}`,
+        {},
+        { withCredentials: true }
+      )
+      .pipe(
+        map(response => {
+          const token = response.data.accessToken;
+          this.saveToken(token);
+          this.currentUser.set(this.parseUser(token));
+          return token;
+        }),
+        catchError(error => {
+          this.logout();
           return throwError(() => error);
-        }
-        return throwError(() => new Error('Error al conectar con el servidor'));
-      })
-    );
+        })
+      );
   }
 
-  /**
-   * Cierra la sesión del usuario
-   */
   logout(): void {
-    this.removeUserFromStorage();
+    this.clearToken();
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
-  /**
-   * Verifica si el usuario está autenticado
-   */
-  isAuthenticated(): boolean {
-    return this.currentUser() !== null;
-  }
-
-  /**
-   * Obtiene el usuario actual
-   */
   getCurrentUser(): User | null {
     return this.currentUser();
   }

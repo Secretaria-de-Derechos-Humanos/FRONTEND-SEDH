@@ -46,6 +46,6 @@ export class NavbarTopComponent {
 
   onLogout(): void {
     this.closeMenu();
-    this.authService.logout();
+    this.authService.logout().subscribe();
   }
 }

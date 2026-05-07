@@ -1,9 +1,9 @@
 import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { Observable, throwError, EMPTY } from 'rxjs';
+import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface UserRol {
@@ -119,6 +119,15 @@ export class AuthService {
     return !!token && this.isExpired(token);
   }
 
+  /** Milisegundos restantes hasta que expire el access token. 0 si ya expiró o no hay token. */
+  getTokenExpiresIn(): number {
+    const token = this.getStoredToken();
+    if (!token) return 0;
+    const p = this.decodeJwtPayload(token);
+    if (!p || typeof p['exp'] !== 'number') return 0;
+    return Math.max(0, (p['exp'] as number) * 1000 - Date.now());
+  }
+
   login(email: string, contrasena: string): Observable<User> {
     return this.http
       .post<LoginApiResponse>(
@@ -130,7 +139,8 @@ export class AuthService {
         map(response => {
           const token = response.data.accessToken;
           this.saveToken(token);
-          const user = this.parseUser(token)!;
+          const user = this.parseUser(token);
+          if (!user) throw new Error('Token inválido recibido del servidor');
           this.currentUser.set(user);
           return user;
         }),
@@ -156,16 +166,38 @@ export class AuthService {
           return token;
         }),
         catchError(error => {
-          this.logout();
+          this.clearSession();
           return throwError(() => error);
         })
       );
   }
 
-  logout(): void {
+  // Limpia la sesión local sin llamar al backend (uso interno y en errores de red)
+  clearSession(): void {
     this.clearToken();
     this.currentUser.set(null);
     this.router.navigate(['/login']);
+  }
+
+  // Cierra sesión llamando al backend (uso explícito desde UI)
+  logout(): Observable<void> {
+    const token = this.getAccessTokenValue();
+    const headers = new HttpHeaders(
+      token ? { Authorization: `Bearer ${token}` } : {}
+    );
+    return this.http
+      .post<void>(
+        `${environment.apiBaseUrl}${environment.endpoints.logout}`,
+        {},
+        { withCredentials: true, headers }
+      )
+      .pipe(
+        tap({
+          next: () => this.clearSession(),
+          error: () => this.clearSession()
+        }),
+        catchError(() => EMPTY)
+      );
   }
 
   getCurrentUser(): User | null {

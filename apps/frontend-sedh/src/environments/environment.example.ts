@@ -7,5 +7,6 @@ export const environment = {
   endpoints: {
     login: '/auth/login',
     refreshToken: '/auth/refresh',
+    logout: '/auth/logout',
   },
 } as const;

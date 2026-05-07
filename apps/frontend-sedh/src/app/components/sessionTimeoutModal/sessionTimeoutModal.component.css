@@ -1,0 +1,217 @@
+/* ── Overlay ── */
+.session-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(8, 15, 33, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sedh-space-md);
+  backdrop-filter: blur(3px);
+}
+
+/* ── Modal card ── */
+.session-modal {
+  background: var(--sedh-surface);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius-lg);
+  box-shadow: var(--sedh-shadow-md);
+  padding: var(--sedh-space-xl);
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sedh-space-md);
+  animation: modal-in 0.2s ease-out;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Icono ── */
+.session-modal__icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--sedh-secondary-50);
+  border: 2px solid var(--sedh-secondary-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.session-modal__icon {
+  width: 32px;
+  height: 32px;
+  color: var(--sedh-secondary-500);
+}
+
+/* ── Textos ── */
+.session-modal__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--sedh-primary-700);
+  margin: 0;
+  text-align: center;
+}
+
+.session-modal__desc {
+  font-size: 0.9375rem;
+  color: var(--sedh-text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Cuenta regresiva ── */
+.session-modal__countdown-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sedh-space-sm);
+  margin: var(--sedh-space-sm) 0;
+}
+
+/* Anillo con conic-gradient. --p va de 100 (lleno) a 0 (vacío) */
+.session-modal__ring {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--sedh-primary-500) calc(var(--p, 100) * 1%),
+    var(--sedh-gray-200) 0
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.5s linear;
+}
+
+.session-modal__ring-inner {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: var(--sedh-surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.session-modal__number {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--sedh-primary-700);
+  line-height: 1;
+}
+
+.session-modal__unit {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--sedh-text-muted);
+}
+
+.session-modal__countdown-label {
+  font-size: 0.8125rem;
+  color: var(--sedh-text-muted);
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Botones ── */
+.session-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sedh-space-sm);
+  width: 100%;
+  margin-top: var(--sedh-space-xs);
+}
+
+.session-modal__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sedh-space-sm);
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border: none;
+  border-radius: var(--sedh-radius);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.session-modal__btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.session-modal__btn--primary {
+  background: var(--sedh-primary-500);
+  color: #ffffff;
+}
+
+.session-modal__btn--primary:hover {
+  background: var(--sedh-primary-400);
+}
+
+.session-modal__btn--danger {
+  background: var(--sedh-danger-light);
+  color: var(--sedh-danger);
+  border: 1px solid var(--sedh-danger);
+}
+
+.session-modal__btn--danger:hover {
+  background: var(--sedh-danger);
+  color: #ffffff;
+}
+
+/* ── Modo oscuro ── */
+:host-context(.dark-theme) .session-modal__icon-wrapper {
+  background: var(--sedh-gray-800);
+  border-color: var(--sedh-secondary-500);
+}
+
+:host-context(.dark-theme) .session-modal__title {
+  color: var(--sedh-secondary-300);
+}
+
+:host-context(.dark-theme) .session-modal__ring {
+  background: conic-gradient(
+    var(--sedh-primary-400) calc(var(--p, 100) * 1%),
+    var(--sedh-gray-700) 0
+  );
+}
+
+:host-context(.dark-theme) .session-modal__number {
+  color: var(--sedh-primary-300);
+}
+
+:host-context(.dark-theme) .session-modal__btn--danger {
+  background: transparent;
+}
+
+/* ── Móvil ── */
+@media (max-width: 576px) {
+  .session-modal {
+    padding: var(--sedh-space-lg);
+  }
+
+  .session-modal__actions {
+    flex-direction: column;
+  }
+}

@@ -8,6 +8,7 @@ import { environment } from '../../environments/environment';
 const AUTH_ENDPOINTS = [
   environment.endpoints.login,
   environment.endpoints.refreshToken,
+  environment.endpoints.logout, // logout maneja su propio Bearer; se excluye del retry-on-401
 ];
 
 const isAuthEndpoint = (url: string): boolean =>
@@ -43,7 +44,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }))
           ),
           catchError(refreshError => {
-            authService.logout();
+            authService.clearSession();
             return throwError(() => refreshError);
           })
         );

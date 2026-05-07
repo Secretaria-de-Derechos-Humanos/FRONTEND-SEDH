@@ -1,0 +1,56 @@
+@if (sessionService.showModal()) {
+  <div class="session-overlay" role="dialog" aria-modal="true" aria-labelledby="session-modal-title">
+
+    <div class="session-modal">
+
+      <!-- Icono de advertencia -->
+      <div class="session-modal__icon-wrapper">
+        <svg class="session-modal__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
+
+      <!-- Título y descripción -->
+      <h2 id="session-modal-title" class="session-modal__title">Su sesión está por expirar</h2>
+      <p class="session-modal__desc">¿Desea continuar conectado al sistema?</p>
+
+      <!-- Cuenta regresiva -->
+      <div class="session-modal__countdown-wrapper">
+        <div class="session-modal__ring" [style.--p]="progressPct">
+          <div class="session-modal__ring-inner">
+            <span class="session-modal__number">{{ sessionService.countdown() }}</span>
+            <span class="session-modal__unit">seg</span>
+          </div>
+        </div>
+        <p class="session-modal__countdown-label">La sesión se cerrará automáticamente</p>
+      </div>
+
+      <!-- Acciones -->
+      <div class="session-modal__actions">
+        <button
+          type="button"
+          class="session-modal__btn session-modal__btn--primary"
+          (click)="sessionService.continuarSesion()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Seguir conectado
+        </button>
+
+        <button
+          type="button"
+          class="session-modal__btn session-modal__btn--danger"
+          (click)="sessionService.performLogout()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

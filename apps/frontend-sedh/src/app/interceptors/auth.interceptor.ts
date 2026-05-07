@@ -3,6 +3,7 @@ import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
+import { SessionService } from '../services/session.service';
 import { environment } from '../../environments/environment';
 
 const AUTH_ENDPOINTS = [
@@ -25,6 +26,7 @@ const isAuthEndpoint = (url: string): boolean =>
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const sessionService = inject(SessionService);
 
   // Los endpoints /auth/* usan cookie HttpOnly, no necesitan Bearer
   if (isAuthEndpoint(req.url)) {
@@ -44,7 +46,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }))
           ),
           catchError(refreshError => {
-            authService.clearSession();
+            sessionService.forceExpiredModal();
             return throwError(() => refreshError);
           })
         );

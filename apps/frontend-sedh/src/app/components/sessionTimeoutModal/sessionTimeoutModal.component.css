@@ -18,8 +18,8 @@
   border-radius: var(--sedh-radius-lg);
   box-shadow: var(--sedh-shadow-md);
   padding: var(--sedh-space-xl);
-  width: 100%;
-  max-width: 400px;
+  inline-size: 100%;
+  max-inline-size: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,8 +40,8 @@
 
 /* ── Icono ── */
 .session-modal__icon-wrapper {
-  width: 64px;
-  height: 64px;
+  inline-size: 64px;
+  block-size: 64px;
   border-radius: 50%;
   background: var(--sedh-secondary-50);
   border: 2px solid var(--sedh-secondary-300);
@@ -52,8 +52,8 @@
 }
 
 .session-modal__icon {
-  width: 32px;
-  height: 32px;
+  inline-size: 32px;
+  block-size: 32px;
   color: var(--sedh-secondary-500);
 }
 
@@ -85,8 +85,8 @@
 /* Anillo con conic-gradient. --p va de 100 (lleno) a 0 (vacío) */
 .session-modal__ring {
   position: relative;
-  width: 100px;
-  height: 100px;
+  inline-size: 100px;
+  block-size: 100px;
   border-radius: 50%;
   background: conic-gradient(
     var(--sedh-primary-500) calc(var(--p, 100) * 1%),
@@ -99,8 +99,8 @@
 }
 
 .session-modal__ring-inner {
-  width: 76px;
-  height: 76px;
+  inline-size: 76px;
+  block-size: 76px;
   border-radius: 50%;
   background: var(--sedh-surface);
   display: flex;
@@ -135,8 +135,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--sedh-space-sm);
-  width: 100%;
-  margin-top: var(--sedh-space-xs);
+  inline-size: 100%;
+  margin-block-start: var(--sedh-space-xs);
 }
 
 .session-modal__btn {
@@ -151,12 +151,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  width: 100%;
+  inline-size: 100%;
 }
 
 .session-modal__btn svg {
-  width: 18px;
-  height: 18px;
+  inline-size: 18px;
+  block-size: 18px;
   flex-shrink: 0;
 }
 

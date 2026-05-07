@@ -12,8 +12,13 @@
       </div>
 
       <!-- Título y descripción -->
-      <h2 id="session-modal-title" class="session-modal__title">Su sesión está por expirar</h2>
-      <p class="session-modal__desc">¿Desea continuar conectado al sistema?</p>
+      @if (sessionService.sessionExpiredForced()) {
+        <h2 id="session-modal-title" class="session-modal__title">Su sesión ha expirado</h2>
+        <p class="session-modal__desc">Será redirigido al inicio de sesión automáticamente.</p>
+      } @else {
+        <h2 id="session-modal-title" class="session-modal__title">Su sesión está por expirar</h2>
+        <p class="session-modal__desc">¿Desea continuar conectado al sistema?</p>
+      }
 
       <!-- Cuenta regresiva -->
       <div class="session-modal__countdown-wrapper">
@@ -28,15 +33,17 @@
 
       <!-- Acciones -->
       <div class="session-modal__actions">
-        <button
-          type="button"
-          class="session-modal__btn session-modal__btn--primary"
-          (click)="sessionService.continuarSesion()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="20 6 9 17 4 12"></polyline>
-          </svg>
-          Seguir conectado
-        </button>
+        @if (!sessionService.sessionExpiredForced()) {
+          <button
+            type="button"
+            class="session-modal__btn session-modal__btn--primary"
+            (click)="sessionService.continuarSesion()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            Seguir conectado
+          </button>
+        }
 
         <button
           type="button"

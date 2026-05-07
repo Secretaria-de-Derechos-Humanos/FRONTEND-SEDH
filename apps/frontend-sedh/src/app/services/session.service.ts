@@ -19,6 +19,8 @@ export class SessionService {
 
   readonly showModal = signal(false);
   readonly countdown = signal(60);
+  /** true cuando la sesión expiró sin posibilidad de renovarla (el refresh token también falló) */
+  readonly sessionExpiredForced = signal(false);
 
   // ── Handler de actividad (referencia fija para poder eliminarla) ─────────────
 
@@ -51,8 +53,22 @@ export class SessionService {
         this.activityDetected = false;
         this.scheduleCheck();
       },
-      error: () => { /* clearSession ya navegó a /login */ }
+      error: () => this.forceExpiredModal()
     });
+  }
+
+  /**
+   * Llamado por el interceptor cuando el refresh token también falla.
+   * Muestra el modal en modo «sesión expirada» (sin opción de renovar).
+   */
+  forceExpiredModal(): void {
+    if (this.showModal()) return; // ya está visible, no duplicar
+    clearTimeout(this.inactivityTimer);
+    clearInterval(this.countdownInterval);
+    this.sessionExpiredForced.set(true);
+    this.countdown.set(30);
+    this.showModal.set(true);
+    this.startCountdown();
   }
 
   performLogout(): void {
@@ -96,7 +112,7 @@ export class SessionService {
         this.activityDetected = false;
         this.authService.refreshToken().subscribe({
           next: () => this.scheduleCheck(),
-          error: () => { /* clearSession ya navegó a /login */ }
+          error: () => this.forceExpiredModal()
         });
       } else {
         this.showInactivityModal();
@@ -110,7 +126,7 @@ export class SessionService {
         this.activityDetected = false;
         this.authService.refreshToken().subscribe({
           next: () => this.scheduleCheck(),
-          error: () => { /* clearSession ya navegó a /login */ }
+          error: () => this.forceExpiredModal()
         });
       } else {
         // Usuario inactivo → mostrar modal con cuenta regresiva
@@ -120,6 +136,7 @@ export class SessionService {
   }
 
   private showInactivityModal(): void {
+    this.sessionExpiredForced.set(false);
     this.countdown.set(this.COUNTDOWN_SECONDS);
     this.showModal.set(true);
     this.startCountdown();

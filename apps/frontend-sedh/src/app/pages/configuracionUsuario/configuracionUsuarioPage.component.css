@@ -5,7 +5,7 @@
 
 /* — claro — */
 .config-usuario {
-  max-width: 1200px;
+  max-inline-size: 1200px;
   margin: 0 auto;
 }
 
@@ -13,12 +13,12 @@
   display: flex;
   align-items: center;
   gap: var(--sedh-space-lg);
-  margin-bottom: var(--sedh-space-lg);
+  margin-block-end: var(--sedh-space-lg);
 }
 
 .avatar {
-  width: 96px;
-  height: 96px;
+  inline-size: 96px;
+  block-size: 96px;
   border-radius: 50%;
   background: var(--sedh-primary-500);
   border: 3px solid var(--sedh-secondary-500);
@@ -63,9 +63,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--sedh-space-md);
-  padding-bottom: var(--sedh-space-md);
-  border-bottom: 1px solid var(--sedh-border);
+  margin-block-end: var(--sedh-space-md);
+  padding-block-end: var(--sedh-space-md);
+  border-block-end: 1px solid var(--sedh-border);
 }
 
 .section__title {
@@ -96,8 +96,8 @@
 }
 
 .btn-edit__icon {
-  width: 16px;
-  height: 16px;
+  inline-size: 16px;
+  block-size: 16px;
 }
 
 .section__content {
@@ -147,7 +147,7 @@
 .section__actions {
   display: flex;
   gap: var(--sedh-space-sm);
-  margin-top: var(--sedh-space-sm);
+  margin-block-start: var(--sedh-space-sm);
 }
 
 .btn {
@@ -164,8 +164,8 @@
 }
 
 .btn__icon {
-  width: 16px;
-  height: 16px;
+  inline-size: 16px;
+  block-size: 16px;
 }
 
 .btn--primary {
@@ -229,7 +229,7 @@
 .heatmap__months-row {
   display: flex;
   gap: 2px;
-  padding-left: calc(40px + var(--sedh-space-sm));
+  padding-inline-start: calc(40px + var(--sedh-space-sm));
   overflow-x: auto;
 }
 
@@ -238,8 +238,8 @@
   color: var(--sedh-text-muted);
   font-weight: 500;
   flex: 1;
-  min-width: calc((12px + 2px) * 4);
-  text-align: left;
+  min-inline-size: calc((12px + 2px) * 4);
+  text-align: start;
 }
 
 .heatmap__container {
@@ -254,13 +254,13 @@
   flex-direction: column;
   gap: 2px;
   justify-content: flex-start;
-  padding-right: var(--sedh-space-xs);
+  padding-inline-end: var(--sedh-space-xs);
 }
 
 .heatmap__day-label {
   font-size: 0.75rem;
   color: var(--sedh-text-muted);
-  height: 12px;
+  block-size: 12px;
   display: flex;
   align-items: center;
   font-weight: 500;
@@ -278,8 +278,8 @@
 }
 
 .heatmap__day {
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   border-radius: 2px;
   cursor: pointer;
   transition: all 0.2s;
@@ -331,8 +331,8 @@
 }
 
 .heatmap__legend-item {
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   border-radius: 2px;
 }
 
@@ -356,7 +356,7 @@
 }
 
 :host-context(.dark-theme) .section__header {
-  border-bottom-color: var(--sedh-gray-700);
+  border-block-end-color: var(--sedh-gray-700);
 }
 
 :host-context(.dark-theme) .btn-edit {
@@ -433,8 +433,8 @@
   }
 
   .avatar {
-    width: 80px;
-    height: 80px;
+    inline-size: 80px;
+    block-size: 80px;
   }
 
   .avatar__initials {
@@ -456,12 +456,12 @@
   }
 
   .btn {
-    width: 100%;
+    inline-size: 100%;
     justify-content: center;
   }
 
   .heatmap__months-row {
-    padding-left: calc(32px + var(--sedh-space-sm));
+    padding-inline-start: calc(32px + var(--sedh-space-sm));
   }
 
   .heatmap__month-label {
@@ -473,18 +473,16 @@
   }
 
   .heatmap__day {
-    width: 10px;
-    height: 10px;
+    inline-size: 10px;
+    block-size: 10px;
   }
 
   .heatmap__legend-item {
-    width: 10px;
-    height: 10px;
+    inline-size: 10px;
+    block-size: 10px;
   }
 }
-  font-weight: 700;
-  margin: 0 0 var(--sedh-space-xs);
-}
+
 
 .configuracion-usuario__subtitle {
   color: var(--sedh-text-muted);
@@ -504,8 +502,8 @@
   font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 var(--sedh-space-lg);
-  padding-bottom: var(--sedh-space-sm);
-  border-bottom: 2px solid var(--sedh-primary-500);
+  padding-block-end: var(--sedh-space-sm);
+  border-block-end: 2px solid var(--sedh-primary-500);
 }
 
 /* ── Perfil Section ── */
@@ -526,8 +524,8 @@
 }
 
 .profile-section__avatar {
-  width: 80px;
-  height: 80px;
+  inline-size: 80px;
+  block-size: 80px;
   border-radius: 50%;
   background: var(--sedh-primary-100);
   display: flex;
@@ -610,7 +608,7 @@
 
 .profile-form__input,
 .security-form__input {
-  width: 100%;
+  inline-size: 100%;
   padding: var(--sedh-space-sm) var(--sedh-space-md);
   border: 1px solid var(--sedh-border);
   border-radius: var(--sedh-radius);
@@ -653,8 +651,8 @@
   display: flex;
   gap: var(--sedh-space-sm);
   justify-content: flex-start;
-  padding-top: var(--sedh-space-md);
-  border-top: 1px solid var(--sedh-border);
+  padding-block-start: var(--sedh-space-md);
+  border-block-start: 1px solid var(--sedh-border);
 }
 
 /* ── Cards ── */
@@ -668,7 +666,7 @@
 
 /* ── Divider ── */
 .divider {
-  height: 1px;
+  block-size: 1px;
   background: var(--sedh-border);
   margin: var(--sedh-space-xl) 0;
 }
@@ -690,8 +688,8 @@
 }
 
 .button__icon {
-  width: 18px;
-  height: 18px;
+  inline-size: 18px;
+  block-size: 18px;
   flex-shrink: 0;
 }
 
@@ -736,19 +734,19 @@
 /* ── Password Input ── */
 .password-input {
   position: relative;
-  width: 100%;
+  inline-size: 100%;
 }
 
 .password-input input {
-  padding-right: 48px;
+  padding-inline-end: 48px;
 }
 
 .password-input__toggle {
   position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 48px;
+  inset-inline-end: 0;
+  inset-block-start: 0;
+  block-size: 100%;
+  inline-size: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -764,8 +762,8 @@
 }
 
 .password-input__toggle svg {
-  width: 20px;
-  height: 20px;
+  inline-size: 20px;
+  block-size: 20px;
 }
 
 /* ── Security Section ── */
@@ -797,7 +795,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sedh-space-lg);
-  margin-top: var(--sedh-space-lg);
+  margin-block-start: var(--sedh-space-lg);
 }
 
 .security-form__field {
@@ -816,8 +814,8 @@
   display: flex;
   gap: var(--sedh-space-sm);
   justify-content: flex-start;
-  padding-top: var(--sedh-space-md);
-  border-top: 1px solid var(--sedh-border);
+  padding-block-start: var(--sedh-space-md);
+  border-block-start: 1px solid var(--sedh-border);
 }
 
 /* ── Security Info ── */
@@ -825,7 +823,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sedh-space-md);
-  margin-top: var(--sedh-space-md);
+  margin-block-start: var(--sedh-space-md);
 }
 
 .security-info__item {
@@ -839,8 +837,8 @@
 }
 
 .security-info__icon {
-  width: 24px;
-  height: 24px;
+  inline-size: 24px;
+  block-size: 24px;
   color: var(--sedh-primary-500);
   flex-shrink: 0;
 }

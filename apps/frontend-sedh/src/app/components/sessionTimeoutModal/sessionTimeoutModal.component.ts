@@ -13,6 +13,8 @@ export class SessionTimeoutModalComponent {
   protected readonly sessionService = inject(SessionService);
 
   protected get progressPct(): number {
-    return (this.sessionService.countdown() / 60) * 100;
+    // El countdown inicial varía según el modo (60s normal, 30s expirado forzoso)
+    const initial = this.sessionService.sessionExpiredForced() ? 30 : 60;
+    return (this.sessionService.countdown() / initial) * 100;
   }
 }

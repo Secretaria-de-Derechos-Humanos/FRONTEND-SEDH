@@ -166,7 +166,7 @@ export class AuthService {
           return token;
         }),
         catchError(error => {
-          this.clearSession();
+          // No navegamos aquí. El llamador (SessionService o interceptor) decide qué hacer.
           return throwError(() => error);
         })
       );

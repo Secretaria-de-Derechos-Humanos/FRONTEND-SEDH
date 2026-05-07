@@ -1,0 +1,110 @@
+@if (visible()) {
+  <div class="modal-backdrop"
+    tabindex="0"
+    (click)="onCerrar()"
+    (keydown.escape)="onCerrar()"
+    (keydown.enter)="onCerrar()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo"
+      (click)="$event.stopPropagation()"
+      (keydown)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2 id="modal-titulo" class="modal-titulo">{{ tipoSolicitud }}</h2>
+        <button class="btn-cerrar" type="button" aria-label="Cerrar modal" (click)="onCerrar()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label class="form-label" for="ag-campo-nombre">Nombre del empleado</label>
+          <input id="ag-campo-nombre" type="text" class="form-control" [value]="nombreCompleto" readonly />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ag-campo-dependencia">Dependencia</label>
+          <input id="ag-campo-dependencia" type="text" class="form-control"
+            [value]="solicitud().nom_dependencia ?? solicitud().dependencia" readonly />
+        </div>
+
+        @if (solicitud().nom_cargo) {
+          <div class="form-group">
+            <label class="form-label" for="ag-campo-cargo">Cargo</label>
+            <input id="ag-campo-cargo" type="text" class="form-control" [value]="solicitud().nom_cargo" readonly />
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label" for="ag-campo-fecha">Fecha de solicitud</label>
+          <input id="ag-campo-fecha" type="text" class="form-control"
+            [value]="formatearFecha(solicitud().fec_solicitud ?? solicitud().fechaSolicitud)" readonly />
+        </div>
+
+        @if (!esPermisoOficial && solicitud().hor_solicitadas) {
+          <div class="form-group">
+            <label class="form-label" for="ag-campo-horas">Horas solicitadas</label>
+            <input id="ag-campo-horas" type="text" class="form-control" [value]="solicitud().hor_solicitadas" readonly />
+          </div>
+        }
+
+        @if (solicitud().motivo) {
+          <div class="form-group">
+            <label class="form-label" for="ag-campo-motivo">Motivo de salida</label>
+            <textarea id="ag-campo-motivo" class="form-control" rows="2" [value]="solicitud().motivo" readonly></textarea>
+          </div>
+        }
+
+        <!-- Registro de horas -->
+        <div class="horas-grid">
+          <div class="form-group">
+            <label class="form-label" for="ag-hora-salida">Hora de salida</label>
+            <input
+              id="ag-hora-salida"
+              type="time"
+              class="form-control"
+              [ngModel]="horaSalida()"
+              (ngModelChange)="horaSalida.set($event)"
+              [disabled]="horaSalidaBloqueada()" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="ag-hora-retorno">Hora de retorno</label>
+            <input
+              id="ag-hora-retorno"
+              type="time"
+              class="form-control"
+              [class.is-invalid]="horaInvalida()"
+              [ngModel]="horaRetorno()"
+              (ngModelChange)="horaRetorno.set($event); validarHoraRetorno()"
+              [disabled]="horaRetornoBloqueada()" />
+            @if (horaInvalida()) {
+              <span class="invalid-feedback">{{ mensajeError() }}</span>
+            }
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-salida"
+          type="button"
+          [disabled]="horaSalidaBloqueada()"
+          (click)="onRegistrarSalida()">
+          Registrar hora de salida
+        </button>
+        <button
+          class="btn btn-retorno"
+          type="button"
+          [disabled]="horaRetornoBloqueada() || horaInvalida()"
+          (click)="onRegistrarRetorno()">
+          Enviar permiso a RRHH
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

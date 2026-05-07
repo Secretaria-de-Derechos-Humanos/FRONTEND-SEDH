@@ -27,18 +27,6 @@ export class ActionButtonComponent {
       label: 'Ver detalles',
       icon: 'eye',
       color: 'info'
-    },
-    {
-      id: 'edit',
-      label: 'Editar',
-      icon: 'pencil',
-      color: 'primary'
-    },
-    {
-      id: 'delete',
-      label: 'Eliminar',
-      icon: 'trash',
-      color: 'danger'
     }
   ]);
 

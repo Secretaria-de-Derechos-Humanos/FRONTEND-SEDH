@@ -1,0 +1,205 @@
+:host {
+  display: block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 15, 33, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--sedh-space-md);
+  animation: fadeInBackdrop 0.2s ease;
+}
+
+@keyframes fadeInBackdrop {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal {
+  background: var(--sedh-surface);
+  border-radius: var(--sedh-radius-lg);
+  box-shadow: var(--sedh-shadow-md);
+  inline-size: 100%;
+  max-inline-size: 640px;
+  max-block-size: 90dvh;
+  display: flex;
+  flex-direction: column;
+  animation: slideInModal 0.25s ease;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sedh-space-md) var(--sedh-space-lg);
+  background: linear-gradient(270deg, var(--sedh-primary-500), var(--sedh-primary-700));
+  color: white;
+  flex-shrink: 0;
+}
+
+.modal-titulo {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+  text-align: center;
+  flex: 1;
+  letter-spacing: 0.02em;
+}
+
+.btn-cerrar {
+  flex-shrink: 0;
+  inline-size: 32px;
+  block-size: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--sedh-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background 0.15s ease;
+}
+
+.btn-cerrar:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.modal-body {
+  padding: var(--sedh-space-lg);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sedh-space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sedh-space-xs);
+}
+
+.form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--sedh-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.form-control {
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  background: var(--sedh-surface);
+  color: var(--sedh-text);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  transition: border-color 0.15s ease;
+  resize: vertical;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--sedh-primary-500);
+  box-shadow: 0 0 0 3px rgba(38, 77, 160, 0.1);
+}
+
+.form-control[readonly],
+.form-control:disabled {
+  background: var(--sedh-bg);
+  color: var(--sedh-text-muted);
+  cursor: default;
+  opacity: 0.75;
+}
+
+/* Grid de dos columnas para horas */
+.horas-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sedh-space-md);
+}
+
+@media (max-width: 480px) {
+  .horas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Validación hora retorno */
+.form-control.is-invalid {
+  border-color: var(--sedh-danger);
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+}
+
+.invalid-feedback {
+  font-size: 0.75rem;
+  color: var(--sedh-danger);
+  margin-top: 2px;
+}
+
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sedh-space-sm);
+  padding: var(--sedh-space-md) var(--sedh-space-lg);
+  border-block-start: 1px solid var(--sedh-border);
+  background: var(--sedh-bg);
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: var(--sedh-space-sm) var(--sedh-space-md);
+  border-radius: var(--sedh-radius);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, scale 0.15s ease;
+}
+
+.btn:hover:not(:disabled) {
+  scale: 1.03;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-salida {
+  background: var(--sedh-primary-600, var(--sedh-primary-500));
+  color: white;
+}
+
+.btn-salida:hover:not(:disabled) {
+  background: var(--sedh-primary-500);
+}
+
+.btn-retorno {
+  background: var(--sedh-primary-500);
+  color: white;
+}
+
+.btn-retorno:hover:not(:disabled) {
+  background: var(--sedh-primary-400);
+}

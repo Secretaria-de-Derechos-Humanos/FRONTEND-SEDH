@@ -35,15 +35,6 @@
               [(ngModel)]="editableData().telefono"
               [disabled]="!isEditingPersonal()" />
           </div>
-          <div class="field">
-            <label class="field__label" for="direccion">Dirección de casa</label>
-            <textarea
-              id="direccion"
-              class="field__textarea"
-              rows="3"
-              [(ngModel)]="editableData().direccion"
-              [disabled]="!isEditingPersonal()"></textarea>
-          </div>
           @if (isEditingPersonal()) {
             <div class="section__actions">
               <button class="btn btn--primary" (click)="onSavePersonal()">
@@ -83,7 +74,7 @@
               <span class="info-item__value">{{ userProfile()!.institucionalInfo.departamento }}</span>
             </div>
             <div class="info-item">
-              <span class="info-item__label">Fecha de ingreso</span>
+              <span class="info-item__label">Fecha de ingreso a la SEDH</span>
               <span class="info-item__value">{{ userProfile()!.institucionalInfo.fechaIngreso }}</span>
             </div>
           </div>

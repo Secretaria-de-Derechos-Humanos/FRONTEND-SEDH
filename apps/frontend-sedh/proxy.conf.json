@@ -1,0 +1,8 @@
+{
+  "/api/v1": {
+    "target": "https://api.sedh.gob.hn",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}

@@ -56,7 +56,7 @@ export class RecursosHumanosMainComponent {
     const usuario = this.authService.currentUser();
     if (!usuario) return [];
 
-    const rolUsuario = usuario.rol;
+    const rolUsuario = usuario.roles?.[0]?.r ?? -1;
     return this.todasLasOpciones().filter(opcion =>
       opcion.rolesPermitidos.includes(rolUsuario)
     );

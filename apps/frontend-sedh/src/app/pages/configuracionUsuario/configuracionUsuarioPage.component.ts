@@ -7,7 +7,6 @@ import { AuthService } from '../../services/auth.service';
 interface UserProfile {
   personalInfo: {
     telefono: string;
-    direccion: string;
   };
   institucionalInfo: {
     avatar: string;
@@ -44,8 +43,7 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
   protected readonly isEditingPersonal = signal(false);
 
   protected readonly editableData = signal({
-    telefono: '',
-    direccion: ''
+    telefono: ''
   });
 
   protected readonly userInitials = computed(() => {
@@ -103,7 +101,6 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
     this.userProfile.set({
       personalInfo: {
         telefono: user.telefono ?? '',
-        direccion: '',
       },
       institucionalInfo: {
         avatar: '',
@@ -118,7 +115,6 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
 
     this.editableData.set({
       telefono: user.telefono ?? '',
-      direccion: '',
     });
   }
 
@@ -200,7 +196,6 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
     if (profile) {
       this.editableData.set({
         telefono: profile.personalInfo.telefono,
-        direccion: profile.personalInfo.direccion
       });
     }
     this.isEditingPersonal.set(false);

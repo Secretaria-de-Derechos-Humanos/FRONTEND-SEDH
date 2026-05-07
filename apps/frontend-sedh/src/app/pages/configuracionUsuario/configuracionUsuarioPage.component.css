@@ -143,10 +143,6 @@
   cursor: not-allowed;
 }
 
-.field__textarea {
-  resize: vertical;
-  font-family: inherit;
-}
 
 .section__actions {
   display: flex;

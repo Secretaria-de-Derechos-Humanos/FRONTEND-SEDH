@@ -7,7 +7,8 @@ import { AuthService } from '../../../../../services/auth.service';
 import {
   EP_RRHH_MIS_SOLICITUDES,
   EP_RRHH_MIS_SOLICITUDES_EMERGENCIA,
-  EP_RRHH_DATOS_PERMISO
+  EP_RRHH_DATOS_PERMISO,
+  EP_RRHH_PERMISOS_PERSONALES_INSERTAR
 } from '../../../../../config/api.endpoints';
 import { Solicitud } from './solicitudesEmpleado.component';
 
@@ -60,6 +61,21 @@ interface DatosPermisoApi {
   horas_disponibles: string;
 }
 
+export interface InsertarPermisoPersonalBody {
+  fecha:      string;  // YYYY-MM-DD
+  horas:      string;  // HH:MM
+  motivo:     string;
+  emergencia: boolean;
+}
+
+export interface InsertarPermisoPersonalResponse {
+  status:          string;  // 'OK'
+  message:         string;
+  idpermiso:       string;
+  horas_solicitadas: number;
+  emergencia:      boolean;
+}
+
 interface DatosPermisoResponse {
   success:   boolean;
   data:      DatosPermisoApi;
@@ -108,6 +124,13 @@ export class SolicitudesEmpleadoService {
         this.emailBody
       )
       .pipe(map(r => r.data.emergencias.map(mapSolicitud)));
+  }
+
+  insertarPermisoPersonal(body: InsertarPermisoPersonalBody): Observable<InsertarPermisoPersonalResponse> {
+    return this.http.post<InsertarPermisoPersonalResponse>(
+      `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
+      { ...this.emailBody, ...body }
+    );
   }
 
   getDatosPermiso(): Observable<DatosPermiso> {

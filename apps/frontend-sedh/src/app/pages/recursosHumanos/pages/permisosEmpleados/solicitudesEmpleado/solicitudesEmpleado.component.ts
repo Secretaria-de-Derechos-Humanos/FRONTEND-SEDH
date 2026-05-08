@@ -5,7 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
 import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
-import { DatosPermiso } from './solicitudesEmpleado.service';
+import { DatosPermiso, InsertarPermisoPersonalBody } from './solicitudesEmpleado.service';
 
 export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
 
@@ -95,6 +95,7 @@ export class SolicitudesEmpleadoComponent implements OnInit {
   // ── Modal ──
   modalAbierto   = signal(false);
   cargandoModal  = signal(false);
+  isEnviando     = signal(false);
   form = signal<NuevaSolicitudForm>({
     nombreEmpleado: '',
     dependencia: '',
@@ -231,24 +232,30 @@ export class SolicitudesEmpleadoComponent implements OnInit {
   }
 
   enviarSolicitud(): void {
-    // TODO: conectar con servicio real
     if (this.form().tipoSolicitud === 'permiso-personal') {
-      console.log('Permiso personal:', {
-        ...this.form(),
-        fecha: this.ppFecha(),
-        tiempo: this.ppFormatHM(),
-        motivo: this.ppMotivo(),
-        citaMedica: this.ppCitaMedica()
+      const body: InsertarPermisoPersonalBody = {
+        fecha:      this.ppFecha(),
+        horas:      this.ppFormatHM(),
+        motivo:     this.ppMotivo(),
+        emergencia: this.ppCitaMedica() === 1
+      };
+      this.isEnviando.set(true);
+      this.solicitudesService.insertarPermisoPersonal(body).subscribe({
+        next: () => {
+          this.isEnviando.set(false);
+          this.cerrarModal();
+          this.cargarDatos();
+        },
+        error: () => {
+          this.isEnviando.set(false);
+        }
       });
+      return;
     }
     if (this.form().tipoSolicitud === 'permiso-oficial') {
-      console.log('Permiso oficial:', {
-        ...this.form(),
-        fecha: this.poFecha(),
-        motivo: this.poMotivo()
-      });
+      // TODO: implementar envío de permiso oficial
+      this.cerrarModal();
     }
-    this.cerrarModal();
   }
 
   primerRevision(s: Solicitud): string {

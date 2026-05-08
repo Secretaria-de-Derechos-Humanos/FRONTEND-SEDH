@@ -418,19 +418,24 @@
         <button
           class="btn-enviar"
           type="button"
-          [disabled]="cargandoModal() ||
+          [disabled]="cargandoModal() || isEnviando() ||
             !form().tipoSolicitud ||
             (form().tipoSolicitud === 'permiso-personal' && ppFormInvalido()) ||
             (form().tipoSolicitud === 'permiso-oficial'  && poFormInvalido())"
           (click)="enviarSolicitud()">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
-          </svg>
-          @if (form().tipoSolicitud === 'permiso-personal' || form().tipoSolicitud === 'permiso-oficial') {
-            Enviar a jefe inmediato
+          @if (isEnviando()) {
+            <span class="spinner-modal" aria-hidden="true"></span>
+            Enviando…
           } @else {
-            Enviar solicitud
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+            </svg>
+            @if (form().tipoSolicitud === 'permiso-personal' || form().tipoSolicitud === 'permiso-oficial') {
+              Enviar a jefe inmediato
+            } @else {
+              Enviar solicitud
+            }
           }
         </button>
       </div>

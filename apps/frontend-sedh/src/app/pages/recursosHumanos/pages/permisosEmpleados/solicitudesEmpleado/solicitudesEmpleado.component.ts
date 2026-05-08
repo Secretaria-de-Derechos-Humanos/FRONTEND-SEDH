@@ -5,7 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
 import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
-import { DatosPermiso, InsertarPermisoPersonalBody } from './solicitudesEmpleado.service';
+import { DatosPermiso, InsertarPermisoPersonalBody, InsertarPermisoOficialBody } from './solicitudesEmpleado.service';
 
 export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
 
@@ -253,8 +253,22 @@ export class SolicitudesEmpleadoComponent implements OnInit {
       return;
     }
     if (this.form().tipoSolicitud === 'permiso-oficial') {
-      // TODO: implementar envío de permiso oficial
-      this.cerrarModal();
+      const body: InsertarPermisoOficialBody = {
+        fecha:  this.poFecha(),
+        motivo: this.poMotivo()
+      };
+      this.isEnviando.set(true);
+      this.solicitudesService.insertarPermisoOficial(body).subscribe({
+        next: () => {
+          this.isEnviando.set(false);
+          this.cerrarModal();
+          this.cargarDatos();
+        },
+        error: () => {
+          this.isEnviando.set(false);
+        }
+      });
+      return;
     }
   }
 

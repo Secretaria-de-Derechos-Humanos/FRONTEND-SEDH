@@ -8,7 +8,8 @@ import {
   EP_RRHH_MIS_SOLICITUDES,
   EP_RRHH_MIS_SOLICITUDES_EMERGENCIA,
   EP_RRHH_DATOS_PERMISO,
-  EP_RRHH_PERMISOS_PERSONALES_INSERTAR
+  EP_RRHH_PERMISOS_PERSONALES_INSERTAR,
+  EP_RRHH_PERMISOS_OFICIALES_INSERTAR
 } from '../../../../../config/api.endpoints';
 import { Solicitud } from './solicitudesEmpleado.component';
 
@@ -76,6 +77,17 @@ export interface InsertarPermisoPersonalResponse {
   emergencia:      boolean;
 }
 
+export interface InsertarPermisoOficialBody {
+  fecha:  string;  // YYYY-MM-DD
+  motivo: string;
+}
+
+export interface InsertarPermisoOficialResponse {
+  status:    string;  // 'OK'
+  message:   string;
+  idpermiso: string;
+}
+
 interface DatosPermisoResponse {
   success:   boolean;
   data:      DatosPermisoApi;
@@ -114,7 +126,10 @@ export class SolicitudesEmpleadoService {
         `${this.base}${EP_RRHH_MIS_SOLICITUDES}`,
         this.emailBody
       )
-      .pipe(map(r => r.data.solicitudes.map(mapSolicitud)));
+      .pipe(map(r => r.data.solicitudes
+        .map(mapSolicitud)
+        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
+      ));
   }
 
   getMisSolicitudesEmergencia(): Observable<Solicitud[]> {
@@ -123,7 +138,17 @@ export class SolicitudesEmpleadoService {
         `${this.base}${EP_RRHH_MIS_SOLICITUDES_EMERGENCIA}`,
         this.emailBody
       )
-      .pipe(map(r => r.data.emergencias.map(mapSolicitud)));
+      .pipe(map(r => r.data.emergencias
+        .map(mapSolicitud)
+        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
+      ));
+  }
+
+  insertarPermisoOficial(body: InsertarPermisoOficialBody): Observable<InsertarPermisoOficialResponse> {
+    return this.http.post<InsertarPermisoOficialResponse>(
+      `${this.base}${EP_RRHH_PERMISOS_OFICIALES_INSERTAR}`,
+      { ...this.emailBody, ...body }
+    );
   }
 
   insertarPermisoPersonal(body: InsertarPermisoPersonalBody): Observable<InsertarPermisoPersonalResponse> {

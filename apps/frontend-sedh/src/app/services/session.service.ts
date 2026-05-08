@@ -13,12 +13,11 @@ export class SessionService {
   private activityDetected = false;
   private eventsRegistered = false;
 
-  /** 14 minutos — el token dura 15, se renueva antes de que expire */
-  private readonly INACTIVITY_MS = 14 * 60 * 1000;
-  private readonly COUNTDOWN_SECONDS = 60;
+  /** 30 segundos — el modal avisa antes de que expire el access token (4 min) */
+  readonly COUNTDOWN_SECONDS = 30;
 
   readonly showModal = signal(false);
-  readonly countdown = signal(60);
+  readonly countdown = signal(30);
   /** true cuando la sesión expiró sin posibilidad de renovarla (el refresh token también falló) */
   readonly sessionExpiredForced = signal(false);
 
@@ -43,6 +42,9 @@ export class SessionService {
     clearTimeout(this.inactivityTimer);
     clearInterval(this.countdownInterval);
     this.showModal.set(false);
+    this.sessionExpiredForced.set(false);
+    this.countdown.set(this.COUNTDOWN_SECONDS);
+    this.unbindActivityEvents();
   }
 
   continuarSesion(): void {
@@ -53,30 +55,31 @@ export class SessionService {
         this.activityDetected = false;
         this.scheduleCheck();
       },
-      error: () => this.forceExpiredModal()
+      error: () => {
+        this.destroySession();
+        this.authService.clearSession();
+      }
     });
   }
 
-  /**
-   * Llamado por el interceptor cuando el refresh token también falla.
-   * Muestra el modal en modo «sesión expirada» (sin opción de renovar).
-   */
-  forceExpiredModal(): void {
-    if (this.showModal()) return; // ya está visible, no duplicar
-    clearTimeout(this.inactivityTimer);
-    clearInterval(this.countdownInterval);
-    this.sessionExpiredForced.set(true);
-    this.countdown.set(30);
-    this.showModal.set(true);
-    this.startCountdown();
+  performLogout(): void {
+    this.destroySession();
+    this.authService.logout().subscribe();
   }
 
-  performLogout(): void {
-    clearInterval(this.countdownInterval);
-    clearTimeout(this.inactivityTimer);
-    this.unbindActivityEvents();
-    this.showModal.set(false);
-    this.authService.logout().subscribe();
+  /**
+   * Llamado por el interceptor cuando el refresh tiene éxito.
+   * Si el modal de inactividad está abierto (no el de sesión expirada forzada),
+   * lo cierra y reprograma el timer para que el usuario no sea expulsado
+   * aunque no haya interactuado con el modal.
+   */
+  onTokenRefreshed(): void {
+    if (this.showModal() && !this.sessionExpiredForced()) {
+      clearInterval(this.countdownInterval);
+      this.showModal.set(false);
+      this.activityDetected = false;
+      this.scheduleCheck();
+    }
   }
 
   // ── Internos ─────────────────────────────────────────────────────────────────
@@ -112,7 +115,10 @@ export class SessionService {
         this.activityDetected = false;
         this.authService.refreshToken().subscribe({
           next: () => this.scheduleCheck(),
-          error: () => this.forceExpiredModal()
+          error: () => {
+            this.destroySession();
+            this.authService.clearSession();
+          }
         });
       } else {
         this.showInactivityModal();
@@ -126,7 +132,10 @@ export class SessionService {
         this.activityDetected = false;
         this.authService.refreshToken().subscribe({
           next: () => this.scheduleCheck(),
-          error: () => this.forceExpiredModal()
+          error: () => {
+            this.destroySession();
+            this.authService.clearSession();
+          }
         });
       } else {
         // Usuario inactivo → mostrar modal con cuenta regresiva
@@ -135,7 +144,15 @@ export class SessionService {
     }, delay);
   }
 
-  private showInactivityModal(): void {
+  /**
+   * Muestra el modal de inactividad (modo «¿Desea continuar?»).
+   * Llamado cuando el usuario está inactivo O cuando el refresh falla
+   * con error transitorio (500, red) y no se debe forzar el logout.
+   */
+  showInactivityModal(): void {
+    if (this.showModal()) return; // ya está visible, no duplicar
+    clearTimeout(this.inactivityTimer);
+    clearInterval(this.countdownInterval);
     this.sessionExpiredForced.set(false);
     this.countdown.set(this.COUNTDOWN_SECONDS);
     this.showModal.set(true);

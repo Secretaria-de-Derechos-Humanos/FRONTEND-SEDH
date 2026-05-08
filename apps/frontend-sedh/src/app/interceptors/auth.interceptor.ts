@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { throwError } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
@@ -14,6 +14,8 @@ const AUTH_ENDPOINTS = [
 
 const isAuthEndpoint = (url: string): boolean =>
   AUTH_ENDPOINTS.some(endpoint => url.includes(endpoint));
+
+const REFRESH_RETRY_ATTEMPTED = new HttpContextToken<boolean>(() => false);
 
 /**
  * Interceptor HTTP que gestiona la autenticación JWT.
@@ -41,12 +43,23 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authorizedReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
+        if (req.context.get(REFRESH_RETRY_ATTEMPTED)) {
+          sessionService.destroySession();
+          authService.clearSession();
+          return throwError(() => error);
+        }
+
         return authService.refreshToken().pipe(
-          switchMap(newToken =>
-            next(req.clone({ setHeaders: { Authorization: `Bearer ${newToken}` } }))
-          ),
+          switchMap(newToken => {
+            sessionService.onTokenRefreshed();
+            return next(req.clone({
+              context: req.context.set(REFRESH_RETRY_ATTEMPTED, true),
+              setHeaders: { Authorization: `Bearer ${newToken}` }
+            }));
+          }),
           catchError(refreshError => {
-            sessionService.forceExpiredModal();
+            sessionService.destroySession();
+            authService.clearSession();
             return throwError(() => refreshError);
           })
         );

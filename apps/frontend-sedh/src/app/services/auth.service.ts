@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Observable, throwError, EMPTY } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
+import { EP_AUTH_LOGIN, EP_AUTH_REFRESH, EP_AUTH_LOGOUT } from '../config/api.endpoints';
 
 export interface UserRol {
   r: number;
@@ -131,7 +132,7 @@ export class AuthService {
   login(email: string, contrasena: string): Observable<User> {
     return this.http
       .post<LoginApiResponse>(
-        `${environment.apiBaseUrl}${environment.endpoints.login}`,
+        `${environment.apiBaseUrl}${EP_AUTH_LOGIN}`,
         { email, contrasena },
         { withCredentials: true }
       )
@@ -154,7 +155,7 @@ export class AuthService {
   refreshToken(): Observable<string> {
     return this.http
       .post<RefreshApiResponse>(
-        `${environment.apiBaseUrl}${environment.endpoints.refreshToken}`,
+        `${environment.apiBaseUrl}${EP_AUTH_REFRESH}`,
         {},
         { withCredentials: true }
       )
@@ -187,7 +188,7 @@ export class AuthService {
     );
     return this.http
       .post<void>(
-        `${environment.apiBaseUrl}${environment.endpoints.logout}`,
+        `${environment.apiBaseUrl}${EP_AUTH_LOGOUT}`,
         {},
         { withCredentials: true, headers }
       )

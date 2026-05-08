@@ -34,15 +34,30 @@ this.http.get('/api/v1/rrhh/endpoint/usuario@sedh.gob.hn')
 
 ---
 
-## Verbo HTTP según operación
+## Verbo HTTP: SIEMPRE POST
+
+> **Todas las peticiones al backend usan `POST`, sin excepción.**  
+> No se usan `GET`, `PUT`, `PATCH` ni `DELETE` para ningún endpoint.
 
 | Operación | Verbo | Body |
 |---|---|---|
-| Consultar datos del usuario autenticado | `POST` | `{ email }` u otros filtros |
-| Consultar listados generales (sin datos privados) | `GET` | — |
+| Consultar datos | `POST` | `{ email }` u otros filtros |
 | Crear un recurso | `POST` | datos del recurso |
-| Actualizar un recurso | `PUT` / `PATCH` | datos a actualizar |
-| Eliminar un recurso | `DELETE` | `{ id }` u identificador en body |
+| Actualizar un recurso | `POST` | datos a actualizar + identificador |
+| Eliminar un recurso | `POST` | identificador del recurso |
+
+```typescript
+// ✅ CORRECTO — siempre POST, datos en body JSON
+this.http.post('/api/v1/rrhh/endpoint', { email: 'usuario@sedh.gob.hn' })
+this.http.post('/api/v1/rrhh/crear', { nombre: 'Juan', email: '...' })
+this.http.post('/api/v1/rrhh/actualizar', { id: 5, campo: 'valor' })
+this.http.post('/api/v1/rrhh/eliminar', { id: 5 })
+
+// ❌ INCORRECTO — nunca GET, PUT, PATCH, DELETE
+this.http.get('/api/v1/rrhh/endpoint')
+this.http.put('/api/v1/rrhh/actualizar', { ... })
+this.http.delete('/api/v1/rrhh/eliminar/5')
+```
 
 ---
 
@@ -66,7 +81,52 @@ export class MiServicio {
 
 ---
 
+## Barril de endpoints — `api.endpoints.ts`
+
+Todos los endpoints del sistema están centralizados en:
+
+```
+src/app/config/api.endpoints.ts
+```
+
+### Convención de nomenclatura
+
+```
+EP_<MODULO>_<ACCION>
+```
+
+Ejemplos:
+```typescript
+EP_AUTH_LOGIN
+EP_AUTH_LOGOUT
+EP_RRHH_MIS_SOLICITUDES
+EP_RRHH_MIS_SOLICITUDES_EMERGENCIA
+EP_ALMACEN_INVENTARIO
+```
+
+### Al agregar un nuevo endpoint
+
+1. Abre `src/app/config/api.endpoints.ts`
+2. Ubica el bloque del módulo correspondiente (o crea uno nuevo al final)
+3. Agrega la constante con el formato `EP_<MODULO>_<ACCION>`
+4. Importa la constante en el servicio que la usa
+
+```typescript
+// En api.endpoints.ts — agregar dentro del módulo correcto
+export const EP_RRHH_NUEVO_ENDPOINT = '/rrhh/modulo/nuevo-endpoint';
+
+// En el servicio — importar y usar
+import { EP_RRHH_NUEVO_ENDPOINT } from '../../../config/api.endpoints';
+...
+this.http.post(`${this.base}${EP_RRHH_NUEVO_ENDPOINT}`, body)
+```
+
+---
+
 ## Estructura de un servicio Angular — plantilla base
+
+> **Siempre importa los endpoints desde el barril central `src/app/config/api.endpoints.ts`.**  
+> Nunca escribas la ruta del endpoint como string directo en el servicio.
 
 ```typescript
 import { Injectable, inject } from '@angular/core';
@@ -75,6 +135,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../../services/auth.service';
+import { EP_MODULO_ENDPOINT } from '../../../config/api.endpoints'; // ← barril
 
 // ── Interfaces de respuesta API ──────────────────────────────────────────────
 
@@ -101,7 +162,7 @@ export class MiServicio {
   getMisDatos(): Observable<MiModelo[]> {
     return this.http
       .post<ApiResponse<{ items: MiModeloApi[] }>>(
-        `${this.base}/modulo/endpoint`,
+        `${this.base}${EP_MODULO_ENDPOINT}`,   // ← constante del barril
         this.emailBody
       )
       .pipe(map(r => r.data.items.map(mapModelo)));

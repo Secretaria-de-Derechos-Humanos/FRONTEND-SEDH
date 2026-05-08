@@ -4,6 +4,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../services/auth.service';
+import {
+  EP_RRHH_MIS_SOLICITUDES,
+  EP_RRHH_MIS_SOLICITUDES_EMERGENCIA
+} from '../../../../../config/api.endpoints';
 import { Solicitud } from './solicitudesEmpleado.component';
 
 // ── Tipos de respuesta de la API ────────────────────────────────────────────
@@ -64,7 +68,7 @@ export class SolicitudesEmpleadoService {
   getMisSolicitudes(): Observable<Solicitud[]> {
     return this.http
       .post<MisSolicitudesResponse>(
-        `${this.base}/rrhh/solicitudes-empleados/mis-solicitudes`,
+        `${this.base}${EP_RRHH_MIS_SOLICITUDES}`,
         this.emailBody
       )
       .pipe(map(r => r.data.solicitudes.map(mapSolicitud)));
@@ -73,7 +77,7 @@ export class SolicitudesEmpleadoService {
   getMisSolicitudesEmergencia(): Observable<Solicitud[]> {
     return this.http
       .post<MisSolicitudesEmergenciaResponse>(
-        `${this.base}/rrhh/solicitudes-empleados/mis-solicitudes-emergencia`,
+        `${this.base}${EP_RRHH_MIS_SOLICITUDES_EMERGENCIA}`,
         this.emailBody
       )
       .pipe(map(r => r.data.emergencias.map(mapSolicitud)));

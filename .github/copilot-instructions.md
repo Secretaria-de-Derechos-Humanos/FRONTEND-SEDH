@@ -10,6 +10,10 @@ Cuando la tarea involucre crear o modificar **cualquier texto visible** en un te
 
 - **Gramática RAE**: `.github/skills/rae-grammar/SKILL.md`
 
+Cuando la tarea involucre **crear o modificar un servicio Angular** que llame a un endpoint del backend (HttpClient, peticiones HTTP, body, parámetros), DEBES leer el skill antes de generar código:
+
+- **Convenciones HTTP API SEDH**: `.github/skills/api-http-conventions/SKILL.md`
+
 **DESPUÉS de completar CUALQUIER cambio** que cree, modifique o elimine archivos del proyecto, DEBES leer y ejecutar el skill de versionado:
 
 - **Auto Version Bump**: `.github/skills/auto-version-bump/SKILL.md`

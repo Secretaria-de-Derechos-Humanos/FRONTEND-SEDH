@@ -1,7 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
+import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
 
 export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
 
@@ -44,47 +46,13 @@ function maxFechaOficialStr(): string {
   styleUrls: ['./solicitudesEmpleado.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SolicitudesEmpleadoComponent {
-  // TODO: reemplazar con llamada al servicio real
-  solicitudes = signal<Solicitud[]>([
-    {
-      fec_solicitud: '2026-04-10',
-      nom_tipo_solicitud: 'Permiso personal',
-      nom_estado: 'APROBADO',
-      pri_aporbacion: 'JUAN PÉREZ',
-      seg_aprobacion: 'MARÍA LÓPEZ',
-      mot_rechazo: null
-    },
-    {
-      fec_solicitud: '2026-04-22',
-      nom_tipo_solicitud: 'Permiso médico',
-      nom_estado: 'EN PROCESO',
-      pri_aporbacion: null,
-      seg_aprobacion: null,
-      mot_rechazo: null
-    },
-    {
-      fec_solicitud: '2026-05-01',
-      nom_tipo_solicitud: 'Permiso sindical',
-      nom_estado: 'RECHAZADO',
-      pri_aporbacion: '----------------',
-      seg_aprobacion: '----------------',
-      mot_rechazo: 'Documentación incompleta'
-    }
-  ]);
+export class SolicitudesEmpleadoComponent implements OnInit {
+  private readonly solicitudesService = inject(SolicitudesEmpleadoService);
 
-  solicitudesEmergencia = signal<Solicitud[]>([
-    {
-      fec_solicitud: '2026-05-03',
-      nom_tipo_solicitud: 'Emergencia familiar',
-      nom_estado: 'EN PROCESO',
-      pri_aporbacion: null,
-      seg_aprobacion: null,
-      mot_rechazo: null
-    }
-  ]);
+  solicitudes          = signal<Solicitud[]>([]);
+  solicitudesEmergencia = signal<Solicitud[]>([]);
 
-  isActualizando = signal(false);
+  isActualizando = signal(true);
   errorMessage   = signal('');
 
   // — Filtros tabla normal —
@@ -179,6 +147,34 @@ export class SolicitudesEmpleadoComponent {
   poFormInvalido = computed(() =>
     Object.values(this.poErrores()).some(Boolean)
   );
+
+  // ── Carga de datos ──
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
+
+  actualizarDatos(): void {
+    this.cargarDatos();
+  }
+
+  private cargarDatos(): void {
+    this.isActualizando.set(true);
+    this.errorMessage.set('');
+    forkJoin({
+      solicitudes: this.solicitudesService.getMisSolicitudes(),
+      emergencias: this.solicitudesService.getMisSolicitudesEmergencia()
+    }).subscribe({
+      next: ({ solicitudes, emergencias }) => {
+        this.solicitudes.set(solicitudes);
+        this.solicitudesEmergencia.set(emergencias);
+        this.isActualizando.set(false);
+      },
+      error: () => {
+        this.errorMessage.set('No fue posible cargar las solicitudes. Intente de nuevo más tarde.');
+        this.isActualizando.set(false);
+      }
+    });
+  }
 
   // ── Acciones modal ──
   abrirModal(): void {

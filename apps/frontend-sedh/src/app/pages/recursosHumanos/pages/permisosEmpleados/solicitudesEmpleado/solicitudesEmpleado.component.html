@@ -12,7 +12,8 @@
       <button
         class="btn-actualizar"
         title="Actualizar solicitudes"
-        [disabled]="isActualizando()">
+        [disabled]="isActualizando()"
+        (click)="actualizarDatos()">
         @if (!isActualizando()) {
           <span>&#x21BB; Actualizar</span>
         } @else {
@@ -28,7 +29,7 @@
   }
 
   <!-- ── Tabla: Solicitudes normales ── -->
-  @if (solicitudes().length === 0) {
+  @if (!isActualizando() && solicitudes().length === 0) {
     <div class="empty-state">
       <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -103,7 +104,7 @@
     />
   </div>
 
-  @if (solicitudesEmergencia().length === 0) {
+  @if (!isActualizando() && solicitudesEmergencia().length === 0) {
     <div class="empty-state">
       <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

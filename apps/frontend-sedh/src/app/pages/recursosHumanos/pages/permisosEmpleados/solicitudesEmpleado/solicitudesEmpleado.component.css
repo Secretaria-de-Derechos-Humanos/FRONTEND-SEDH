@@ -427,6 +427,41 @@
   gap: var(--sedh-space-md);
 }
 
+/* — Loading del modal — */
+.modal-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sedh-space-md);
+  padding: var(--sedh-space-2xl) var(--sedh-space-lg);
+  color: var(--sedh-text-muted);
+  font-size: 0.95rem;
+}
+
+.spinner-modal {
+  inline-size: 36px;
+  block-size: 36px;
+  border: 3px solid var(--sedh-border);
+  border-block-start-color: var(--sedh-primary-500);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* — Inputs solo lectura — */
+.form-control--readonly {
+  background: var(--sedh-primary-50);
+  color: var(--sedh-text-muted);
+  cursor: default;
+  border-color: var(--sedh-border);
+}
+
+:host-context(.dark-theme) .form-control--readonly {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sedh-text-muted);
+  border-color: var(--sedh-border);
+}
+
 .modal-footer {
   display: flex;
   justify-content: space-between;

@@ -5,6 +5,7 @@ import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
 import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
+import { DatosPermiso } from './solicitudesEmpleado.service';
 
 export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
 
@@ -92,7 +93,8 @@ export class SolicitudesEmpleadoComponent implements OnInit {
   readonly badgeClass = 'badge';
 
   // ── Modal ──
-  modalAbierto = signal(false);
+  modalAbierto   = signal(false);
+  cargandoModal  = signal(false);
   form = signal<NuevaSolicitudForm>({
     nombreEmpleado: '',
     dependencia: '',
@@ -109,8 +111,7 @@ export class SolicitudesEmpleadoComponent implements OnInit {
   ppMinutos    = signal(0);
   ppMotivo     = signal('Asunto Personal.');
   ppCitaMedica = signal(0);
-  // TODO: obtener del servicio real
-  ppHorasDisponibles = signal(24);
+  ppHorasDisponibles = signal<string>('--:--');
 
   ppErrores = computed(() => ({
     fecha:   !this.ppFecha() ||
@@ -183,16 +184,38 @@ export class SolicitudesEmpleadoComponent implements OnInit {
   }
 
   // ── Acciones modal ──
-  abrirModal(): void {
-    this.form.set({ nombreEmpleado: '', dependencia: '', cargo: '', tipoSolicitud: '' });
+  private resetModal(datos?: DatosPermiso): void {
+    this.form.set({
+      nombreEmpleado: datos?.nombre      ?? '',
+      dependencia:    datos?.dependencia ?? '',
+      cargo:          datos?.cargo       ?? '',
+      tipoSolicitud:  ''
+    });
     this.ppFecha.set(hoyStr());
     this.ppHoras.set(3);
     this.ppMinutos.set(0);
     this.ppMotivo.set('Asunto Personal.');
     this.ppCitaMedica.set(0);
+    this.ppHorasDisponibles.set(datos?.horasDisponibles ?? '--:--');
     this.poFecha.set(hoyStr());
     this.poMotivo.set('');
-    this.modalAbierto.set(true);
+  }
+
+  abrirModal(): void {
+    this.cargandoModal.set(true);
+
+    this.solicitudesService.getDatosPermiso().subscribe({
+      next: (datos: DatosPermiso) => {
+        this.resetModal(datos);
+        this.cargandoModal.set(false);
+        this.modalAbierto.set(true);
+      },
+      error: () => {
+        this.resetModal();
+        this.cargandoModal.set(false);
+        this.modalAbierto.set(true);
+      }
+    });
   }
 
   cerrarModal(): void {

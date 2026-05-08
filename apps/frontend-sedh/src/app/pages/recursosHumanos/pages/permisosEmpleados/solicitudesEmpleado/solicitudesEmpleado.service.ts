@@ -6,9 +6,19 @@ import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../services/auth.service';
 import {
   EP_RRHH_MIS_SOLICITUDES,
-  EP_RRHH_MIS_SOLICITUDES_EMERGENCIA
+  EP_RRHH_MIS_SOLICITUDES_EMERGENCIA,
+  EP_RRHH_DATOS_PERMISO
 } from '../../../../../config/api.endpoints';
 import { Solicitud } from './solicitudesEmpleado.component';
+
+// ── Modelo público del modal ────────────────────────────────────────────────
+
+export interface DatosPermiso {
+  nombre:           string;
+  dependencia:      string;
+  cargo:            string;
+  horasDisponibles: string; // formato HH:MM
+}
 
 // ── Tipos de respuesta de la API ────────────────────────────────────────────
 
@@ -38,6 +48,23 @@ interface MisSolicitudesEmergenciaResponse {
     emergencias: SolicitudApi[];
   };
   message: string;
+}
+
+interface DatosPermisoApi {
+  prinombre:         string;
+  segnombre:         string | null;
+  priapellido:       string;
+  segapellido:       string | null;
+  dependencia:       string;
+  cargo:             string;
+  horas_disponibles: string;
+}
+
+interface DatosPermisoResponse {
+  success:   boolean;
+  data:      DatosPermisoApi;
+  message:   string;
+  timestamp: string;
 }
 
 // ── Mapper API → modelo interno ─────────────────────────────────────────────
@@ -81,5 +108,26 @@ export class SolicitudesEmpleadoService {
         this.emailBody
       )
       .pipe(map(r => r.data.emergencias.map(mapSolicitud)));
+  }
+
+  getDatosPermiso(): Observable<DatosPermiso> {
+    return this.http
+      .post<DatosPermisoResponse>(
+        `${this.base}${EP_RRHH_DATOS_PERMISO}`,
+        this.emailBody
+      )
+      .pipe(
+        map(r => ({
+          nombre: [
+            r.data.prinombre,
+            r.data.segnombre  ?? '',
+            r.data.priapellido,
+            r.data.segapellido ?? ''
+          ].filter(Boolean).join(' '),
+          dependencia:      r.data.dependencia,
+          cargo:            r.data.cargo,
+          horasDisponibles: r.data.horas_disponibles.substring(0, 5),
+        }))
+      );
   }
 }

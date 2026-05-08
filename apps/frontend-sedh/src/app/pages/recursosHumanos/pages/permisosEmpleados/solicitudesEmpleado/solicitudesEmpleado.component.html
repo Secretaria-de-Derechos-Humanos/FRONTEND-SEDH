@@ -6,8 +6,17 @@
       subtitulo="Consulte el estado de sus solicitudes de permisos y ausencias"
     />
     <div class="header-actions">
-      <button class="btn-nueva-solicitud" title="Solicitar un nuevo permiso" (click)="abrirModal()">
-        + Nueva solicitud
+      <button
+        class="btn-nueva-solicitud"
+        title="Solicitar un nuevo permiso"
+        [disabled]="cargandoModal()"
+        (click)="abrirModal()">
+        @if (cargandoModal()) {
+          <span class="spinner"></span>
+          <span>Cargando...</span>
+        } @else {
+          + Nueva solicitud
+        }
       </button>
       <button
         class="btn-actualizar"
@@ -203,11 +212,10 @@
         <label class="form-label" for="nombreEmpleado">Nombre del empleado</label>
         <input
           id="nombreEmpleado"
-          class="form-control"
+          class="form-control form-control--readonly"
           type="text"
-          placeholder="Ingrese el nombre del empleado"
-          [ngModel]="form().nombreEmpleado"
-          (ngModelChange)="onCampoChange('nombreEmpleado', $event)" />
+          readonly
+          [value]="form().nombreEmpleado" />
       </div>
 
       <div class="form-row">
@@ -215,22 +223,20 @@
           <label class="form-label" for="dependencia">Dependencia</label>
           <input
             id="dependencia"
-            class="form-control"
+            class="form-control form-control--readonly"
             type="text"
-            placeholder="Ingrese la dependencia"
-            [ngModel]="form().dependencia"
-            (ngModelChange)="onCampoChange('dependencia', $event)" />
+            readonly
+            [value]="form().dependencia" />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="cargo">Cargo</label>
           <input
             id="cargo"
-            class="form-control"
+            class="form-control form-control--readonly"
             type="text"
-            placeholder="Ingrese el cargo"
-            [ngModel]="form().cargo"
-            (ngModelChange)="onCampoChange('cargo', $event)" />
+            readonly
+            [value]="form().cargo" />
         </div>
       </div>
 
@@ -412,7 +418,8 @@
         <button
           class="btn-enviar"
           type="button"
-          [disabled]="!form().tipoSolicitud ||
+          [disabled]="cargandoModal() ||
+            !form().tipoSolicitud ||
             (form().tipoSolicitud === 'permiso-personal' && ppFormInvalido()) ||
             (form().tipoSolicitud === 'permiso-oficial'  && poFormInvalido())"
           (click)="enviarSolicitud()">

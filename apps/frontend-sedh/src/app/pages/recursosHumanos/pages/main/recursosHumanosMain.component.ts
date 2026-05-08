@@ -29,25 +29,25 @@ export class RecursosHumanosMainComponent {
       label: 'Solicitar algo a RRHH',
       imageUrl: 'LogoSolicitarAlgo-RRHH.png',
       route: '/rrhh/mis-solicitudes',
-      rolesPermitidos: [1, 5]
+      rolesPermitidos: [1,2,3,4,5]
     },
     {
       label: 'Control de asistencia',
       imageUrl: 'LogoControlAsistencia-RRHH.png',
       route: '',
-      rolesPermitidos: [1, 5]
+      rolesPermitidos: [5]
     },
     {
       label: 'Reporte de permisos',
       imageUrl: 'LogoReportePermisos-RRHH.png',
       route: '/rrhh/reporte-permisos',
-      rolesPermitidos: [1, 5]
+      rolesPermitidos: [5]
     },
     {
       label: 'Gestión de empleados',
       imageUrl: 'LogoGestionEmpleados-RRHH.png',
       route: '/rrhh/gestion-empleados',
-      rolesPermitidos: [1, 5]
+      rolesPermitidos: [5]
     }
   ]);
 

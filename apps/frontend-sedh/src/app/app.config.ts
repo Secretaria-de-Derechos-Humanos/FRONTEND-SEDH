@@ -11,13 +11,14 @@ import {
 } from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { ssrAbsoluteUrlInterceptor } from './interceptors/ssrAbsoluteUrl.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
     provideBrowserGlobalErrorListeners(),
     provideRouter(appRoutes),
-    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([ssrAbsoluteUrlInterceptor, authInterceptor])),
     provideAnimationsAsync(),
   ],
 };

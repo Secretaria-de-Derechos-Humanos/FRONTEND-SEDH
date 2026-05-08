@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, OnInit, signal, computed, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, ChangeDetectionStrategy, OnInit, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+import { DatePipe, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
 import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
 
@@ -48,6 +49,7 @@ function maxFechaOficialStr(): string {
 })
 export class SolicitudesEmpleadoComponent implements OnInit {
   private readonly solicitudesService = inject(SolicitudesEmpleadoService);
+  private readonly platformId          = inject(PLATFORM_ID);
 
   solicitudes          = signal<Solicitud[]>([]);
   solicitudesEmergencia = signal<Solicitud[]>([]);
@@ -150,7 +152,10 @@ export class SolicitudesEmpleadoComponent implements OnInit {
 
   // ── Carga de datos ──
   ngOnInit(): void {
-    this.cargarDatos();
+    // Solo carga en el browser: evita mismatch de hidratación SSR
+    if (isPlatformBrowser(this.platformId)) {
+      this.cargarDatos();
+    }
   }
 
   actualizarDatos(): void {
@@ -161,18 +166,19 @@ export class SolicitudesEmpleadoComponent implements OnInit {
     this.isActualizando.set(true);
     this.errorMessage.set('');
     forkJoin({
-      solicitudes: this.solicitudesService.getMisSolicitudes(),
-      emergencias: this.solicitudesService.getMisSolicitudesEmergencia()
-    }).subscribe({
-      next: ({ solicitudes, emergencias }) => {
-        this.solicitudes.set(solicitudes);
-        this.solicitudesEmergencia.set(emergencias);
-        this.isActualizando.set(false);
-      },
-      error: () => {
+      solicitudes: this.solicitudesService.getMisSolicitudes().pipe(
+        catchError(() => of(null))
+      ),
+      emergencias: this.solicitudesService.getMisSolicitudesEmergencia().pipe(
+        catchError(() => of(null))
+      )
+    }).subscribe(({ solicitudes, emergencias }) => {
+      if (solicitudes === null && emergencias === null) {
         this.errorMessage.set('No fue posible cargar las solicitudes. Intente de nuevo más tarde.');
-        this.isActualizando.set(false);
       }
+      this.solicitudes.set(solicitudes ?? []);
+      this.solicitudesEmergencia.set(emergencias ?? []);
+      this.isActualizando.set(false);
     });
   }
 

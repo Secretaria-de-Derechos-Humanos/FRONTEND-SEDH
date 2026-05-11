@@ -112,3 +112,13 @@
     (rechazar)="rechazarSolicitud($event)"
   />
 }
+
+@if (solicitudAgenteSeleccionada(); as solicitudAgente) {
+  <app-modal-agente-permisos-rrhh
+    [solicitud]="solicitudAgente"
+    [visible]="modalAgenteVisible()"
+    (cerrar)="cerrarModalAgente()"
+    (registrarSalida)="onRegistrarSalida($event)"
+    (registrarRetorno)="onRegistrarRetorno($event)"
+  />
+}

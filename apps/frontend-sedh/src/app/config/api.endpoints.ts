@@ -35,6 +35,10 @@ export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficia
 export const EP_RRHH_JEFE_INMEDIATO_PENDIENTES = '/rrhh/jefe-inmediato/pendientes';
 export const EP_RRHH_JEFE_INMEDIATO_RESPONDER  = '/rrhh/jefe-inmediato/responder';
 export const EP_RRHH_SUBGERENTE_PENDIENTES     = '/rrhh/subgerente/pendientes';
+export const EP_RRHH_SUBGERENTE_RESPONDER      = '/rrhh/subgerente/responder';
+export const EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES = '/rrhh/agente-seguridad/solicitudes';
+export const EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA  = '/rrhh/agente-seguridad/hora-salida';
+export const EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO = '/rrhh/agente-seguridad/hora-retorno';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

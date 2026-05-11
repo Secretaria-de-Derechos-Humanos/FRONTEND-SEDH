@@ -1,7 +1,7 @@
 :host {
   position: fixed;
-  top: var(--sedh-space-lg);
-  right: var(--sedh-space-lg);
+  inset-block-start: var(--sedh-space-lg);
+  inset-inline-end: var(--sedh-space-lg);
   z-index: 9999;
   display: flex;
   flex-direction: column;
@@ -91,10 +91,10 @@
 /* — Responsive — */
 @media (max-width: 480px) {
   :host {
-    top: auto;
-    bottom: var(--sedh-space-lg);
-    right: var(--sedh-space-md);
-    left: var(--sedh-space-md);
+    inset-block-start: auto;
+    inset-block-end: var(--sedh-space-lg);
+    inset-inline-end: var(--sedh-space-md);
+    inset-inline-start: var(--sedh-space-md);
   }
 
   .toast {

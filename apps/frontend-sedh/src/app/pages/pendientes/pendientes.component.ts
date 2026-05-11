@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActionButtonComponent } from '../../components/actionButton/actionButton.component';
 import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
 import { ModalAprobarPermisosRRHHComponent, SolicitudPermiso, RechazarPayload } from '../../components/modalAprobarPermisosRRHH/modalAprobarPermisosRRHH.component';
-import { PendientesService, PendienteJefeInmediatoApi } from './pendientes.service';
+import { ModalAgentePermisosRRHHComponent, SolicitudAgentePermiso, HoraSalidaPayload, HoraRetornoPayload } from '../../components/modalAgentePermisosRRHH/modalAgentePermisosRRHH.component';
+import { PendientesService, PendienteJefeInmediatoApi, SolicitudAgenteApi, RegistrarHoraSalidaParams, RegistrarHoraRetornoParams } from './pendientes.service';
 import { ToastService } from '../../services/toast.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -20,7 +21,7 @@ interface SolicitudPendiente {
 @Component({
   selector: 'app-pendientes',
   standalone: true,
-  imports: [CommonModule, FormsModule, ActionButtonComponent, EncabezadosPaginaComponent, ModalAprobarPermisosRRHHComponent],
+  imports: [CommonModule, FormsModule, ActionButtonComponent, EncabezadosPaginaComponent, ModalAprobarPermisosRRHHComponent, ModalAgentePermisosRRHHComponent],
   templateUrl: './pendientes.component.html',
   styleUrls: ['./pendientes.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -68,6 +69,9 @@ export class PendientesComponent implements OnInit {
   modalPermisoVisible = signal<boolean>(false);
   solicitudSeleccionada = signal<SolicitudPermiso | null>(null);
 
+  modalAgenteVisible = signal<boolean>(false);
+  solicitudAgenteSeleccionada = signal<SolicitudAgentePermiso | null>(null);
+
   ngOnInit(): void {
     // Solo carga en el browser: evita mismatch de hidratación SSR
     if (isPlatformBrowser(this.platformId)) {
@@ -85,15 +89,86 @@ export class PendientesComponent implements OnInit {
     this.solicitudSeleccionada.set(null);
   }
 
+  cerrarModalAgente(): void {
+    this.modalAgenteVisible.set(false);
+    this.solicitudAgenteSeleccionada.set(null);
+  }
+
+  onRegistrarSalida(payload: HoraSalidaPayload): void {
+    const solicitud = this.solicitudesOriginales().find(s => s.idPermiso === payload.id);
+    if (!solicitud || this.procesando()) return;
+
+    this.procesando.set(true);
+    const tipo = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
+
+    const params: RegistrarHoraSalidaParams = {
+      idpermiso:  payload.id,
+      tipo,
+      horaSalida: payload.horaSalida
+    };
+
+    this.pendientesService.registrarHoraSalida(params).subscribe({
+      next: mensaje => {
+        this.toastService.mostrar('exito', mensaje);
+        this.cerrarModalAgente();
+        this.cargarPendientes();
+        this.procesando.set(false);
+      },
+      error: err => {
+        const msg = (err?.error?.error?.message as string | undefined)
+          ?? 'No fue posible registrar la hora de salida. Intente de nuevo.';
+        this.toastService.mostrar('error', msg);
+        this.procesando.set(false);
+      }
+    });
+  }
+
+  onRegistrarRetorno(payload: HoraRetornoPayload): void {
+    const solicitud = this.solicitudesOriginales().find(s => s.idPermiso === payload.id);
+    if (!solicitud || this.procesando()) return;
+
+    this.procesando.set(true);
+    const tipo = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
+
+    const params: RegistrarHoraRetornoParams = {
+      idpermiso:   payload.id,
+      tipo,
+      horaRetorno: payload.horaRetorno
+    };
+
+    this.pendientesService.registrarHoraRetorno(params).subscribe({
+      next: mensaje => {
+        this.toastService.mostrar('exito', mensaje);
+        this.cerrarModalAgente();
+        this.cargarPendientes();
+        this.procesando.set(false);
+      },
+      error: err => {
+        const msg = (err?.error?.error?.message as string | undefined)
+          ?? 'No fue posible registrar la hora de retorno. Intente de nuevo.';
+        this.toastService.mostrar('error', msg);
+        this.procesando.set(false);
+      }
+    });
+  }
+
   aprobarSolicitud(id: string): void {
     const solicitud = this.solicitudesOriginales().find(s => s.idPermiso === id);
     if (!solicitud || this.procesando()) return;
 
     this.procesando.set(true);
-    const tipo  = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
-    const horas = this.normalizarHoras(solicitud.detalle.hor_solicitadas);
+    const tipo = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
+    const rol  = this.authService.currentUser()?.roles[0]?.r;
 
-    this.pendientesService.responderPermiso({ idpermiso: id, tipo, motRechazo: null, horas }).subscribe({
+    const params = rol === 3
+      ? { idpermiso: id, tipo, motRechazo: null, horas: null }
+      : { idpermiso: id, tipo, motRechazo: null, horas: this.normalizarHoras(solicitud.detalle.hor_solicitadas) };
+
+    const peticion$ = rol === 3
+      ? this.pendientesService.responderPermisoSubgerente(params)
+      : this.pendientesService.responderPermiso(params);
+
+    peticion$.subscribe({
       next: resultado => {
         this.toastService.mostrar('exito', resultado);
         this.cerrarModalPermiso();
@@ -114,10 +189,21 @@ export class PendientesComponent implements OnInit {
     if (!solicitud || this.procesando()) return;
 
     this.procesando.set(true);
-    const tipo  = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
-    const horas = this.normalizarHoras(solicitud.detalle.hor_solicitadas);
+    const tipo       = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
+    const esPersonal = solicitud.detalle.tipoSolicitud === 'PERSONAL';
+    const rol        = this.authService.currentUser()?.roles[0]?.r;
 
-    this.pendientesService.responderPermiso({ idpermiso: payload.id, tipo, motRechazo: payload.motRechazo, horas }).subscribe({
+    const params = rol === 3
+      ? { idpermiso: payload.id, tipo, motRechazo: payload.motRechazo,
+          horas: esPersonal ? this.normalizarHoras(solicitud.detalle.hor_solicitadas) : null }
+      : { idpermiso: payload.id, tipo, motRechazo: payload.motRechazo,
+          horas: this.normalizarHoras(solicitud.detalle.hor_solicitadas) };
+
+    const peticion$ = rol === 3
+      ? this.pendientesService.responderPermisoSubgerente(params)
+      : this.pendientesService.responderPermiso(params);
+
+    peticion$.subscribe({
       next: resultado => {
         this.toastService.mostrar('exito', resultado);
         this.cerrarModalPermiso();
@@ -137,7 +223,13 @@ export class PendientesComponent implements OnInit {
     const solicitud = this.solicitudesOriginales().find(s => s.idPermiso === id);
     if (!solicitud) return;
 
-    this.abrirModalPermiso(solicitud.detalle);
+    const rol = this.authService.currentUser()?.roles[0]?.r;
+    if (rol === 4) {
+      this.solicitudAgenteSeleccionada.set(solicitud.detalle as SolicitudAgentePermiso);
+      this.modalAgenteVisible.set(true);
+    } else {
+      this.abrirModalPermiso(solicitud.detalle);
+    }
   }
 
   /**
@@ -146,12 +238,17 @@ export class PendientesComponent implements OnInit {
    * @param solicitudId - ID de la solicitud
    */
   handleAction(action: string, solicitudId: string): void {
+    const rol = this.authService.currentUser()?.roles[0]?.r;
     switch (action) {
       case 'view':
         this.verDetalles(solicitudId);
         break;
       case 'edit':
-        this.aprobarSolicitud(solicitudId);
+        if (rol === 4) {
+          this.verDetalles(solicitudId);
+        } else {
+          this.aprobarSolicitud(solicitudId);
+        }
         break;
       case 'delete':
         this.verDetalles(solicitudId);
@@ -163,6 +260,21 @@ export class PendientesComponent implements OnInit {
     this.cargando.set(true);
 
     const rol = this.authService.currentUser()?.roles[0]?.r;
+
+    if (rol === 4) {
+      this.pendientesService.getSolicitudesAgente().subscribe({
+        next: items => {
+          this.solicitudesOriginales.set(this.mapSolicitudesAgenteToTable(items));
+          this.cargando.set(false);
+        },
+        error: () => {
+          this.solicitudesOriginales.set([]);
+          this.cargando.set(false);
+        }
+      });
+      return;
+    }
+
     const peticion$ = rol === 3
       ? this.pendientesService.getPendientesSubgerente()
       : this.pendientesService.getPendientesJefeInmediato();
@@ -218,6 +330,51 @@ export class PendientesComponent implements OnInit {
       .sort((a, b) => b.fechaSolicitud.getTime() - a.fechaSolicitud.getTime());
   }
 
+  private mapSolicitudesAgenteToTable(solicitudes: SolicitudAgenteApi[]): SolicitudPendiente[] {
+    return solicitudes
+      .map(item => {
+        const empleado = [
+          item.empleado.nombre,
+          item.empleado.segundoNombre,
+          item.empleado.apellido,
+          item.empleado.segundoApellido
+        ].filter(Boolean).join(' ');
+        const fechaSolicitud = new Date(`${item.fecha}T00:00:00`);
+        const detalle: SolicitudAgentePermiso = {
+          id:                item.idpermiso,
+          id_permiso:        item.idpermiso,
+          empleado,
+          pri_nombre:        item.empleado.nombre,
+          seg_nombre:        item.empleado.segundoNombre,
+          pri_apellido:      item.empleado.apellido,
+          seg_apellido:      item.empleado.segundoApellido,
+          tipoSolicitud:     item.tipoPermiso,
+          nom_tipo_solicitud: item.tipo,
+          dependencia:       item.dependencia,
+          nom_dependencia:   item.dependencia,
+          fechaSolicitud,
+          fec_solicitud:     fechaSolicitud,
+          nom_cargo:         item.cargo,
+          hor_solicitadas:   item.horasSolicitadas,
+          motivo:            item.motivo,
+          cat_emergencia:    null,
+          nom_estado:        item.estado,
+          mot_rechazo:       null,
+          hor_salida:        item.horaSalida,
+          hor_retorno:       item.horaRetorno
+        };
+        return {
+          idPermiso: item.idpermiso,
+          fechaSolicitud,
+          empleado,
+          estado: item.estado,
+          dependencia: item.dependencia,
+          detalle
+        };
+      })
+      .sort((a, b) => b.fechaSolicitud.getTime() - a.fechaSolicitud.getTime());
+  }
+
   private construirNombreCompleto(pendiente: PendienteJefeInmediatoApi): string {
     return [
       pendiente.empleado.nombre,
@@ -229,8 +386,8 @@ export class PendientesComponent implements OnInit {
       .join(' ');
   }
 
-  private normalizarHoras(horas: string | null | undefined): string {
-    if (!horas) return '00:00';
+  private normalizarHoras(horas: string | null | undefined): string | null {
+    if (!horas) return null;
     return horas.substring(0, 5);
   }
 

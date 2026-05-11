@@ -223,6 +223,11 @@
   color: var(--sedh-secondary-300);
 }
 
+:host-context(.dark-theme) .badge-estado {
+  background: rgba(173, 132, 17, 0.3);
+  color: var(--sedh-secondary-300);
+}
+
 :host-context(.dark-theme) .spinner {
   border-color: var(--sedh-gray-700);
   border-block-start-color: var(--sedh-secondary-500);
@@ -249,7 +254,7 @@
   color: var(--sedh-text);
 }
 
-.td-tipo {
+.td-estado {
   min-inline-size: 180px;
 }
 
@@ -264,6 +269,11 @@
 }
 
 .badge-tipo {
+  background: var(--sedh-info-light);
+  color: var(--sedh-info-dark);
+}
+
+.badge-estado {
   background: var(--sedh-info-light);
   color: var(--sedh-info-dark);
 }
@@ -422,6 +432,11 @@
 }
 
 .dark-theme .badge-tipo {
+  background: rgba(38, 77, 160, 0.2);
+  color: var(--sedh-primary-300);
+}
+
+.dark-theme .badge-estado {
   background: rgba(38, 77, 160, 0.2);
   color: var(--sedh-primary-300);
 }

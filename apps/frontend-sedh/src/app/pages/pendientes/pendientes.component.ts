@@ -1,17 +1,18 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, signal, computed, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActionButtonComponent } from '../../components/actionButton/actionButton.component';
 import { EncabezadosPaginaComponent } from '../../components/encabezadosPagina/encabezadosPagina.component';
 import { ModalAprobarPermisosRRHHComponent, SolicitudPermiso, RechazarPayload } from '../../components/modalAprobarPermisosRRHH/modalAprobarPermisosRRHH.component';
+import { PendientesService, PendienteJefeInmediatoApi } from './pendientes.service';
 
 interface SolicitudPendiente {
-  id: string;
+  idPermiso: string;
   fechaSolicitud: Date;
   empleado: string;
-  tipoSolicitud: string;
+  estado: string;
   dependencia: string;
-  estado: 'pendiente' | 'en-revision';
+  detalle: SolicitudPermiso;
 }
 
 @Component({
@@ -22,47 +23,16 @@ interface SolicitudPendiente {
   styleUrls: ['./pendientes.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class PendientesComponent {
-  // Datos originales
-  solicitudesOriginales = signal<SolicitudPendiente[]>([
-    {
-      id: '001',
-      fechaSolicitud: new Date('2026-05-01'),
-      empleado: 'Ana María González',
-      tipoSolicitud: 'Permiso personal',
-      dependencia: 'Recursos Humanos',
-      estado: 'pendiente'
-    },
-    {
-      id: '002',
-      fechaSolicitud: new Date('2026-05-02'),
-      empleado: 'Carlos Eduardo Martínez',
-      tipoSolicitud: 'Vacaciones',
-      dependencia: 'Finanzas',
-      estado: 'en-revision'
-    },
-    {
-      id: '003',
-      fechaSolicitud: new Date('2026-05-03'),
-      empleado: 'María José Rodríguez',
-      tipoSolicitud: 'Licencia médica',
-      dependencia: 'Administrativa',
-      estado: 'pendiente'
-    },
-    {
-      id: '004',
-      fechaSolicitud: new Date('2026-05-04'),
-      empleado: 'Juan Pablo Hernández',
-      tipoSolicitud: 'Permiso familiar',
-      dependencia: 'Tecnología',
-      estado: 'pendiente'
-    }
-  ]);
+export class PendientesComponent implements OnInit {
+  private readonly pendientesService = inject(PendientesService);
+  private readonly platformId = inject(PLATFORM_ID);
+
+  solicitudesOriginales = signal<SolicitudPendiente[]>([]);
 
   // Filtros
   filtroFecha = signal<string>('');
   filtroEmpleado = signal<string>('');
-  filtroTipo = signal<string>('');
+  filtroEstado = signal<string>('');
   filtroDependencia = signal<string>('');
 
   // Solicitudes filtradas
@@ -70,19 +40,19 @@ export class PendientesComponent {
     const originales = this.solicitudesOriginales();
     const fecha = this.filtroFecha().toLowerCase().trim();
     const empleado = this.filtroEmpleado().toLowerCase().trim();
-    const tipo = this.filtroTipo().toLowerCase().trim();
+    const estado = this.filtroEstado().toLowerCase().trim();
     const dependencia = this.filtroDependencia().toLowerCase().trim();
 
     return originales.filter(solicitud => {
       const fechaFormateada = this.formatearFecha(solicitud.fechaSolicitud).toLowerCase();
       const nombreEmpleado = solicitud.empleado.toLowerCase();
-      const tipoSolicitud = solicitud.tipoSolicitud.toLowerCase();
+      const estadoSolicitud = solicitud.estado.toLowerCase();
       const nombreDependencia = solicitud.dependencia.toLowerCase();
 
       return (
         fechaFormateada.includes(fecha) &&
         nombreEmpleado.includes(empleado) &&
-        tipoSolicitud.includes(tipo) &&
+        estadoSolicitud.includes(estado) &&
         nombreDependencia.includes(dependencia)
       );
     });
@@ -92,6 +62,13 @@ export class PendientesComponent {
 
   modalPermisoVisible = signal<boolean>(false);
   solicitudSeleccionada = signal<SolicitudPermiso | null>(null);
+
+  ngOnInit(): void {
+    // Solo carga en el browser: evita mismatch de hidratación SSR
+    if (isPlatformBrowser(this.platformId)) {
+      this.cargarPendientes();
+    }
+  }
 
   abrirModalPermiso(solicitud: SolicitudPermiso): void {
     this.solicitudSeleccionada.set(solicitud);
@@ -114,12 +91,10 @@ export class PendientesComponent {
   }
 
   verDetalles(id: string): void {
-    const solicitud = this.solicitudesOriginales().find(s => s.id === id);
+    const solicitud = this.solicitudesOriginales().find(s => s.idPermiso === id);
     if (!solicitud) return;
 
-    if (solicitud.tipoSolicitud.toLowerCase() === 'permiso personal') {
-      this.abrirModalPermiso(solicitud);
-    }
+    this.abrirModalPermiso(solicitud.detalle);
   }
 
   /**
@@ -128,7 +103,7 @@ export class PendientesComponent {
    * @param solicitudId - ID de la solicitud
    */
   handleAction(action: string, solicitudId: string): void {
-    switch(action) {
+    switch (action) {
       case 'view':
         this.verDetalles(solicitudId);
         break;
@@ -139,6 +114,71 @@ export class PendientesComponent {
         this.verDetalles(solicitudId);
         break;
     }
+  }
+
+  private cargarPendientes(): void {
+    this.cargando.set(true);
+
+    this.pendientesService.getPendientesJefeInmediato().subscribe({
+      next: pendientes => {
+        this.solicitudesOriginales.set(this.mapPendientesApiToTable(pendientes));
+        this.cargando.set(false);
+      },
+      error: () => {
+        this.solicitudesOriginales.set([]);
+        this.cargando.set(false);
+      }
+    });
+  }
+
+  private mapPendientesApiToTable(pendientes: PendienteJefeInmediatoApi[]): SolicitudPendiente[] {
+    return pendientes
+      .map(pendiente => {
+        const empleado = this.construirNombreCompleto(pendiente);
+        const fechaSolicitud = new Date(`${pendiente.fecha}T00:00:00`);
+        const detalle: SolicitudPermiso = {
+          id: pendiente.idpermiso,
+          id_permiso: pendiente.idpermiso,
+          empleado,
+          pri_nombre: pendiente.empleado.nombre,
+          seg_nombre: pendiente.empleado.segundoNombre,
+          pri_apellido: pendiente.empleado.apellido,
+          seg_apellido: pendiente.empleado.segundoApellido,
+          tipoSolicitud: pendiente.tipoPermiso,
+          nom_tipo_solicitud: pendiente.tipo,
+          dependencia: pendiente.dependencia,
+          nom_dependencia: pendiente.dependencia,
+          fechaSolicitud,
+          fec_solicitud: fechaSolicitud,
+          nom_cargo: pendiente.cargo,
+          hor_solicitadas: pendiente.horasSolicitadas,
+          motivo: pendiente.motivo,
+          cat_emergencia: pendiente.emergencia,
+          nom_estado: pendiente.estado,
+          mot_rechazo: pendiente.motRechazo
+        };
+
+        return {
+          idPermiso: pendiente.idpermiso,
+          fechaSolicitud,
+          empleado,
+          estado: pendiente.estado,
+          dependencia: pendiente.dependencia,
+          detalle
+        };
+      })
+      .sort((a, b) => b.fechaSolicitud.getTime() - a.fechaSolicitud.getTime());
+  }
+
+  private construirNombreCompleto(pendiente: PendienteJefeInmediatoApi): string {
+    return [
+      pendiente.empleado.nombre,
+      pendiente.empleado.segundoNombre,
+      pendiente.empleado.apellido,
+      pendiente.empleado.segundoApellido
+    ]
+      .filter(Boolean)
+      .join(' ');
   }
 
   formatearFecha(fecha: Date): string {

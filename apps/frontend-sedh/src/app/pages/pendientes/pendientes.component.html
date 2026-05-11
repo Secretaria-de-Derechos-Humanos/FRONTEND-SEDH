@@ -47,13 +47,13 @@
             </th>
             <th>
               <div class="th-content">
-                <span class="th-label">Tipo de solicitud</span>
+                <span class="th-label">Estado</span>
                 <input
                   type="text"
                   class="filter-input"
-                  placeholder="Buscar tipo..."
-                  [(ngModel)]="filtroTipo"
-                  (ngModelChange)="filtroTipo.set($event)"
+                  placeholder="Buscar estado..."
+                  [(ngModel)]="filtroEstado"
+                  (ngModelChange)="filtroEstado.set($event)"
                 />
               </div>
             </th>
@@ -73,7 +73,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (solicitud of solicitudes(); track solicitud.id) {
+          @for (solicitud of solicitudes(); track solicitud.idPermiso) {
             <tr>
               <td class="td-fecha">{{ formatearFecha(solicitud.fechaSolicitud) }}</td>
               <td class="td-empleado">
@@ -81,13 +81,13 @@
                   <span class="empleado-nombre">{{ solicitud.empleado }}</span>
                 </div>
               </td>
-              <td class="td-tipo">
-                <span class="badge badge-tipo">{{ solicitud.tipoSolicitud }}</span>
+              <td class="td-estado">
+                <span class="badge badge-estado">{{ solicitud.estado }}</span>
               </td>
               <td class="td-dependencia">{{ solicitud.dependencia }}</td>
               <td class="td-actions">
                 <app-action-button
-                  (actionSelected)="handleAction($event, solicitud.id)" />
+                  (actionSelected)="handleAction($event, solicitud.idPermiso)" />
               </td>
             </tr>
           }

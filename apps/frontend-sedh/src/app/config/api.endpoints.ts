@@ -32,6 +32,8 @@ export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficia
 // MÓDULO: Recursos Humanos — Aprobaciones
 // ─────────────────────────────────────────────────────────────────────────────
 
+export const EP_RRHH_JEFE_INMEDIATO_PENDIENTES = '/rrhh/jefe-inmediato/pendientes';
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MÓDULO: Recursos Humanos — Gestión de empleados

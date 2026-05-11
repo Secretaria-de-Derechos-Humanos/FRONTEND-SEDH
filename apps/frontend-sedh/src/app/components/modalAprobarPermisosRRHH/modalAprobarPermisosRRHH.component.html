@@ -19,10 +19,24 @@
 
       <div class="modal-body">
 
+        @if (solicitud().id_permiso) {
+          <div class="form-group">
+            <label class="form-label" for="campo-id-permiso">Id de permiso</label>
+            <input id="campo-id-permiso" type="text" class="form-control" [value]="solicitud().id_permiso" readonly />
+          </div>
+        }
+
         <div class="form-group">
           <label class="form-label" for="campo-nombre">Nombre del empleado</label>
           <input id="campo-nombre" type="text" class="form-control" [value]="nombreCompleto" readonly />
         </div>
+
+        @if (solicitud().nom_estado) {
+          <div class="form-group">
+            <label class="form-label" for="campo-estado">Estado</label>
+            <input id="campo-estado" type="text" class="form-control" [value]="solicitud().nom_estado" readonly />
+          </div>
+        }
 
         <div class="form-group">
           <label class="form-label" for="campo-dependencia">Dependencia</label>
@@ -53,6 +67,13 @@
           <div class="form-group">
             <label class="form-label" for="campo-motivo">Motivo de salida</label>
             <textarea id="campo-motivo" class="form-control" rows="2" [value]="solicitud().motivo" readonly></textarea>
+          </div>
+        }
+
+        @if (solicitud().mot_rechazo) {
+          <div class="form-group">
+            <label class="form-label" for="campo-rechazo-registrado">Motivo de rechazo registrado</label>
+            <textarea id="campo-rechazo-registrado" class="form-control" rows="2" [value]="solicitud().mot_rechazo" readonly></textarea>
           </div>
         }
 

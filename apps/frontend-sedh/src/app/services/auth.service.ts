@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, throwError, EMPTY } from 'rxjs';
@@ -8,7 +9,7 @@ import { EP_AUTH_LOGIN, EP_AUTH_REFRESH, EP_AUTH_LOGOUT } from '../config/api.en
 
 export interface UserRol {
   r: number;
-  m: number[];
+  m: number | number[];
 }
 
 export interface User {
@@ -41,9 +42,11 @@ interface RefreshApiResponse {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly isBrowser = isPlatformBrowser(this.platformId);
 
-  private readonly accessToken = signal<string | null>(null);
-  public readonly currentUser = signal<User | null>(null);
+  private readonly ACCESS_TOKEN_KEY = 'sedh_access_token';
+  public readonly currentUser = signal<User | null>(this.getUserFromToken());
 
   /** Guarda el Observable de refresh en vuelo para deduplicar peticiones concurrentes */
   private refreshTokenInFlight$: Observable<string> | null = null;
@@ -81,29 +84,48 @@ export class AuthService {
     return Date.now() >= (p['exp'] as number) * 1000;
   }
 
-  private setAccessToken(token: string | null): void {
-    this.accessToken.set(token);
+  // ── sessionStorage helpers ───────────────────────────────────────────────────
+
+  private getStoredToken(): string | null {
+    if (!this.isBrowser) return null;
+    try { return sessionStorage.getItem(this.ACCESS_TOKEN_KEY); } catch { return null; }
+  }
+
+  private saveToken(token: string): void {
+    if (!this.isBrowser) return;
+    try { sessionStorage.setItem(this.ACCESS_TOKEN_KEY, token); } catch { /* no disponible */ }
+  }
+
+  private clearToken(): void {
+    if (!this.isBrowser) return;
+    try { sessionStorage.removeItem(this.ACCESS_TOKEN_KEY); } catch { /* no disponible */ }
+  }
+
+  private getUserFromToken(): User | null {
+    const token = this.getStoredToken();
+    if (!token || this.isExpired(token)) return null;
+    return this.parseUser(token);
   }
 
   // ── API pública ──────────────────────────────────────────────────────────────
 
   getAccessTokenValue(): string | null {
-    return this.accessToken();
+    return this.getStoredToken();
   }
 
   isAuthenticated(): boolean {
-    const token = this.accessToken();
+    const token = this.getStoredToken();
     return !!token && !this.isExpired(token);
   }
 
   hasExpiredToken(): boolean {
-    const token = this.accessToken();
+    const token = this.getStoredToken();
     return !!token && this.isExpired(token);
   }
 
   /** Milisegundos restantes hasta que expire el access token. 0 si ya expiró o no hay token. */
   getTokenExpiresIn(): number {
-    const token = this.accessToken();
+    const token = this.getStoredToken();
     if (!token) return 0;
     const p = this.decodeJwtPayload(token);
     if (!p || typeof p['exp'] !== 'number') return 0;
@@ -120,7 +142,7 @@ export class AuthService {
       .pipe(
         map(response => {
           const token = response.data.accessToken;
-          this.setAccessToken(token);
+          this.saveToken(token);
           const user = this.parseUser(token);
           if (!user) throw new Error('Token inválido recibido del servidor');
           this.currentUser.set(user);
@@ -152,7 +174,7 @@ export class AuthService {
       .pipe(
         map(response => {
           const token = response.data.accessToken;
-          this.setAccessToken(token);
+          this.saveToken(token);
           this.currentUser.set(this.parseUser(token));
           return token;
         }),
@@ -170,14 +192,14 @@ export class AuthService {
 
   // Limpia la sesión local sin llamar al backend (uso interno y en errores de red)
   clearSession(): void {
-    this.setAccessToken(null);
+    this.clearToken();
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
   // Cierra sesión llamando al backend (uso explícito desde UI)
   logout(): Observable<void> {
-    const token = this.accessToken();
+    const token = this.getAccessTokenValue();
     const headers = new HttpHeaders(
       token ? { Authorization: `Bearer ${token}` } : {}
     );

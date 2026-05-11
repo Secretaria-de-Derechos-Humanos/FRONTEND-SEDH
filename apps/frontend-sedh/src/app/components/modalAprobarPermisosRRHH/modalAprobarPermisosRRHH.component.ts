@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 export interface SolicitudPermiso {
   id: string;
-  id_permiso?: number;
+  id_permiso?: string;
   empleado: string;
   pri_nombre?: string;
   seg_nombre?: string;
@@ -21,6 +21,7 @@ export interface SolicitudPermiso {
   motivo?: string;
   cat_emergencia?: boolean;
   nom_estado?: string;
+  mot_rechazo?: string | null;
 }
 
 export interface RechazarPayload {

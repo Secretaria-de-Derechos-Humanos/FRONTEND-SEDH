@@ -185,8 +185,15 @@
   color: white;
 }
 
-.btn-rechazar:hover {
+.btn-rechazar:hover:not(:disabled) {
   background: var(--sedh-danger-dark);
+}
+
+.btn-rechazar:disabled {
+  background: var(--sedh-gray-300, #d1d5db);
+  color: var(--sedh-text-muted);
+  cursor: not-allowed;
+  scale: 1;
 }
 
 .btn-aprobar {

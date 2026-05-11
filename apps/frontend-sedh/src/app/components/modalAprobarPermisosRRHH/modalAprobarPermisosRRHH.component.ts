@@ -75,10 +75,6 @@ export class ModalAprobarPermisosRRHHComponent {
   }
 
   onRechazar(): void {
-    if (!this.motRechazo().trim()) {
-      alert('Debe ingresar el motivo de rechazo para no aprobar la solicitud.');
-      return;
-    }
     this.rechazar.emit({ id: this.solicitud().id, motRechazo: this.motRechazo() });
     this.motRechazo.set('');
   }

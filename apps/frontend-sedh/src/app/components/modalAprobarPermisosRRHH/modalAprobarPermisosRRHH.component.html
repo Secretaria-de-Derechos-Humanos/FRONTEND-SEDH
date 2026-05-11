@@ -93,7 +93,7 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-rechazar" type="button" (click)="onRechazar()">No aprobar este permiso</button>
+        <button class="btn btn-rechazar" type="button" (click)="onRechazar()" [disabled]="!motRechazo().trim()">No aprobar este permiso</button>
         <button class="btn btn-aprobar" type="button" (click)="onAprobar()">Aprobar este permiso</button>
       </div>
 

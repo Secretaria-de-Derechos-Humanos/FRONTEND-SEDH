@@ -151,9 +151,9 @@ export class PendientesComponent implements OnInit {
           fechaSolicitud,
           fec_solicitud: fechaSolicitud,
           nom_cargo: pendiente.cargo,
-          hor_solicitadas: pendiente.horasSolicitadas,
+          hor_solicitadas: pendiente.horasSolicitadas ?? null,
           motivo: pendiente.motivo,
-          cat_emergencia: pendiente.emergencia,
+          cat_emergencia: pendiente.emergencia ?? null,
           nom_estado: pendiente.estado,
           mot_rechazo: pendiente.motRechazo
         };

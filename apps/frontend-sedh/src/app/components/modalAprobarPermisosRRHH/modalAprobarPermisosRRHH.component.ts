@@ -17,9 +17,9 @@ export interface SolicitudPermiso {
   fechaSolicitud: Date;
   fec_solicitud?: Date;
   nom_cargo?: string;
-  hor_solicitadas?: string;
+  hor_solicitadas?: string | null;
   motivo?: string;
-  cat_emergencia?: boolean;
+  cat_emergencia?: boolean | null;
   nom_estado?: string;
   mot_rechazo?: string | null;
 }

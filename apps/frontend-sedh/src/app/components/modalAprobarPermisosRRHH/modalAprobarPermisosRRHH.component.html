@@ -19,13 +19,6 @@
 
       <div class="modal-body">
 
-        @if (solicitud().id_permiso) {
-          <div class="form-group">
-            <label class="form-label" for="campo-id-permiso">Id de permiso</label>
-            <input id="campo-id-permiso" type="text" class="form-control" [value]="solicitud().id_permiso" readonly />
-          </div>
-        }
-
         <div class="form-group">
           <label class="form-label" for="campo-nombre">Nombre del empleado</label>
           <input id="campo-nombre" type="text" class="form-control" [value]="nombreCompleto" readonly />

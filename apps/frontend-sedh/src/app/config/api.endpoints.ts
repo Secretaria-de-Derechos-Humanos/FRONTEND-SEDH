@@ -33,6 +33,8 @@ export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficia
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const EP_RRHH_JEFE_INMEDIATO_PENDIENTES = '/rrhh/jefe-inmediato/pendientes';
+export const EP_RRHH_JEFE_INMEDIATO_RESPONDER  = '/rrhh/jefe-inmediato/responder';
+export const EP_RRHH_SUBGERENTE_PENDIENTES     = '/rrhh/subgerente/pendientes';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,30 @@
+@for (toast of toasts(); track toast.id) {
+  <div class="toast" [class]="'toast--' + toast.tipo" role="alert" aria-live="polite">
+
+    <span class="toast__icono">
+      @if (toast.tipo === 'exito') {
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+        </svg>
+      } @else {
+        <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" stroke-width="2" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4m0 4h.01" />
+        </svg>
+      }
+    </span>
+
+    <span class="toast__mensaje">{{ toast.mensaje }}</span>
+
+    <button
+      class="toast__cerrar"
+      type="button"
+      aria-label="Cerrar notificación"
+      (click)="cerrar(toast.id)">
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+  </div>
+}

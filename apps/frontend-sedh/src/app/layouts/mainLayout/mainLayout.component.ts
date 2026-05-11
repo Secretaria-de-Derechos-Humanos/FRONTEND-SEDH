@@ -3,12 +3,13 @@ import { RouterOutlet } from '@angular/router';
 import { SidebarLeftComponent } from '../../components/sidebar/sidebarLeft.component';
 import { NavbarTopComponent } from '../../components/navbar/navbarTop.component';
 import { SessionTimeoutModalComponent } from '../../components/sessionTimeoutModal/sessionTimeoutModal.component';
+import { ToastComponent } from '../../components/toast/toast.component';
 import { SessionService } from '../../services/session.service';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [RouterOutlet, SidebarLeftComponent, NavbarTopComponent, SessionTimeoutModalComponent],
+  imports: [RouterOutlet, SidebarLeftComponent, NavbarTopComponent, SessionTimeoutModalComponent, ToastComponent],
   templateUrl: './mainLayout.component.html',
   styleUrl: './mainLayout.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -42,6 +42,13 @@ export const EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO = '/rrhh/agente-seguridad/hor
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// MÓDULO: Recursos Humanos — Reportes
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const EP_RRHH_REPORTES_PERMISOS_POR_MES = '/rrhh/reportes-permisos/por-mes';
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MÓDULO: Recursos Humanos — Gestión de empleados
 // ─────────────────────────────────────────────────────────────────────────────
 

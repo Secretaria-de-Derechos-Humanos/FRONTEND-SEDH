@@ -17,17 +17,62 @@
             <option [value]="anio">{{ anio }}</option>
           }
         </select>
-        <button class="btn btn-primary" type="button" (click)="buscarPorMes()">
+        <button class="btn btn-primary" type="button" (click)="buscarPorMes()" [disabled]="cargando()">
           <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
             <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/>
           </svg>
           Buscar
         </button>
+        <button
+          class="btn btn-excel"
+          type="button"
+          (click)="exportarExcel()"
+          [disabled]="!hayDatos() || exportando()"
+          title="Descargar Excel">
+          <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <path d="M8 13l2.5 3 2.5-3M10.5 16v-6"/>
+          </svg>
+          Excel
+        </button>
+        <button
+          class="btn btn-pdf"
+          type="button"
+          (click)="exportarPDF()"
+          [disabled]="!hayDatos() || exportando()"
+          title="Descargar PDF">
+          <svg class="btn-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="9" y1="13" x2="15" y2="13"/>
+            <line x1="9" y1="17" x2="15" y2="17"/>
+          </svg>
+          PDF
+        </button>
       </div>
     </div>
 
+    <!-- Preloader -->
+    @if (cargando()) {
+      <div class="re-loading">
+        <div class="re-spinner"></div>
+        <p>Cargando reporte...</p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="re-error">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ error() }}
+      </div>
+    }
+
     <!-- Sin resultados -->
-    @if (dependencias().length === 0) {
+    @if (!cargando() && !error() && buscado() && dependencias().length === 0) {
       <div class="re-empty">
         <span class="re-empty-icon">
           <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -39,9 +84,9 @@
     }
 
     <!-- Grid de cards -->
-    @if (dependencias().length > 0) {
+    @if (!cargando() && dependencias().length > 0) {
       <div class="re-grid">
-        @for (dep of dependencias(); track dep.nom_dependencia) {
+        @for (dep of dependencias(); track dep.dependencia) {
           <div
             class="re-card"
             (click)="abrirModal(dep)"
@@ -54,7 +99,7 @@
               </svg>
             </div>
             <div class="re-card-body">
-              <h6 class="re-card-title">{{ dep.nom_dependencia }}</h6>
+              <h6 class="re-card-title">{{ dep.dependencia }}</h6>
               <div class="re-card-stats">
                 <span>
                   <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
@@ -104,7 +149,7 @@
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 21h18M9 8h1m5 0h1M9 12h1m5 0h1M9 16h1m5 0h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
           </svg>
-          {{ depSeleccionada()?.nom_dependencia }}
+          {{ depSeleccionada()?.dependencia }}
         </h5>
         <button class="re-modal-close" type="button" (click)="cerrarModal()" aria-label="Cerrar">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -131,12 +176,12 @@
               @for (reg of registrosSeleccionados(); track $index; let i = $index) {
                 <tr [class.emp-par]="i % 2 === 0" [class.emp-impar]="i % 2 !== 0">
                   <td>{{ reg.empleado }}</td>
-                  <td>{{ reg.fec_solicitud | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ reg.nom_tipo }}</td>
-                  <td>{{ reg.hor_salida }}</td>
-                  <td>{{ reg.hor_retorno }}</td>
-                  <td>{{ reg.hor_permiso }}</td>
-                  <td>{{ reg.hor_disponible || 'N/A' }}</td>
+                  <td>{{ reg.fecha | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ reg.tipo }}</td>
+                  <td>{{ reg.horaSalida }}</td>
+                  <td>{{ reg.horaRetorno }}</td>
+                  <td>{{ reg.horasPermiso }}</td>
+                  <td>{{ reg.horasDisponibles || 'N/A' }}</td>
                 </tr>
               }
             </tbody>

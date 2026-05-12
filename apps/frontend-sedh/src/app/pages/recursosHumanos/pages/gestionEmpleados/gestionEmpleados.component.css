@@ -320,6 +320,39 @@
   padding-inline-end: calc(var(--sedh-space-sm) + 20px);
 }
 
+/* ── Horas disponibles con botón de edición ──────────────────────────────────── */
+.campo-horas-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--sedh-space-xs, 4px);
+}
+
+.campo-horas-wrapper .campo-input-edicion {
+  flex: 1;
+}
+
+.btn-editar-horas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: 30px;
+  block-size: 30px;
+  border: 1px solid var(--sedh-border);
+  border-radius: var(--sedh-radius);
+  background: transparent;
+  color: var(--sedh-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-editar-horas:hover,
+.btn-editar-horas.activo {
+  background: var(--sedh-secondary-100);
+  border-color: var(--sedh-secondary-400);
+  color: var(--sedh-secondary-700);
+}
+
 /* ── Cargando catálogos ─────────────────────────────────────────────────────── */
 .cargando-catalogos {
   display: flex;
@@ -482,8 +515,11 @@
 }
 
 :host-context(.dark-theme) .campo-select-edicion {
+  appearance: none;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EABF44' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m6 9 6 6 6-6'/%3e%3c%2fsvg%3e");
-  color-scheme: dark;
+  background-repeat: no-repeat;
+  background-position: right var(--sedh-space-sm) center;
+  background-size: 16px;
 }
 
 :host-context(.dark-theme) .btn-agregar-acceso {
@@ -498,6 +534,18 @@
 
 :host-context(.dark-theme) .cargando-catalogos {
   background: var(--sedh-gray-800);
+}
+
+:host-context(.dark-theme) .btn-editar-horas {
+  border-color: var(--sedh-secondary-700);
+  color: var(--sedh-text-muted);
+}
+
+:host-context(.dark-theme) .btn-editar-horas:hover,
+:host-context(.dark-theme) .btn-editar-horas.activo {
+  background: rgba(173, 132, 17, 0.15);
+  border-color: var(--sedh-secondary-400);
+  color: var(--sedh-secondary-300);
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────────── */

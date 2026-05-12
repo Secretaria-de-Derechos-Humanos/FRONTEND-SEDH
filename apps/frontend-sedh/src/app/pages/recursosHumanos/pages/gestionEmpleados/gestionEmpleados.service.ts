@@ -1,10 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../services/auth.service';
-import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH } from '../../../../config/api.endpoints';
+import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH, EP_RRHH_EMPLEADOS_ACTUALIZAR } from '../../../../config/api.endpoints';
 
 // ── Sub-tipos ────────────────────────────────────────────────────────────────
 
@@ -113,6 +113,7 @@ export interface DatosSedh {
 
 interface BuscarEmpleadoData {
   status:          string;
+  mensaje?:        string;
   empleado:        EmpleadoDetalle;
   accesosSistema:  AccesoSistema[];
   historialCargos: HistorialCargo[];
@@ -151,11 +152,16 @@ export class GestionEmpleadosService {
         this.buildBody({ emailEmpleado })
       )
       .pipe(
-        map(r => ({
-          empleado:        r.data.empleado,
-          accesosSistema:  r.data.accesosSistema  ?? [],
-          historialCargos: r.data.historialCargos ?? [],
-        }))
+        switchMap(r => {
+          if (r.data.status === 'ERROR') {
+            return throwError(() => new Error(r.data.mensaje ?? 'Empleado no encontrado'));
+          }
+          return [{
+            empleado:        r.data.empleado,
+            accesosSistema:  r.data.accesosSistema  ?? [],
+            historialCargos: r.data.historialCargos ?? [],
+          }];
+        })
       );
   }
 
@@ -167,4 +173,53 @@ export class GestionEmpleadosService {
       )
       .pipe(map(r => r.data));
   }
+
+  actualizarEmpleado(
+    emailEmpleado: string,
+    edicion: EmpleadoDetalle,
+    accesos: AccesoSistema[]
+  ): Observable<ActualizarEmpleadoRespuesta> {
+    const empleadoBody: ActualizarEmpleadoPayload = {
+      fechaIngreso:       edicion.fechaIngreso,
+      activo:             edicion.activo,
+      telefono:           edicion.telefono,
+      idTipoContratacion: String(edicion.idTipoContratacion),
+      idCargo:            Number(edicion.idCargo),
+      idSexo:             String(edicion.idSexo),
+      idEstadoCivil:      String(edicion.idEstadoCivil),
+      idMunicipio:        Number(edicion.idMunicipio),
+      jefeInmediato:      { identidad: edicion.jefeInmediato.identidad },
+    };
+
+    return this.http
+      .post<ApiResponse<ActualizarEmpleadoRespuesta>>(
+        `${this.base}${EP_RRHH_EMPLEADOS_ACTUALIZAR}`,
+        this.buildBody({
+          emailEmpleado,
+          empleado:       empleadoBody,
+          accesosSistema: accesos.map(a => ({ idRol: a.idRol, idModulo: a.idModulo })),
+        })
+      )
+      .pipe(map(r => r.data));
+  }
+}
+
+// ── Tipos de payload/respuesta del endpoint actualizar ───────────────────────
+
+interface ActualizarEmpleadoPayload {
+  fechaIngreso:       string;
+  activo:             boolean;
+  telefono:           string;
+  idTipoContratacion: string;
+  idCargo:            number;
+  idSexo:             string;
+  idEstadoCivil:      string;
+  idMunicipio:        number;
+  jefeInmediato:      { identidad: string };
+}
+
+export interface ActualizarEmpleadoRespuesta {
+  status:  string;
+  mensaje: string;
+  email:   string;
 }

@@ -1,6 +1,6 @@
 :host {
   display: block;
-  width: 100%;
+  inline-size: 100%;
 }
 
 /* ── Animaciones ── */
@@ -28,7 +28,7 @@
 
 .rrhh-main-container {
   padding: var(--sedh-space-md);
-  max-width: 1800px;
+  max-inline-size: 1800px;
   margin: 0 auto;
 }
 

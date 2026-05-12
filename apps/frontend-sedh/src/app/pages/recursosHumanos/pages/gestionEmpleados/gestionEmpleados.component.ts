@@ -15,6 +15,7 @@ import {
   DatosSedh,
   MunicipioCatalogo,
 } from './gestionEmpleados.service';
+import { ToastService } from '../../../../services/toast.service';
 
 // ── Definición de tabs ────────────────────────────────────────────────────────
 
@@ -41,7 +42,8 @@ const TABS: Tab[] = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GestionEmpleadosComponent {
-  private readonly service = inject(GestionEmpleadosService);
+  private readonly service      = inject(GestionEmpleadosService);
+  private readonly toastService = inject(ToastService);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
   searchQuery     = signal('');
@@ -54,6 +56,7 @@ export class GestionEmpleadosComponent {
   accesosEdicion  = signal<AccesoSistema[]>([]);
   datosSedh       = signal<DatosSedh | null>(null);
   cargandoDatos   = signal(false);
+  editarHoras     = signal(false);
   guardando       = signal(false);
   mensajeEdicion  = signal('');
   errorEdicion    = signal(false);
@@ -94,8 +97,8 @@ export class GestionEmpleadosComponent {
         this.resultado.set(data);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.errorMessage.set('No se encontró ningún empleado con ese criterio de búsqueda.');
+      error: (err: Error) => {
+        this.errorMessage.set(err.message ?? 'No se encontró ningún empleado con ese criterio de búsqueda.');
         this.isLoading.set(false);
       },
     });
@@ -114,8 +117,7 @@ export class GestionEmpleadosComponent {
     if (!emp) return;
     this.empleadoEdicion.set({ ...emp });
     this.accesosEdicion.set((this.resultado()?.accesosSistema ?? []).map(a => ({ ...a })));
-    this.mensajeEdicion.set('');
-    this.errorEdicion.set(false);
+    this.editarHoras.set(false);
     this.modoEdicion.set(true);
 
     if (!this.datosSedh()) {
@@ -131,8 +133,7 @@ export class GestionEmpleadosComponent {
     this.modoEdicion.set(false);
     this.empleadoEdicion.set(null);
     this.accesosEdicion.set([]);
-    this.mensajeEdicion.set('');
-    this.errorEdicion.set(false);
+    this.editarHoras.set(false);
   }
 
   actualizarCampo(campo: keyof EmpleadoDetalle, valor: unknown): void {
@@ -193,20 +194,25 @@ export class GestionEmpleadosComponent {
     const edicion = this.empleadoEdicion();
     if (!edicion) return;
     this.guardando.set(true);
-    this.mensajeEdicion.set('');
 
-    // TODO: integrar con endpoint de actualización de empleado
-    setTimeout(() => {
-      this.resultado.update(r =>
-        r ? { ...r, empleado: { ...edicion }, accesosSistema: [...this.accesosEdicion()] } : r
-      );
-      this.modoEdicion.set(false);
-      this.empleadoEdicion.set(null);
-      this.accesosEdicion.set([]);
-      this.guardando.set(false);
-      this.mensajeEdicion.set('Cambios guardados correctamente.');
-      this.errorEdicion.set(false);
-      setTimeout(() => this.mensajeEdicion.set(''), 3500);
-    }, 800);
+    const emailEmpleado = this.resultado()?.empleado.email ?? '';
+
+    this.service.actualizarEmpleado(emailEmpleado, edicion, this.accesosEdicion()).subscribe({
+      next: (resp) => {
+        this.resultado.update(r =>
+          r ? { ...r, empleado: { ...edicion }, accesosSistema: [...this.accesosEdicion()] } : r
+        );
+        this.modoEdicion.set(false);
+        this.empleadoEdicion.set(null);
+        this.accesosEdicion.set([]);
+        this.editarHoras.set(false);
+        this.guardando.set(false);
+        this.toastService.mostrar('exito', resp.mensaje || 'Empleado actualizado correctamente.');
+      },
+      error: () => {
+        this.guardando.set(false);
+        this.toastService.mostrar('error', 'Ocurrió un error al guardar los cambios. Intente nuevamente.');
+      },
+    });
   }
 }

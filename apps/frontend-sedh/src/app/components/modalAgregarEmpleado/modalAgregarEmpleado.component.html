@@ -1,0 +1,322 @@
+@if (visible()) {
+  <div class="modal-backdrop"
+       tabindex="0"
+       (click)="onCerrar()"
+       (keydown.escape)="onCerrar()">
+    <div class="modal"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modal-agregar-titulo"
+         (click)="$event.stopPropagation()"
+         (keydown)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h2 id="modal-agregar-titulo" class="modal-titulo">Agregar empleado</h2>
+        <button class="btn-cerrar" type="button" aria-label="Cerrar modal" (click)="onCerrar()" [disabled]="guardando()">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-barra" role="tablist" aria-label="Secciones del nuevo empleado">
+        @for (tab of tabs; track tab.id) {
+          <button
+            class="tab-btn"
+            [class.tab-activa]="estaAbierta(tab.id)"
+            (click)="abrirTab(tab.id)"
+            [attr.aria-selected]="estaAbierta(tab.id)"
+            role="tab"
+            type="button">
+            {{ tab.titulo }}
+          </button>
+        }
+      </div>
+
+      <!-- Cuerpo scrollable -->
+      <div class="modal-body">
+
+        <!-- Banner cargando catálogos -->
+        @if (cargandoDatos()) {
+          <div class="cargando-catalogos" role="status">
+            <span class="spinner" aria-hidden="true"></span>
+            Cargando datos del catálogo...
+          </div>
+        }
+
+        <!-- ── Datos personales ──────────────────────────────────────────── -->
+        @if (estaAbierta('personales')) {
+          <div class="grid-campos">
+
+            <div class="campo-grupo campo-grupo--ancho">
+              <label class="campo-etiqueta" for="ag-email">Correo institucional</label>
+              <input id="ag-email" class="campo-input" type="email"
+                     [ngModel]="empleado().email"
+                     (ngModelChange)="actualizarCampo('email', $event)"
+                     placeholder="correo@sedh.gob.hn" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-identidad">Número de identidad</label>
+              <input id="ag-identidad" class="campo-input" type="text"
+                     [ngModel]="empleado().identidad"
+                     (ngModelChange)="actualizarCampo('identidad', $event)"
+                     placeholder="0000-0000-00000" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-telefono">Teléfono</label>
+              <input id="ag-telefono" class="campo-input" type="text"
+                     [ngModel]="empleado().telefono"
+                     (ngModelChange)="actualizarCampo('telefono', $event)"
+                     placeholder="9999-9999" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-primer-nombre">Primer nombre</label>
+              <input id="ag-primer-nombre" class="campo-input" type="text"
+                     [ngModel]="empleado().primerNombre"
+                     (ngModelChange)="actualizarCampo('primerNombre', $event)" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-segundo-nombre">Segundo nombre</label>
+              <input id="ag-segundo-nombre" class="campo-input" type="text"
+                     [ngModel]="empleado().segundoNombre"
+                     (ngModelChange)="actualizarCampo('segundoNombre', $event)" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-primer-apellido">Primer apellido</label>
+              <input id="ag-primer-apellido" class="campo-input" type="text"
+                     [ngModel]="empleado().primerApellido"
+                     (ngModelChange)="actualizarCampo('primerApellido', $event)" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-segundo-apellido">Segundo apellido</label>
+              <input id="ag-segundo-apellido" class="campo-input" type="text"
+                     [ngModel]="empleado().segundoApellido"
+                     (ngModelChange)="actualizarCampo('segundoApellido', $event)" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-sexo">Sexo</label>
+              <select id="ag-sexo" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().idSexo"
+                      (ngModelChange)="seleccionarCatalogo($event, 'idSexo', datosSedh()?.sexos ?? [])">
+                <option value="">-- Seleccione --</option>
+                @for (item of datosSedh()?.sexos ?? []; track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-estado-civil">Estado civil</label>
+              <select id="ag-estado-civil" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().idEstadoCivil"
+                      (ngModelChange)="seleccionarCatalogo($event, 'idEstadoCivil', datosSedh()?.estadosCiviles ?? [])">
+                <option value="">-- Seleccione --</option>
+                @for (item of datosSedh()?.estadosCiviles ?? []; track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-departamento">Departamento</label>
+              <select id="ag-departamento" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="idDepartamentoSeleccionado()"
+                      (ngModelChange)="seleccionarDepartamento($event)">
+                <option [ngValue]="0">-- Seleccione --</option>
+                @for (item of datosSedh()?.departamentos ?? []; track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-municipio">Municipio</label>
+              <select id="ag-municipio" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().idMunicipio"
+                      (ngModelChange)="seleccionarCatalogo($event, 'idMunicipio', municipiosFiltrados())">
+                <option [ngValue]="0">-- Seleccione --</option>
+                @for (item of municipiosFiltrados(); track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+            </div>
+
+          </div>
+        }
+
+        <!-- ── Información laboral ──────────────────────────────────────── -->
+        @if (estaAbierta('laboral')) {
+          <div class="grid-campos">
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-fecha-ingreso">Fecha de ingreso</label>
+              <input id="ag-fecha-ingreso" class="campo-input" type="date"
+                     [ngModel]="empleado().fechaIngreso"
+                     (ngModelChange)="actualizarCampo('fechaIngreso', $event)" />
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-activo">Estado laboral</label>
+              <select id="ag-activo" class="campo-input campo-select"
+                      [ngModel]="empleado().activo"
+                      (ngModelChange)="actualizarCampo('activo', $event)">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-tipo-contratacion">Tipo de contratación</label>
+              <select id="ag-tipo-contratacion" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().idTipoContratacion"
+                      (ngModelChange)="seleccionarCatalogo($event, 'idTipoContratacion', datosSedh()?.tiposContratacion ?? [])">
+                <option value="">-- Seleccione --</option>
+                @for (item of datosSedh()?.tiposContratacion ?? []; track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo campo-grupo--ancho">
+              <label class="campo-etiqueta" for="ag-cargo">Cargo</label>
+              <select id="ag-cargo" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().idCargo"
+                      (ngModelChange)="seleccionarCatalogo($event, 'idCargo', datosSedh()?.cargos ?? [])">
+                <option [ngValue]="0">-- Seleccione --</option>
+                @for (item of datosSedh()?.cargos ?? []; track item.id) {
+                  <option [ngValue]="item.id">{{ item.nombre }} — {{ item.dependencia }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo campo-grupo--ancho">
+              <label class="campo-etiqueta" for="ag-jefe">Jefe inmediato</label>
+              <select id="ag-jefe" class="campo-input campo-select"
+                      [disabled]="cargandoDatos()"
+                      [ngModel]="empleado().jefeInmediato.identidad"
+                      (ngModelChange)="seleccionarJefe($event)">
+                <option value="">-- Seleccione --</option>
+                @for (jefe of datosSedh()?.jefesInmediatos ?? []; track jefe.identidad) {
+                  <option [ngValue]="jefe.identidad">{{ jefe.nombre }} — {{ jefe.cargo }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="campo-grupo">
+              <label class="campo-etiqueta" for="ag-contrasena">Contraseña temporal</label>
+              <input id="ag-contrasena" class="campo-input" type="password"
+                     autocomplete="new-password"
+                     [ngModel]="contrasena()"
+                     (ngModelChange)="contrasena.set($event)"
+                     placeholder="Contraseña inicial del empleado" />
+            </div>
+
+          </div>
+        }
+
+        <!-- ── Accesos al sistema ──────────────────────────────────────── -->
+        @if (estaAbierta('accesos')) {
+          <div class="tabla-wrapper">
+            <table class="tabla tabla-editable" aria-label="Accesos al sistema">
+              <thead>
+                <tr>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Módulo</th>
+                  <th scope="col" class="col-acciones-tabla">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (acceso of accesos(); track $index) {
+                  <tr>
+                    <td>
+                      <select class="campo-input campo-input-tabla campo-select"
+                              [disabled]="cargandoDatos()"
+                              [ngModel]="acceso.idRol"
+                              (ngModelChange)="seleccionarAccesoRol($index, $event)">
+                        <option [ngValue]="0">-- Seleccione --</option>
+                        @for (item of datosSedh()?.roles ?? []; track item.id) {
+                          <option [ngValue]="item.id">{{ item.nombre }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td>
+                      <select class="campo-input campo-input-tabla campo-select"
+                              [disabled]="cargandoDatos()"
+                              [ngModel]="acceso.idModulo"
+                              (ngModelChange)="seleccionarAccesoModulo($index, $event)">
+                        <option [ngValue]="0">-- Seleccione --</option>
+                        @for (item of datosSedh()?.modulos ?? []; track item.id) {
+                          <option [ngValue]="item.id">{{ item.nombre }}</option>
+                        }
+                      </select>
+                    </td>
+                    <td class="col-acciones-tabla">
+                      <button class="btn-eliminar-acceso" type="button"
+                              (click)="eliminarAcceso($index)"
+                              [attr.aria-label]="'Eliminar acceso ' + ($index + 1)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                             aria-hidden="true">
+                          <path d="M3 6h18M19 6l-1 14H6L5 6M8 6V4h8v2"/>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="accesos-footer">
+            <button class="btn btn-agregar-acceso" type="button" (click)="agregarAcceso()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                   stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              Agregar acceso
+            </button>
+          </div>
+        }
+
+      </div><!-- /modal-body -->
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button class="btn btn-cancelar" type="button" (click)="onCerrar()" [disabled]="guardando()">
+          Cancelar
+        </button>
+        <button class="btn btn-guardar" type="button" (click)="guardar()" [disabled]="guardando() || cargandoDatos() || !formularioValido()">
+          @if (guardando()) {
+            <span class="spinner" aria-hidden="true"></span>
+            Guardando...
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Agregar empleado
+          }
+        </button>
+      </div>
+
+    </div><!-- /modal -->
+  </div><!-- /backdrop -->
+}

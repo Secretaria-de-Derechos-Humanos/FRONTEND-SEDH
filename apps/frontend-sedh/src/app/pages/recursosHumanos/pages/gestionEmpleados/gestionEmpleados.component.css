@@ -12,13 +12,22 @@
 
 /* ── Búsqueda ───────────────────────────────────────────────────────────────── */
 .seccion-busqueda {
-  margin-block: var(--sedh-space-2xl);
-  max-inline-size: 740px;
+  margin-block-start: var(--sedh-space-lg);
+  margin-block-end:   var(--sedh-space-xl);
+}
+
+.fila-busqueda-acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--sedh-space-md);
+  flex-wrap: wrap;
 }
 
 .grupo-busqueda {
   display: flex;
   gap: var(--sedh-space-sm);
+  flex: 1;
+  min-inline-size: 0;
 }
 
 .campo-busqueda-wrapper {
@@ -75,6 +84,25 @@
 
 .btn-primary { background: var(--sedh-primary-500); color: var(--sedh-white); }
 .btn-primary:hover:not(:disabled) { background: var(--sedh-primary-400); box-shadow: var(--sedh-shadow-sm); }
+
+.btn-agregar-empleado {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sedh-space-xs);
+  padding: var(--sedh-space-md) var(--sedh-space-lg);
+  border-radius: var(--sedh-radius);
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  background: var(--sedh-secondary-500);
+  color: white;
+  transition: background 0.15s ease, scale 0.12s ease;
+  flex-shrink: 0;
+}
+.btn-agregar-empleado:hover { background: var(--sedh-secondary-700); scale: 1.03; }
 
 .btn-editar  { background: var(--sedh-secondary-500); color: var(--sedh-white); }
 .btn-editar:hover:not(:disabled)  { background: var(--sedh-secondary-700); box-shadow: var(--sedh-shadow-sm); }
@@ -477,8 +505,11 @@
 }
 
 /* Botón buscar */
-:host-context(.dark-theme) .btn-primary                   { background: var(--sedh-secondary-500); }
+:host-context(.dark-theme) .btn-primary                      { background: var(--sedh-secondary-500); }
 :host-context(.dark-theme) .btn-primary:hover:not(:disabled) { background: var(--sedh-secondary-700); }
+
+/* Botón agregar empleado — en dark mode ya es dorado (sin cambio de base, sólo hover) */
+:host-context(.dark-theme) .btn-agregar-empleado:hover { background: var(--sedh-secondary-700); }
 
 /* Encabezado del empleado */
 :host-context(.dark-theme) .empleado-encabezado { background: var(--sedh-secondary-700); }

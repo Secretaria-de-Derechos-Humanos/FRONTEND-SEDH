@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../services/auth.service';
-import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH, EP_RRHH_EMPLEADOS_ACTUALIZAR } from '../../../../config/api.endpoints';
+import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH, EP_RRHH_EMPLEADOS_ACTUALIZAR, EP_RRHH_EMPLEADOS_CREAR } from '../../../../config/api.endpoints';
 
 // ── Sub-tipos ────────────────────────────────────────────────────────────────
 
@@ -202,6 +202,23 @@ export class GestionEmpleadosService {
       )
       .pipe(map(r => r.data));
   }
+
+  crearEmpleado(
+    nuevoEmpleado: NuevoEmpleadoPayload,
+    accesos: { idRol: number; idModulo: number }[],
+    contrasena: string
+  ): Observable<ActualizarEmpleadoRespuesta> {
+    return this.http
+      .post<ApiResponse<ActualizarEmpleadoRespuesta>>(
+        `${this.base}${EP_RRHH_EMPLEADOS_CREAR}`,
+        this.buildBody({
+          contrasena,
+          empleado:       nuevoEmpleado,
+          accesosSistema: accesos,
+        })
+      )
+      .pipe(map(r => r.data));
+  }
 }
 
 // ── Tipos de payload/respuesta del endpoint actualizar ───────────────────────
@@ -222,4 +239,22 @@ export interface ActualizarEmpleadoRespuesta {
   status:  string;
   mensaje: string;
   email:   string;
+}
+
+export interface NuevoEmpleadoPayload {
+  email:              string;
+  primerNombre:       string;
+  segundoNombre:      string;
+  primerApellido:     string;
+  segundoApellido:    string;
+  fechaIngreso:       string;
+  activo:             boolean;
+  identidad:          string;
+  telefono:           string;
+  idTipoContratacion: string;
+  idCargo:            number;
+  idSexo:             string;
+  idEstadoCivil:      string;
+  idMunicipio:        number;
+  jefeInmediato:      { identidad: string };
 }

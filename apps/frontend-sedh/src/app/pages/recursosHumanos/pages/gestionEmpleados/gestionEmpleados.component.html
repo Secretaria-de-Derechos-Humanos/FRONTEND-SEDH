@@ -2,40 +2,54 @@
 
   <!-- ── Búsqueda ─────────────────────────────────────────────────────────── -->
   <section class="seccion-busqueda">
-    <div class="grupo-busqueda">
-      <div class="campo-busqueda-wrapper">
-        <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-        </svg>
-        <input
-          type="search"
-          class="campo-busqueda"
-          [ngModel]="searchQuery()"
-          (ngModelChange)="searchQuery.set($event)"
-          placeholder="Nombre, correo institucional o número de identidad"
-          (keyup.enter)="buscarEmpleado()"
-          aria-label="Criterio de búsqueda del empleado"
-        />
-      </div>
-      <button
-        class="btn btn-primary"
-        (click)="buscarEmpleado()"
-        [disabled]="isLoading()"
-        type="button"
-      >
-        @if (isLoading()) {
-          <span class="spinner" role="status" aria-hidden="true"></span>
-          Buscando...
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
-               fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-               stroke-linejoin="round" aria-hidden="true">
+    <div class="fila-busqueda-acciones">
+      <div class="grupo-busqueda">
+        <div class="campo-busqueda-wrapper">
+          <svg class="icono-busqueda" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          Buscar
-        }
+          <input
+            type="search"
+            class="campo-busqueda"
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+            placeholder="Nombre, correo institucional o número de identidad"
+            (keyup.enter)="buscarEmpleado()"
+            aria-label="Criterio de búsqueda del empleado"
+          />
+        </div>
+        <button
+          class="btn btn-primary"
+          (click)="buscarEmpleado()"
+          [disabled]="isLoading()"
+          type="button"
+        >
+          @if (isLoading()) {
+            <span class="spinner" role="status" aria-hidden="true"></span>
+            Buscando...
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                 stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Buscar
+          }
+        </button>
+      </div>
+      <button
+        class="btn btn-agregar-empleado"
+        type="button"
+        (click)="mostrarModalAgregar.set(true)"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Agregar empleado
       </button>
     </div>
     @if (errorMessage()) {
@@ -515,6 +529,13 @@
 
     </div><!-- /tabs-contenedor -->
   }
+
+  <!-- ── Modal agregar empleado ─────────────────────────────────────────────── -->
+  <app-modal-agregar-empleado
+    [visible]="mostrarModalAgregar()"
+    (cerrar)="mostrarModalAgregar.set(false)"
+    (creado)="buscarEmpleado()"
+  />
 
 </div>
 

@@ -55,6 +55,14 @@ export const EP_RRHH_REPORTES_PERMISOS_POR_MES = '/rrhh/reportes-permisos/por-me
 export const EP_RRHH_EMPLEADOS_BUSCAR      = '/rrhh/empleados/buscar';
 export const EP_RRHH_EMPLEADOS_DATOS_SEDH  = '/rrhh/empleados/datos-sedh';
 export const EP_RRHH_EMPLEADOS_ACTUALIZAR  = '/rrhh/empleados/actualizar';
+export const EP_RRHH_EMPLEADOS_CREAR       = '/rrhh/empleados/crear';
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MÓDULO: Core — Usuarios
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const EP_CORE_USUARIOS_HEATMAP_ACTIVIDADES = '/core/usuarios/heatmap-actividades';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

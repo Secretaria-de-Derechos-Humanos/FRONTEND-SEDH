@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
+import { EP_CORE_USUARIOS_HEATMAP_ACTIVIDADES } from '../../config/api.endpoints';
 
 interface UserProfile {
   personalInfo: {
@@ -26,6 +28,12 @@ interface ActivityData {
 
 interface HeatmapWeek {
   days: (ActivityData | null)[];
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
 }
 
 @Component({
@@ -57,7 +65,7 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
   });
 
   protected readonly totalActivities = computed(() => {
-    return this.activityData().reduce((sum, day) => sum + day.count, 0);
+    return (this.activityData() ?? []).reduce((sum, day) => sum + day.count, 0);
   });
 
   protected readonly weekDayLabels = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie'];
@@ -86,8 +94,9 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
     return months;
   });
 
-  private readonly http = inject(HttpClient);
+  private readonly http        = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly base        = environment.apiBaseUrl;
 
   ngOnInit(): void {
     this.loadUserProfile();
@@ -119,24 +128,44 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
   }
 
   private loadActivityData(): void {
-    this.http.get<{ heatmapData: ActivityData[] }>('/data/userActivity.json').subscribe({
-      next: (data) => {
-        this.activityData.set(data.heatmapData);
-        this.generateHeatmapWeeks(data.heatmapData);
-      },
-      error: (error) => console.error('Error cargando actividad:', error)
-    });
+    const email = this.authService.currentUser()?.email ?? '';
+    this.http
+      .post<ApiResponse<{ heatmapData: ActivityData[] }>>(
+        `${this.base}${EP_CORE_USUARIOS_HEATMAP_ACTIVIDADES}`,
+        { email }
+      )
+      .subscribe({
+        next: (response) => {
+          const heatmapData = response?.data?.heatmapData ?? [];
+          this.activityData.set(heatmapData);
+          this.generateHeatmapWeeks(heatmapData);
+        },
+        error: (error) => console.error('Error cargando actividad:', error),
+      });
+  }
+
+  private toLocalDateString(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 
   private generateHeatmapWeeks(data: ActivityData[]): void {
+    if (!data?.length) {
+      this.heatmapWeeks.set([]);
+      return;
+    }
+
     const weeks: HeatmapWeek[] = [];
-    const today = new Date(2026, 3, 27);
-    const oneYearAgo = new Date(2026, 3, 27);
+    const today = new Date();
+    const oneYearAgo = new Date();
     oneYearAgo.setFullYear(today.getFullYear() - 1);
 
     const dataMap = new Map(data.map(d => [d.date, d.count]));
 
     const currentDate = new Date(oneYearAgo);
+    currentDate.setHours(12, 0, 0, 0);
 
     let currentWeek: (ActivityData | null)[] = [];
     const startDayOfWeek = currentDate.getDay();
@@ -146,12 +175,14 @@ export class ConfiguracionUsuarioPageComponent implements OnInit {
       currentDate.setDate(currentDate.getDate() + daysToMonday);
     }
 
-    while (currentDate <= today) {
+    const todayStr = this.toLocalDateString(today);
+
+    while (this.toLocalDateString(currentDate) <= todayStr) {
       const dayOfWeek = currentDate.getDay();
 
       if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-        const dateString = currentDate.toISOString().split('T')[0];
-        const count = dataMap.get(dateString) || 0;
+        const dateString = this.toLocalDateString(currentDate);
+        const count = dataMap.get(dateString) ?? 0;
 
         currentWeek.push({ date: dateString, count });
 

@@ -16,6 +16,7 @@ import {
   MunicipioCatalogo,
 } from './gestionEmpleados.service';
 import { ToastService } from '../../../../services/toast.service';
+import { ModalAgregarEmpleadoComponent } from '../../../../components/modalAgregarEmpleado/modalAgregarEmpleado.component';
 
 // ── Definición de tabs ────────────────────────────────────────────────────────
 
@@ -36,7 +37,7 @@ const TABS: Tab[] = [
 @Component({
   selector: 'app-gestion-empleados',
   standalone: true,
-  imports: [FormsModule, TitleCasePipe],
+  imports: [FormsModule, TitleCasePipe, ModalAgregarEmpleadoComponent],
   templateUrl: './gestionEmpleados.component.html',
   styleUrls: ['./gestionEmpleados.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,8 +57,9 @@ export class GestionEmpleadosComponent {
   accesosEdicion  = signal<AccesoSistema[]>([]);
   datosSedh       = signal<DatosSedh | null>(null);
   cargandoDatos   = signal(false);
-  editarHoras     = signal(false);
-  guardando       = signal(false);
+  editarHoras          = signal(false);
+  guardando            = signal(false);
+  mostrarModalAgregar  = signal(false);
   mensajeEdicion  = signal('');
   errorEdicion    = signal(false);
 

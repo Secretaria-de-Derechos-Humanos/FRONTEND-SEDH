@@ -164,8 +164,56 @@ toggleTheme(): void {
 }
 ```
 
-Los colores primario y secundario **NO cambian** entre temas — solo cambian
-los fondos, superficies y textos semánticos.
+### Regla crítica de modo oscuro
+
+> **En modo oscuro (`dark-theme`) NUNCA se usan colores `--sedh-primary-*` (azul).**
+> Todos los estados interactivos (hover, activo, foco, borde de input, tab activa,
+> encabezados de tabla, etc.) deben usar los colores `--sedh-secondary-*` (dorado).
+
+| Estado / Elemento          | Modo claro                  | Modo oscuro (override obligatorio)           |
+|----------------------------|-----------------------------|-----------------------------------------------|
+| Tab activa                 | `--sedh-primary-500`        | `--sedh-secondary-300`                        |
+| Tab hover                  | `--sedh-primary-50` + `500` | `rgba(173, 132, 17, 0.1)` + `secondary-300`  |
+| Hover de fila de tabla     | `--sedh-primary-50`         | `rgba(173, 132, 17, 0.1)`                     |
+| Encabezado tabla (`<thead>`) | `--sedh-primary-700`      | `--sedh-secondary-700`                        |
+| Borde de input (focus)     | `--sedh-primary-500`        | `--sedh-secondary-300`                        |
+| Box-shadow de input (focus) | `rgba(38,77,160,0.1)`      | `rgba(173, 132, 17, 0.2)`                     |
+| Botón primario hover       | `--sedh-primary-400`        | `--sedh-secondary-700`                        |
+
+Ejemplo de patrón correcto:
+
+```css
+/* ── Modo oscuro ── */
+/* SIEMPRE usar :host-context(.dark-theme) en componentes Angular — NUNCA .dark-theme directamente */
+:host-context(.dark-theme) .tab-btn:hover {
+  color: var(--sedh-secondary-300);
+  background: rgba(173, 132, 17, 0.1);
+}
+:host-context(.dark-theme) .tab-btn.tab-activa {
+  color: var(--sedh-secondary-300);
+  border-bottom-color: var(--sedh-secondary-300);
+}
+:host-context(.dark-theme) .tabla thead tr {
+  background: var(--sedh-secondary-700);
+}
+:host-context(.dark-theme) .tabla tbody tr:hover {
+  background: rgba(173, 132, 17, 0.1);
+}
+:host-context(.dark-theme) .campo-input-edicion:focus {
+  border-color: var(--sedh-secondary-300);
+  box-shadow: 0 0 0 3px rgba(173, 132, 17, 0.2);
+}
+```
+
+> **IMPORTANTE — Angular CSS Scoping**: Angular usa `ViewEncapsulation.Emulated` por defecto.
+> Esto agrega atributos `[_ngcontent-xxx]` a los selectores. Si usas `.dark-theme .mi-clase`,
+> Angular puede añadir el atributo de scope a `.dark-theme` también, rompiendo el selector
+> porque `.dark-theme` está en el `<body>` (fuera del componente).
+> **Solución**: usar siempre `:host-context(.dark-theme) .mi-clase` en archivos `.css` de componentes.
+
+Los colores primario y secundario **NO cambian** entre temas para fondos principales —
+solo cambian los fondos, superficies y textos semánticos. Pero los colores primarios
+**deben ser reemplazados por secundarios** en todos los estados interactivos del modo oscuro.
 
 ---
 

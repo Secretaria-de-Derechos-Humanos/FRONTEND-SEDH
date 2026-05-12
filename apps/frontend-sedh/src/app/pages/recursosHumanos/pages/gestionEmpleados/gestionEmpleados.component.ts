@@ -10,6 +10,8 @@ import { TitleCasePipe } from '@angular/common';
 import {
   GestionEmpleadosService,
   ResultadoBusquedaEmpleado,
+  EmpleadoDetalle,
+  AccesoSistema,
 } from './gestionEmpleados.service';
 
 // ── Definición de tabs ────────────────────────────────────────────────────────
@@ -40,11 +42,17 @@ export class GestionEmpleadosComponent {
   private readonly service = inject(GestionEmpleadosService);
 
   // ── Estado ──────────────────────────────────────────────────────────────────
-  searchQuery  = signal('');
-  resultado    = signal<ResultadoBusquedaEmpleado | null>(null);
-  isLoading    = signal(false);
-  errorMessage = signal('');
-  tabAbierta   = signal<TabId>('personales');
+  searchQuery     = signal('');
+  resultado       = signal<ResultadoBusquedaEmpleado | null>(null);
+  isLoading       = signal(false);
+  errorMessage    = signal('');
+  tabAbierta      = signal<TabId>('personales');
+  modoEdicion     = signal(false);
+  empleadoEdicion = signal<EmpleadoDetalle | null>(null);
+  accesosEdicion  = signal<AccesoSistema[]>([]);
+  guardando       = signal(false);
+  mensajeEdicion  = signal('');
+  errorEdicion    = signal(false);
 
   readonly tabs = TABS;
 
@@ -68,6 +76,8 @@ export class GestionEmpleadosComponent {
     this.errorMessage.set('');
     this.resultado.set(null);
     this.tabAbierta.set('personales');
+    this.modoEdicion.set(false);
+    this.empleadoEdicion.set(null);
 
     this.service.buscarEmpleado(query).subscribe({
       next: (data) => {
@@ -87,5 +97,62 @@ export class GestionEmpleadosComponent {
 
   estaAbierta(id: TabId): boolean {
     return this.tabAbierta() === id;
+  }
+
+  iniciarEdicion(): void {
+    const emp = this.resultado()?.empleado;
+    if (!emp) return;
+    this.empleadoEdicion.set({ ...emp });
+    this.accesosEdicion.set(this.resultado()!.accesosSistema.map(a => ({ ...a })));
+    this.mensajeEdicion.set('');
+    this.errorEdicion.set(false);
+    this.modoEdicion.set(true);
+  }
+
+  cancelarEdicion(): void {
+    this.modoEdicion.set(false);
+    this.empleadoEdicion.set(null);
+    this.accesosEdicion.set([]);
+    this.mensajeEdicion.set('');
+    this.errorEdicion.set(false);
+  }
+
+  actualizarCampo(campo: keyof EmpleadoDetalle, valor: unknown): void {
+    this.empleadoEdicion.update(e => e ? { ...e, [campo]: valor } : e);
+  }
+
+  guardarCambios(): void {
+    const edicion = this.empleadoEdicion();
+    if (!edicion) return;
+    this.guardando.set(true);
+    this.mensajeEdicion.set('');
+
+    // TODO: integrar con endpoint de actualización de empleado
+    setTimeout(() => {
+      this.resultado.update(r =>
+        r ? { ...r, empleado: { ...edicion }, accesosSistema: [...this.accesosEdicion()] } : r
+      );
+      this.modoEdicion.set(false);
+      this.empleadoEdicion.set(null);
+      this.accesosEdicion.set([]);
+      this.guardando.set(false);
+      this.mensajeEdicion.set('Cambios guardados correctamente.');
+      this.errorEdicion.set(false);
+      setTimeout(() => this.mensajeEdicion.set(''), 3500);
+    }, 800);
+  }
+
+  agregarAcceso(): void {
+    this.accesosEdicion.update(list => [...list, { rol: '', modulo: '' }]);
+  }
+
+  eliminarAcceso(index: number): void {
+    this.accesosEdicion.update(list => list.filter((_, i) => i !== index));
+  }
+
+  actualizarAcceso(index: number, campo: keyof AccesoSistema, valor: string): void {
+    this.accesosEdicion.update(list =>
+      list.map((a, i) => i === index ? { ...a, [campo]: valor } : a)
+    );
   }
 }

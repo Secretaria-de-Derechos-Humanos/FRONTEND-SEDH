@@ -52,7 +52,8 @@ export const EP_RRHH_REPORTES_PERMISOS_POR_MES = '/rrhh/reportes-permisos/por-me
 // MÓDULO: Recursos Humanos — Gestión de empleados
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const EP_RRHH_EMPLEADOS_BUSCAR = '/rrhh/empleados/buscar';
+export const EP_RRHH_EMPLEADOS_BUSCAR      = '/rrhh/empleados/buscar';
+export const EP_RRHH_EMPLEADOS_DATOS_SEDH  = '/rrhh/empleados/datos-sedh';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

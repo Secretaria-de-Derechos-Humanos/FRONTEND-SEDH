@@ -4,34 +4,50 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../services/auth.service';
-import { EP_RRHH_EMPLEADOS_BUSCAR } from '../../../../config/api.endpoints';
+import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH } from '../../../../config/api.endpoints';
+
+// ── Sub-tipos ────────────────────────────────────────────────────────────────
+
+export interface JefeInmediato {
+  identidad: string;
+  nombre:    string;
+}
 
 // ── Modelos públicos ─────────────────────────────────────────────────────────
 
 export interface EmpleadoDetalle {
-  email:            string;
-  primerNombre:     string;
-  segundoNombre:    string;
-  primerApellido:   string;
-  segundoApellido:  string;
-  fechaIngreso:     string;
-  activo:           boolean;
-  identidad:        string;
-  telefono:         string;
-  tipoContratacion: string;
-  dependencia:      string;
-  cargo:            string;
-  sexo:             string;
-  estadoCivil:      string;
-  departamento:     string;
-  municipio:        string;
-  jefeInmediato:    string;
-  horasDisponibles: string;
+  email:              string;
+  primerNombre:       string;
+  segundoNombre:      string;
+  primerApellido:     string;
+  segundoApellido:    string;
+  fechaIngreso:       string;
+  activo:             boolean;
+  identidad:          string;
+  telefono:           string;
+  tipoContratacion:   string;
+  idTipoContratacion: string;
+  dependencia:        string;
+  idDependencia:      number;
+  cargo:              string;
+  idCargo:            number;
+  sexo:               string;
+  idSexo:             string;
+  estadoCivil:        string;
+  idEstadoCivil:      string;
+  departamento:       string;
+  idDepartamento:     number;
+  municipio:          string;
+  idMunicipio:        number;
+  jefeInmediato:      JefeInmediato;
+  horasDisponibles:   string;
 }
 
 export interface AccesoSistema {
-  rol:    string;
-  modulo: string;
+  idRol:    number;
+  rol:      string;
+  idModulo: number;
+  modulo:   string;
 }
 
 export interface HistorialCargo {
@@ -41,9 +57,56 @@ export interface HistorialCargo {
 }
 
 export interface ResultadoBusquedaEmpleado {
-  empleado:       EmpleadoDetalle;
-  accesosSistema: AccesoSistema[];
+  empleado:        EmpleadoDetalle;
+  accesosSistema:  AccesoSistema[];
   historialCargos: HistorialCargo[];
+}
+
+// ── Catálogos (datos-sedh) ────────────────────────────────────────────────────
+
+export interface CatalogoItem {
+  id:     number | string;
+  nombre: string;
+}
+
+export interface CargoCatalogo {
+  id:            number;
+  nombre:        string;
+  idDependencia: number;
+  dependencia:   string;
+}
+
+export interface MunicipioCatalogo {
+  id:             number;
+  nombre:         string;
+  idDepartamento: number;
+}
+
+export interface ModuloCatalogo {
+  id:          number;
+  nombre:      string;
+  descripcion: string;
+}
+
+export interface JefeInmediatoCatalogo {
+  identidad:   string;
+  nombre:      string;
+  email:       string;
+  cargo:       string;
+  dependencia: string;
+}
+
+export interface DatosSedh {
+  tiposContratacion: CatalogoItem[];
+  dependencias:      CatalogoItem[];
+  cargos:            CargoCatalogo[];
+  sexos:             CatalogoItem[];
+  estadosCiviles:    CatalogoItem[];
+  departamentos:     CatalogoItem[];
+  municipios:        MunicipioCatalogo[];
+  roles:             CatalogoItem[];
+  modulos:           ModuloCatalogo[];
+  jefesInmediatos:   JefeInmediatoCatalogo[];
 }
 
 // ── Tipos internos de respuesta API ─────────────────────────────────────────
@@ -70,21 +133,22 @@ export class GestionEmpleadosService {
   private readonly authService = inject(AuthService);
   private readonly base        = environment.apiBaseUrl;
 
-  buscarEmpleado(emailEmpleado: string): Observable<ResultadoBusquedaEmpleado> {
+  private buildBody(extra: Record<string, unknown> = {}): Record<string, unknown> {
     const user = this.authService.currentUser();
     const rol  = user?.roles[0];
-
-    const body = {
-      emailEmpleado,
+    return {
       email:    user?.email ?? '',
       rol:      rol?.r ?? 5,
       idmodulo: typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? (rol.m as number[])[0] : 1),
+      ...extra,
     };
+  }
 
+  buscarEmpleado(emailEmpleado: string): Observable<ResultadoBusquedaEmpleado> {
     return this.http
       .post<ApiResponse<BuscarEmpleadoData>>(
         `${this.base}${EP_RRHH_EMPLEADOS_BUSCAR}`,
-        body
+        this.buildBody({ emailEmpleado })
       )
       .pipe(
         map(r => ({
@@ -93,5 +157,14 @@ export class GestionEmpleadosService {
           historialCargos: r.data.historialCargos ?? [],
         }))
       );
+  }
+
+  cargarDatosSedh(): Observable<DatosSedh> {
+    return this.http
+      .post<ApiResponse<DatosSedh>>(
+        `${this.base}${EP_RRHH_EMPLEADOS_DATOS_SEDH}`,
+        this.buildBody()
+      )
+      .pipe(map(r => r.data));
   }
 }

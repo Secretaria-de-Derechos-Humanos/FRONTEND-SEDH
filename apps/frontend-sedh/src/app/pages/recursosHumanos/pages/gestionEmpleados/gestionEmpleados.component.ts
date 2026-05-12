@@ -12,6 +12,8 @@ import {
   ResultadoBusquedaEmpleado,
   EmpleadoDetalle,
   AccesoSistema,
+  DatosSedh,
+  MunicipioCatalogo,
 } from './gestionEmpleados.service';
 
 // ── Definición de tabs ────────────────────────────────────────────────────────
@@ -50,6 +52,8 @@ export class GestionEmpleadosComponent {
   modoEdicion     = signal(false);
   empleadoEdicion = signal<EmpleadoDetalle | null>(null);
   accesosEdicion  = signal<AccesoSistema[]>([]);
+  datosSedh       = signal<DatosSedh | null>(null);
+  cargandoDatos   = signal(false);
   guardando       = signal(false);
   mensajeEdicion  = signal('');
   errorEdicion    = signal(false);
@@ -63,6 +67,12 @@ export class GestionEmpleadosComponent {
     return [emp.primerNombre, emp.segundoNombre, emp.primerApellido, emp.segundoApellido]
       .filter(Boolean)
       .join(' ');
+  });
+
+  municipiosFiltrados = computed((): MunicipioCatalogo[] => {
+    const depId = this.empleadoEdicion()?.idDepartamento;
+    const todos  = this.datosSedh()?.municipios ?? [];
+    return depId ? todos.filter(m => m.idDepartamento === depId) : todos;
   });
 
   // ── Acciones ────────────────────────────────────────────────────────────────
@@ -103,10 +113,18 @@ export class GestionEmpleadosComponent {
     const emp = this.resultado()?.empleado;
     if (!emp) return;
     this.empleadoEdicion.set({ ...emp });
-    this.accesosEdicion.set(this.resultado()!.accesosSistema.map(a => ({ ...a })));
+    this.accesosEdicion.set((this.resultado()?.accesosSistema ?? []).map(a => ({ ...a })));
     this.mensajeEdicion.set('');
     this.errorEdicion.set(false);
     this.modoEdicion.set(true);
+
+    if (!this.datosSedh()) {
+      this.cargandoDatos.set(true);
+      this.service.cargarDatosSedh().subscribe({
+        next:  (data) => { this.datosSedh.set(data); this.cargandoDatos.set(false); },
+        error: ()     => this.cargandoDatos.set(false),
+      });
+    }
   }
 
   cancelarEdicion(): void {
@@ -119,6 +137,56 @@ export class GestionEmpleadosComponent {
 
   actualizarCampo(campo: keyof EmpleadoDetalle, valor: unknown): void {
     this.empleadoEdicion.update(e => e ? { ...e, [campo]: valor } : e);
+  }
+
+  /** Actualiza un campo de catálogo sincronizando id + nombre */
+  seleccionarCatalogo(
+    id: unknown,
+    campoId:     keyof EmpleadoDetalle,
+    campoNombre: keyof EmpleadoDetalle,
+    lista: Array<{ id: unknown; nombre: string }>
+  ): void {
+    const item = lista.find(i => String(i.id) === String(id));
+    if (!item) return;
+    this.empleadoEdicion.update(e =>
+      e ? { ...e, [campoId]: item.id, [campoNombre]: item.nombre } : e
+    );
+  }
+
+  /** Selecciona departamento y resetea municipio */
+  seleccionarDepartamento(id: unknown): void {
+    this.seleccionarCatalogo(id, 'idDepartamento', 'departamento', this.datosSedh()?.departamentos ?? []);
+    this.empleadoEdicion.update(e => e ? { ...e, idMunicipio: 0, municipio: '' } : e);
+  }
+
+  /** Selecciona jefe inmediato por identidad */
+  seleccionarJefe(identidad: string): void {
+    const jefe = this.datosSedh()?.jefesInmediatos.find(j => j.identidad === identidad);
+    if (jefe) this.actualizarCampo('jefeInmediato', { identidad: jefe.identidad, nombre: jefe.nombre });
+  }
+
+  seleccionarAccesoRol(index: number, idRol: unknown): void {
+    const rol = this.datosSedh()?.roles.find(r => String(r.id) === String(idRol));
+    if (!rol) return;
+    this.accesosEdicion.update(list =>
+      list.map((a, i) => i === index ? { ...a, idRol: Number(rol.id), rol: rol.nombre } : a)
+    );
+  }
+
+  seleccionarAccesoModulo(index: number, idModulo: unknown): void {
+    const mod = this.datosSedh()?.modulos.find(m => String(m.id) === String(idModulo));
+    if (!mod) return;
+    this.accesosEdicion.update(list =>
+      list.map((a, i) => i === index ? { ...a, idModulo: Number(mod.id), modulo: mod.nombre } : a)
+    );
+  }
+
+  agregarAcceso(): void {
+    this.accesosEdicion.update(list => [...list, { idRol: 0, rol: '', idModulo: 0, modulo: '' }]);
+  }
+
+  eliminarAcceso(index: number): void {
+    this.accesosEdicion.update(list => list.filter((_, i) => i !== index));
   }
 
   guardarCambios(): void {
@@ -140,19 +208,5 @@ export class GestionEmpleadosComponent {
       this.errorEdicion.set(false);
       setTimeout(() => this.mensajeEdicion.set(''), 3500);
     }, 800);
-  }
-
-  agregarAcceso(): void {
-    this.accesosEdicion.update(list => [...list, { rol: '', modulo: '' }]);
-  }
-
-  eliminarAcceso(index: number): void {
-    this.accesosEdicion.update(list => list.filter((_, i) => i !== index));
-  }
-
-  actualizarAcceso(index: number, campo: keyof AccesoSistema, valor: string): void {
-    this.accesosEdicion.update(list =>
-      list.map((a, i) => i === index ? { ...a, [campo]: valor } : a)
-    );
   }
 }

@@ -137,6 +137,14 @@
             role="tabpanel"
           >
 
+            <!-- Banner de carga de catálogos -->
+            @if (modoEdicion() && cargandoDatos()) {
+              <div class="cargando-catalogos" role="status">
+                <span class="spinner" aria-hidden="true"></span>
+                Cargando datos del catálogo...
+              </div>
+            }
+
             <!-- ─── Datos personales ─────────────────────────────────────────── -->
             @if (tab.id === 'personales') {
               <div class="grid-campos">
@@ -178,10 +186,13 @@
                     <span class="campo-valor">{{ resultado()!.empleado.sexo }}</span>
                   } @else {
                     <select class="campo-input-edicion campo-select-edicion"
-                            [ngModel]="empleadoEdicion()!.sexo"
-                            (ngModelChange)="actualizarCampo('sexo', $event)">
-                      <option value="Masculino">Masculino</option>
-                      <option value="Femenino">Femenino</option>
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idSexo"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idSexo', 'sexo', datosSedh()?.sexos ?? [])">
+                      <option value="">-- Seleccione --</option>
+                      @for (item of datosSedh()?.sexos ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
                     </select>
                   }
                 </div>
@@ -191,9 +202,15 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.estadoCivil | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.estadoCivil"
-                           (ngModelChange)="actualizarCampo('estadoCivil', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idEstadoCivil"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idEstadoCivil', 'estadoCivil', datosSedh()?.estadosCiviles ?? [])">
+                      <option value="">-- Seleccione --</option>
+                      @for (item of datosSedh()?.estadosCiviles ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -202,9 +219,15 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.departamento | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.departamento"
-                           (ngModelChange)="actualizarCampo('departamento', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idDepartamento"
+                            (ngModelChange)="seleccionarDepartamento($event)">
+                      <option [ngValue]="0">-- Seleccione --</option>
+                      @for (item of datosSedh()?.departamentos ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -213,9 +236,15 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.municipio | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.municipio"
-                           (ngModelChange)="actualizarCampo('municipio', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idMunicipio"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idMunicipio', 'municipio', municipiosFiltrados())">
+                      <option [ngValue]="0">-- Seleccione --</option>
+                      @for (item of municipiosFiltrados(); track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -272,9 +301,15 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.tipoContratacion | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.tipoContratacion"
-                           (ngModelChange)="actualizarCampo('tipoContratacion', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idTipoContratacion"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idTipoContratacion', 'tipoContratacion', datosSedh()?.tiposContratacion ?? [])">
+                      <option value="">-- Seleccione --</option>
+                      @for (item of datosSedh()?.tiposContratacion ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -295,9 +330,15 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.dependencia | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.dependencia"
-                           (ngModelChange)="actualizarCampo('dependencia', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idDependencia"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idDependencia', 'dependencia', datosSedh()?.dependencias ?? [])">
+                      <option [ngValue]="0">-- Seleccione --</option>
+                      @for (item of datosSedh()?.dependencias ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -306,20 +347,32 @@
                   @if (!modoEdicion()) {
                     <span class="campo-valor">{{ resultado()!.empleado.cargo | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.cargo"
-                           (ngModelChange)="actualizarCampo('cargo', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.idCargo"
+                            (ngModelChange)="seleccionarCatalogo($event, 'idCargo', 'cargo', datosSedh()?.cargos ?? [])">
+                      <option [ngValue]="0">-- Seleccione --</option>
+                      @for (item of datosSedh()?.cargos ?? []; track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }} — {{ item.dependencia }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
                 <div class="campo-grupo campo-grupo--ancho">
                   <span class="campo-etiqueta">Jefe inmediato</span>
                   @if (!modoEdicion()) {
-                    <span class="campo-valor">{{ resultado()!.empleado.jefeInmediato | titlecase }}</span>
+                    <span class="campo-valor">{{ resultado()!.empleado.jefeInmediato.nombre | titlecase }}</span>
                   } @else {
-                    <input class="campo-input-edicion" type="text"
-                           [ngModel]="empleadoEdicion()!.jefeInmediato"
-                           (ngModelChange)="actualizarCampo('jefeInmediato', $event)" />
+                    <select class="campo-input-edicion campo-select-edicion"
+                            [disabled]="cargandoDatos()"
+                            [ngModel]="empleadoEdicion()!.jefeInmediato.identidad"
+                            (ngModelChange)="seleccionarJefe($event)">
+                      <option value="">-- Seleccione --</option>
+                      @for (jefe of datosSedh()?.jefesInmediatos ?? []; track jefe.identidad) {
+                        <option [ngValue]="jefe.identidad">{{ jefe.nombre }} — {{ jefe.cargo }}</option>
+                      }
+                    </select>
                   }
                 </div>
 
@@ -369,18 +422,26 @@
                       @for (acceso of accesosEdicion(); track $index) {
                         <tr>
                           <td>
-                            <input class="campo-input-edicion campo-input-tabla"
-                                   type="text"
-                                   [ngModel]="acceso.rol"
-                                   (ngModelChange)="actualizarAcceso($index, 'rol', $event)"
-                                   placeholder="Rol del acceso" />
+                            <select class="campo-input-edicion campo-input-tabla campo-select-edicion"
+                                    [disabled]="cargandoDatos()"
+                                    [ngModel]="acceso.idRol"
+                                    (ngModelChange)="seleccionarAccesoRol($index, $event)">
+                              <option [ngValue]="0">-- Seleccione --</option>
+                              @for (item of datosSedh()?.roles ?? []; track item.id) {
+                                <option [ngValue]="item.id">{{ item.nombre }}</option>
+                              }
+                            </select>
                           </td>
                           <td>
-                            <input class="campo-input-edicion campo-input-tabla"
-                                   type="text"
-                                   [ngModel]="acceso.modulo"
-                                   (ngModelChange)="actualizarAcceso($index, 'modulo', $event)"
-                                   placeholder="Módulo del acceso" />
+                            <select class="campo-input-edicion campo-input-tabla campo-select-edicion"
+                                    [disabled]="cargandoDatos()"
+                                    [ngModel]="acceso.idModulo"
+                                    (ngModelChange)="seleccionarAccesoModulo($index, $event)">
+                              <option [ngValue]="0">-- Seleccione --</option>
+                              @for (item of datosSedh()?.modulos ?? []; track item.id) {
+                                <option [ngValue]="item.id">{{ item.nombre }}</option>
+                              }
+                            </select>
                           </td>
                           <td class="col-acciones-tabla">
                             <button class="btn-eliminar-acceso"

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
@@ -12,7 +12,7 @@ import { ReportePermisosService, DepGroup, RegistroPermiso } from './reportePerm
   styleUrls: ['./reportePermisos.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ReportePermisosComponent {
+export class ReportePermisosComponent implements OnInit {
   private readonly reporteService = inject(ReportePermisosService);
 
   dependencias    = signal<DepGroup[]>([]);
@@ -34,6 +34,10 @@ export class ReportePermisosComponent {
 
   registrosSeleccionados = computed(() => this.depSeleccionada()?.registros ?? []);
   hayDatos               = computed(() => this.dependencias().length > 0);
+
+  ngOnInit(): void {
+    this.buscarPorMes();
+  }
 
   abrirModal(dep: DepGroup): void {
     this.depSeleccionada.set(dep);

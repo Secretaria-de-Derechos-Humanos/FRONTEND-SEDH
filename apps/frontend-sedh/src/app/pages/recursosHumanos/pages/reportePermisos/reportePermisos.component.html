@@ -85,10 +85,12 @@
 
     <!-- Grid de cards -->
     @if (!cargando() && dependencias().length > 0) {
-      <div class="re-grid">
-        @for (dep of dependencias(); track dep.dependencia) {
+      <div class="re-grid-wrapper">
+        <div class="re-grid">
+        @for (dep of dependencias(); track dep.dependencia; let i = $index) {
           <div
             class="re-card"
+            [style.--i]="i"
             (click)="abrirModal(dep)"
             role="button"
             tabindex="0"
@@ -124,6 +126,7 @@
             </div>
           </div>
         }
+        </div>
       </div>
     }
 

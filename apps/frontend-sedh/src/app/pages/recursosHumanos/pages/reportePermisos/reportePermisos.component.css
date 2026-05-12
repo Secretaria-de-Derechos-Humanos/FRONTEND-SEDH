@@ -4,7 +4,6 @@
    ============================================= */
 :host {
   display: block;
-  min-block-size: 100vh;
   /* ── Tokens locales (sobrescritos en dark mode) ── */
   --re-card-shadow:        0 1px 4px rgba(0, 0, 0, 0.06);
   --re-card-shadow-hover:  0 6px 20px rgba(0, 0, 0, 0.13);
@@ -24,7 +23,6 @@
 }
 
 .re-page {
-  min-block-size: 100vh;
   background: var(--sedh-bg);
   transition: background 0.35s ease;
 }
@@ -194,13 +192,23 @@
 }
 
 /* ── Grid de cards ── */
+.re-grid-wrapper {
+  max-block-size: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-inline-end: 4px;
+}
+
 .re-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
   gap: 0.6rem;
-  max-block-size: calc(100vh - 160px);
-  overflow-y: auto;
-  padding-inline-end: 4px;
+  overflow: clip;
+  animation: reGridFadeIn 0.25s ease both;
+}
+
+@keyframes reGridFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Card ── */
@@ -215,6 +223,20 @@
   box-shadow: var(--re-card-shadow);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  animation: reCardSlideIn 0.35s ease both;
+  animation-delay: calc(var(--i, 0) * 55ms);
+  opacity: 0;
+}
+
+@keyframes reCardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .re-card:hover {

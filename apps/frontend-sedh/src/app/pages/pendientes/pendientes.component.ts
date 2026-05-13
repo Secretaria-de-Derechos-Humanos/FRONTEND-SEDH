@@ -160,9 +160,8 @@ export class PendientesComponent implements OnInit {
     const tipo = solicitud.detalle.nom_tipo_solicitud ?? `PERMISO ${solicitud.detalle.tipoSolicitud}`;
     const rol  = this.authService.currentUser()?.roles[0]?.r;
 
-    const params = rol === 3
-      ? { idpermiso: id, tipo, motRechazo: null, horas: null }
-      : { idpermiso: id, tipo, motRechazo: null, horas: this.normalizarHoras(solicitud.detalle.hor_solicitadas) };
+    // Al aprobar, no se envían horas ni motRechazo
+    const params = { idpermiso: id, tipo, motRechazo: null };
 
     const peticion$ = rol === 3
       ? this.pendientesService.responderPermisoSubgerente(params)
@@ -193,11 +192,11 @@ export class PendientesComponent implements OnInit {
     const esPersonal = solicitud.detalle.tipoSolicitud === 'PERSONAL';
     const rol        = this.authService.currentUser()?.roles[0]?.r;
 
-    const params = rol === 3
-      ? { idpermiso: payload.id, tipo, motRechazo: payload.motRechazo,
-          horas: esPersonal ? this.normalizarHoras(solicitud.detalle.hor_solicitadas) : null }
-      : { idpermiso: payload.id, tipo, motRechazo: payload.motRechazo,
-          horas: this.normalizarHoras(solicitud.detalle.hor_solicitadas) };
+    // Solo enviar 'horas' si es PERMISO PERSONAL (rechazado)
+    const params: any = { idpermiso: payload.id, tipo, motRechazo: payload.motRechazo };
+    if (esPersonal) {
+      params.horas = this.normalizarHoras(solicitud.detalle.hor_solicitadas);
+    }
 
     const peticion$ = rol === 3
       ? this.pendientesService.responderPermisoSubgerente(params)

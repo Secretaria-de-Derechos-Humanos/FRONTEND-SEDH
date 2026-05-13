@@ -97,7 +97,7 @@ export interface ResponderPermisoParams {
   idpermiso: string;
   tipo: string;
   motRechazo: string | null;
-  horas: string | null;
+  horas?: string | null;
 }
 
 interface ResponderPermisoResponse {
@@ -196,15 +196,19 @@ export class PendientesService {
     const user = this.authService.currentUser();
     const rol  = user?.roles[0];
 
-    const body = {
+    const body: any = {
       idpermiso:  params.idpermiso,
       tipo:       params.tipo,
       email:      user?.email ?? '',
       rol:        rol?.r ?? 2,
       idmodulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
       motRechazo: params.motRechazo,
-      horas:      params.horas,
     };
+
+    // Solo agregar 'horas' si se proporciona (solo para PERMISO PERSONAL rechazado)
+    if (params.horas !== undefined && params.horas !== null) {
+      body.horas = params.horas;
+    }
 
     return this.http
       .post<ResponderPermisoResponse>(
@@ -218,15 +222,19 @@ export class PendientesService {
     const user = this.authService.currentUser();
     const rol  = user?.roles[0];
 
-    const body = {
+    const body: any = {
       idpermiso:  params.idpermiso,
       tipo:       params.tipo,
       email:      user?.email ?? '',
       rol:        rol?.r ?? 3,
       idmodulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
       motRechazo: params.motRechazo,
-      horas:      params.horas,
     };
+
+    // Solo agregar 'horas' si se proporciona (solo para PERMISO PERSONAL rechazado)
+    if (params.horas !== undefined && params.horas !== null) {
+      body.horas = params.horas;
+    }
 
     return this.http
       .post<ResponderPermisoResponse>(

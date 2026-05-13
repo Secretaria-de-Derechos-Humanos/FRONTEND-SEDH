@@ -256,7 +256,7 @@ export class PendientesComponent implements OnInit {
     }
   }
 
-  private cargarPendientes(): void {
+  cargarPendientes(): void {
     this.cargando.set(true);
 
     const rol = this.authService.currentUser()?.roles[0]?.r;

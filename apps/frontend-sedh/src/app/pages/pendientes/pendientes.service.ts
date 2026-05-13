@@ -181,7 +181,7 @@ export class PendientesService {
     const body = {
       email:    user?.email ?? '',
       rol:      rol?.r ?? 3,
-      idmodulo: typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
+      modulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
     };
 
     return this.http
@@ -196,17 +196,28 @@ export class PendientesService {
     const user = this.authService.currentUser();
     const rol  = user?.roles[0];
 
-    const body: any = {
-      idpermiso:  params.idpermiso,
-      tipo:       params.tipo,
-      email:      user?.email ?? '',
-      rol:        rol?.r ?? 2,
-      idmodulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-      motRechazo: params.motRechazo,
+    const body: {
+      idpermiso: string;
+      tipo: string;
+      email: string;
+      rol: number;
+      modulo: number;
+      motRechazo?: string;
+      horas?: string;
+    } = {
+      idpermiso: params.idpermiso,
+      tipo:      params.tipo,
+      email:     user?.email ?? '',
+      rol:       rol?.r ?? 2,
+      modulo:    typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
     };
 
-    // Solo agregar 'horas' si se proporciona (solo para PERMISO PERSONAL rechazado)
-    if (params.horas !== undefined && params.horas !== null) {
+    if (params.motRechazo) {
+      body.motRechazo = params.motRechazo;
+    }
+
+    // Solo agrega horas cuando viene informada (rechazo de permiso personal).
+    if (params.horas) {
       body.horas = params.horas;
     }
 
@@ -222,17 +233,28 @@ export class PendientesService {
     const user = this.authService.currentUser();
     const rol  = user?.roles[0];
 
-    const body: any = {
-      idpermiso:  params.idpermiso,
-      tipo:       params.tipo,
-      email:      user?.email ?? '',
-      rol:        rol?.r ?? 3,
-      idmodulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-      motRechazo: params.motRechazo,
+    const body: {
+      idpermiso: string;
+      tipo: string;
+      email: string;
+      rol: number;
+      modulo: number;
+      motRechazo?: string;
+      horas?: string;
+    } = {
+      idpermiso: params.idpermiso,
+      tipo:      params.tipo,
+      email:     user?.email ?? '',
+      rol:       rol?.r ?? 3,
+      modulo:    typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
     };
 
-    // Solo agregar 'horas' si se proporciona (solo para PERMISO PERSONAL rechazado)
-    if (params.horas !== undefined && params.horas !== null) {
+    if (params.motRechazo) {
+      body.motRechazo = params.motRechazo;
+    }
+
+    // Solo agrega horas cuando viene informada (rechazo de permiso personal).
+    if (params.horas) {
       body.horas = params.horas;
     }
 

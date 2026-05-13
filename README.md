@@ -30,6 +30,59 @@ npx nx graph
 
 ---
 
+## Despliegue en producción (IIS)
+
+**Ejecutar los siguientes comandos en PowerShell con permisos de Administrador:**
+
+```powershell
+# 1. Navegar al proyecto
+Set-Location "C:\Users\Desarrollo\Documents\GitHub\FRONTEND-SEDH"
+
+# 2. Instalar dependencias (si es necesario)
+npm install
+
+# 3. Limpiar caché de Nx
+npx nx reset
+
+# 4. Construir versión de producción
+npx nx build frontend-sedh --configuration=production
+
+# 5. Definir origen (build) y destino (ruta IIS real)
+$sourcePath = "C:\Users\Desarrollo\Documents\GitHub\FRONTEND-SEDH\dist\apps\frontend-sedh\browser"
+$publishPath = "C:\inetpub\qa.sedh.gob.hn"
+
+# 6. Validar que el build exista
+if (!(Test-Path $sourcePath)) {
+	throw "No existe el build en $sourcePath"
+}
+
+# 7. Detener IIS para despliegue limpio
+iisreset /stop
+
+# 8. Crear carpeta destino si no existe
+if (!(Test-Path $publishPath)) {
+	New-Item -ItemType Directory -Path $publishPath -Force | Out-Null
+}
+
+# 9. Limpiar destino por completo (sin archivos extra)
+Remove-Item "$publishPath\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# 10. Copiar en modo espejo (solo archivos del build actual)
+robocopy $sourcePath $publishPath /MIR /R:1 /W:1
+
+# 11. Iniciar IIS
+iisreset /start
+
+# 12. Validar despliegue y archivos publicados
+Get-ChildItem $publishPath -Filter "main-*.js" | Select-Object Name, LastWriteTime
+Get-ChildItem $publishPath -Filter "index*.html" | Select-Object Name, LastWriteTime
+Invoke-WebRequest http://localhost -UseBasicParsing | Select-Object StatusCode
+```
+
+**Nota:** Este flujo hace un despliegue limpio en la ruta física real del sitio IIS y elimina archivos obsoletos de versiones anteriores.
+
+---
+
 ## Estructura del proyecto
 
 ```

@@ -387,7 +387,18 @@ export class PendientesComponent implements OnInit {
 
   private normalizarHoras(horas: string | null | undefined): string | null {
     if (!horas) return null;
-    return horas.substring(0, 5);
+
+    const valor = horas.trim();
+    if (/^\d{2}:\d{2}:\d{2}$/.test(valor)) {
+      return valor;
+    }
+
+    if (/^\d{2}:\d{2}$/.test(valor)) {
+      return `${valor}:00`;
+    }
+
+    const [hh = '00', mm = '00', ss = '00'] = valor.split(':');
+    return `${hh.padStart(2, '0')}:${mm.padStart(2, '0')}:${ss.padStart(2, '0')}`;
   }
 
   formatearFecha(fecha: Date): string {

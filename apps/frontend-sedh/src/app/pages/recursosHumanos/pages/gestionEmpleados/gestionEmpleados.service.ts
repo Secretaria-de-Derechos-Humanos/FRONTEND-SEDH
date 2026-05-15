@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../services/auth.service';
-import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH, EP_RRHH_EMPLEADOS_ACTUALIZAR, EP_RRHH_EMPLEADOS_CREAR } from '../../../../config/api.endpoints';
+import { EP_RRHH_EMPLEADOS_BUSCAR, EP_RRHH_EMPLEADOS_DATOS_SEDH, EP_RRHH_EMPLEADOS_ACTUALIZAR, EP_RRHH_EMPLEADOS_CREAR, EP_RRHH_EMPLEADOS_ACTUALIZAR_HORAS } from '../../../../config/api.endpoints';
 
 // ── Sub-tipos ────────────────────────────────────────────────────────────────
 
@@ -203,6 +203,26 @@ export class GestionEmpleadosService {
       .pipe(map(r => r.data));
   }
 
+  actualizarHorasDisponibles(
+    emailEmpleado:    string,
+    horasDisponibles: string
+  ): Observable<ActualizarHorasRespuesta> {
+    return this.http
+      .post<ApiResponse<ActualizarHorasRespuesta>>(
+        `${this.base}${EP_RRHH_EMPLEADOS_ACTUALIZAR_HORAS}`,
+        this.buildBody({ emailEmpleado, horasDisponibles })
+      )
+      .pipe(
+        map(r => r.data),
+        switchMap(data => {
+          if (data.status === 'ERROR') {
+            return throwError(() => new Error(data.mensaje));
+          }
+          return [data];
+        })
+      );
+  }
+
   crearEmpleado(
     nuevoEmpleado: NuevoEmpleadoPayload,
     accesos: { idRol: number; idModulo: number }[],
@@ -219,6 +239,14 @@ export class GestionEmpleadosService {
       )
       .pipe(map(r => r.data));
   }
+}
+
+// ── Tipos de payload/respuesta del endpoint actualizar-horas-disponibles ──────
+
+export interface ActualizarHorasRespuesta {
+  status:    string;
+  mensaje:   string;
+  empleado?: { email: string; horasDisponibles: string };
 }
 
 // ── Tipos de payload/respuesta del endpoint actualizar ───────────────────────

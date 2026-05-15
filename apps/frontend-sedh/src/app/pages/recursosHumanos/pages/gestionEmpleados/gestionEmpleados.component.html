@@ -81,7 +81,7 @@
       <!-- Acciones de edición -->
       <div class="encabezado-acciones">
         @if (!modoEdicion()) {
-          <button class="btn btn-editar" (click)="iniciarEdicion()" type="button">
+          <button class="btn btn-editar" (click)="iniciarEdicion()" type="button" [disabled]="editarHoras()">
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                  stroke-linejoin="round" aria-hidden="true">
@@ -316,26 +316,53 @@
 
                 <div class="campo-grupo">
                   <span class="campo-etiqueta">Horas disponibles</span>
-                  @if (!modoEdicion()) {
-                    <span class="campo-valor">{{ resultado()!.empleado.horasDisponibles }}</span>
-                  } @else {
+                  @if (!editarHoras()) {
                     <div class="campo-horas-wrapper">
-                      <input class="campo-input-edicion"
-                             type="text"
-                             [ngModel]="empleadoEdicion()!.horasDisponibles"
-                             (ngModelChange)="actualizarCampo('horasDisponibles', $event)"
-                             placeholder="HH:MM:SS"
-                             [disabled]="!editarHoras()" />
+                      <span class="campo-valor">{{ resultado()!.empleado.horasDisponibles }}</span>
                       <button class="btn-editar-horas"
                               type="button"
-                              [class.activo]="editarHoras()"
-                              (click)="editarHoras.set(!editarHoras())"
-                              [attr.aria-label]="editarHoras() ? 'Bloquear edición de horas' : 'Editar horas disponibles'">
+                              [disabled]="modoEdicion()"
+                              (click)="activarEdicionHoras()"
+                              aria-label="Editar horas disponibles">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
                              fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
                              stroke-linejoin="round" aria-hidden="true">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                           <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="campo-horas-wrapper">
+                      <input class="campo-input-edicion"
+                             type="text"
+                             [ngModel]="horasDisponiblesEdit()"
+                             (ngModelChange)="horasDisponiblesEdit.set($event)"
+                             placeholder="HH:MM:SS" />
+                      <button class="btn-guardar-horas"
+                              type="button"
+                              [disabled]="guardandoHoras()"
+                              (click)="guardarHorasDisponibles()"
+                              aria-label="Guardar horas disponibles">
+                        @if (guardandoHoras()) {
+                          <span class="spinner" role="status" aria-hidden="true"></span>
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                               fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                               stroke-linejoin="round" aria-hidden="true">
+                            <path d="M20 6 9 17l-5-5"/>
+                          </svg>
+                        }
+                      </button>
+                      <button class="btn-cancelar-horas"
+                              type="button"
+                              [disabled]="guardandoHoras()"
+                              (click)="cancelarEdicionHoras()"
+                              aria-label="Cancelar edición de horas">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                          <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
                         </svg>
                       </button>
                     </div>

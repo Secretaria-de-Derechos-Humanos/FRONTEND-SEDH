@@ -14,6 +14,7 @@ import {
   AccesoSistema,
   DatosSedh,
   MunicipioCatalogo,
+  ActualizarHorasRespuesta,
 } from './gestionEmpleados.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ModalAgregarEmpleadoComponent } from '../../../../components/modalAgregarEmpleado/modalAgregarEmpleado.component';
@@ -57,9 +58,11 @@ export class GestionEmpleadosComponent {
   accesosEdicion  = signal<AccesoSistema[]>([]);
   datosSedh       = signal<DatosSedh | null>(null);
   cargandoDatos   = signal(false);
-  editarHoras          = signal(false);
-  guardando            = signal(false);
-  mostrarModalAgregar  = signal(false);
+  editarHoras              = signal(false);
+  horasDisponiblesEdit     = signal<string>('');
+  guardandoHoras           = signal(false);
+  guardando                = signal(false);
+  mostrarModalAgregar      = signal(false);
   mensajeEdicion  = signal('');
   errorEdicion    = signal(false);
 
@@ -190,6 +193,40 @@ export class GestionEmpleadosComponent {
 
   eliminarAcceso(index: number): void {
     this.accesosEdicion.update(list => list.filter((_, i) => i !== index));
+  }
+
+  activarEdicionHoras(): void {
+    const horas = this.resultado()?.empleado.horasDisponibles ?? '';
+    this.horasDisponiblesEdit.set(horas);
+    this.editarHoras.set(true);
+  }
+
+  cancelarEdicionHoras(): void {
+    this.editarHoras.set(false);
+    this.horasDisponiblesEdit.set('');
+  }
+
+  guardarHorasDisponibles(): void {
+    const emailEmpleado    = this.resultado()?.empleado.email ?? '';
+    const horasDisponibles = this.horasDisponiblesEdit().trim();
+    if (!horasDisponibles) return;
+
+    this.guardandoHoras.set(true);
+    this.service.actualizarHorasDisponibles(emailEmpleado, horasDisponibles).subscribe({
+      next: (resp: ActualizarHorasRespuesta) => {
+        this.resultado.update(r =>
+          r ? { ...r, empleado: { ...r.empleado, horasDisponibles } } : r
+        );
+        this.editarHoras.set(false);
+        this.horasDisponiblesEdit.set('');
+        this.guardandoHoras.set(false);
+        this.toastService.mostrar('exito', resp.mensaje || 'Horas disponibles actualizadas correctamente.');
+      },
+      error: (err: Error) => {
+        this.guardandoHoras.set(false);
+        this.toastService.mostrar('error', err.message || 'Ocurrió un error al actualizar las horas disponibles.');
+      },
+    });
   }
 
   guardarCambios(): void {

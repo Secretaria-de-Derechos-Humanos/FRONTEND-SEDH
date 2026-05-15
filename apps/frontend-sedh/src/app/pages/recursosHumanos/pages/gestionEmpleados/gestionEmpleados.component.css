@@ -359,6 +359,10 @@
   flex: 1;
 }
 
+.campo-horas-wrapper .campo-valor {
+  flex: 1;
+}
+
 .btn-editar-horas {
   display: inline-flex;
   align-items: center;
@@ -369,16 +373,60 @@
   border: 1px solid var(--sedh-border);
   border-radius: var(--sedh-radius);
   background: transparent;
-  color: var(--sedh-text-muted);
+  color: var(--sedh-primary-700);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
-.btn-editar-horas:hover,
+.btn-editar-horas:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-editar-horas:hover:not(:disabled),
 .btn-editar-horas.activo {
   background: var(--sedh-secondary-100);
   border-color: var(--sedh-secondary-400);
   color: var(--sedh-secondary-700);
+}
+
+/* Botones guardar / cancelar horas disponibles */
+.btn-guardar-horas,
+.btn-cancelar-horas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: 30px;
+  block-size: 30px;
+  border-radius: var(--sedh-radius);
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-guardar-horas:disabled,
+.btn-cancelar-horas:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-guardar-horas {
+  border: 1px solid var(--sedh-success-dark);
+  color: var(--sedh-success-dark);
+}
+
+.btn-guardar-horas:hover:not(:disabled) {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.btn-cancelar-horas {
+  border: 1px solid var(--sedh-danger);
+  color: var(--sedh-danger);
+}
+
+.btn-cancelar-horas:hover:not(:disabled) {
+  background: rgba(198, 40, 40, 0.1);
 }
 
 /* ── Cargando catálogos ─────────────────────────────────────────────────────── */
@@ -572,7 +620,7 @@
   color: var(--sedh-text-muted);
 }
 
-:host-context(.dark-theme) .btn-editar-horas:hover,
+:host-context(.dark-theme) .btn-editar-horas:hover:not(:disabled),
 :host-context(.dark-theme) .btn-editar-horas.activo {
   background: rgba(173, 132, 17, 0.15);
   border-color: var(--sedh-secondary-400);

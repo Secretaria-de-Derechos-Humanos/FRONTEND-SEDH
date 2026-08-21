@@ -1,0 +1,427 @@
+<section class="pagina-editar-empleado">
+  <header class="encabezado">
+    <div>
+      <h1>Editar empleado</h1>
+
+      <p>
+        Actualice la información laboral, el puesto
+        y los accesos del empleado seleccionado.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="boton-regresar"
+      (click)="regresar()"
+    >
+      Regresar
+    </button>
+  </header>
+
+  @if (cargando()) {
+    <div class="mensaje carga">
+      Cargando información del empleado...
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="mensaje error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="mensaje exito">
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (!cargando()) {
+    <form
+      class="formulario"
+      [formGroup]="formulario"
+      (ngSubmit)="guardar()"
+    >
+      <section class="bloque-formulario">
+        <h2>Información personal</h2>
+
+        <p class="descripcion-bloque">
+          Estos datos se muestran como referencia.
+        </p>
+
+        <div class="cuadricula">
+          <div class="grupo">
+            <label for="primerNombre">
+              Primer nombre
+            </label>
+
+            <input
+              id="primerNombre"
+              type="text"
+              formControlName="primerNombre"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="segundoNombre">
+              Segundo nombre
+            </label>
+
+            <input
+              id="segundoNombre"
+              type="text"
+              formControlName="segundoNombre"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="primerApellido">
+              Primer apellido
+            </label>
+
+            <input
+              id="primerApellido"
+              type="text"
+              formControlName="primerApellido"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="segundoApellido">
+              Segundo apellido
+            </label>
+
+            <input
+              id="segundoApellido"
+              type="text"
+              formControlName="segundoApellido"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="identidad">
+              Número de identidad
+            </label>
+
+            <input
+              id="identidad"
+              type="text"
+              formControlName="identidad"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="email">
+              Correo institucional
+            </label>
+
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="bloque-formulario">
+        <h2>Información laboral</h2>
+
+        <div class="cuadricula">
+          <div class="grupo">
+            <label for="telefono">
+              Teléfono
+            </label>
+
+            <input
+              id="telefono"
+              type="text"
+              formControlName="telefono"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="fechaIngreso">
+              Fecha de ingreso
+            </label>
+
+            <input
+              id="fechaIngreso"
+              type="date"
+              formControlName="fechaIngreso"
+            >
+          </div>
+
+          <div class="grupo">
+            <label for="idTipoContratacion">
+              Tipo de contratación
+            </label>
+
+            <select
+              id="idTipoContratacion"
+              formControlName="idTipoContratacion"
+            >
+              <option value="">
+                Seleccione una opción
+              </option>
+
+              @for (
+                tipo of tiposContratacion();
+                track tipo.id
+              ) {
+                <option [value]="tipo.id">
+                  {{ tipo.nombre }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo">
+            <label for="idCargo">
+              Puesto o cargo
+            </label>
+
+            <select
+              id="idCargo"
+              formControlName="idCargo"
+            >
+              <option [ngValue]="0">
+                Seleccione un cargo
+              </option>
+
+              @for (
+                cargo of cargos();
+                track cargo.id
+              ) {
+                <option [ngValue]="cargo.id">
+                  {{ cargo.nombre }}
+                  —
+                  {{ cargo.dependencia }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo">
+            <label for="idSexo">
+              Sexo
+            </label>
+
+            <select
+              id="idSexo"
+              formControlName="idSexo"
+            >
+              <option value="">
+                Seleccione una opción
+              </option>
+
+              @for (
+                sexo of sexos();
+                track sexo.id
+              ) {
+                <option [value]="sexo.id">
+                  {{ sexo.nombre }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo">
+            <label for="idEstadoCivil">
+              Estado civil
+            </label>
+
+            <select
+              id="idEstadoCivil"
+              formControlName="idEstadoCivil"
+            >
+              <option value="">
+                Seleccione una opción
+              </option>
+
+              @for (
+                estado of estadosCiviles();
+                track estado.id
+              ) {
+                <option [value]="estado.id">
+                  {{ estado.nombre }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo">
+            <label for="idMunicipio">
+              Municipio
+            </label>
+
+            <select
+              id="idMunicipio"
+              formControlName="idMunicipio"
+            >
+              <option [ngValue]="0">
+                Seleccione un municipio
+              </option>
+
+              @for (
+                municipio of municipios();
+                track municipio.id
+              ) {
+                <option [ngValue]="municipio.id">
+                  {{ municipio.nombre }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo">
+            <label for="jefeInmediatoIdentidad">
+              Jefe inmediato
+            </label>
+
+            <select
+              id="jefeInmediatoIdentidad"
+              formControlName="jefeInmediatoIdentidad"
+            >
+              <option value="">
+                Seleccione un jefe inmediato
+              </option>
+
+              @for (
+                jefe of jefesInmediatos();
+                track jefe.identidad
+              ) {
+                <option [value]="jefe.identidad">
+                  {{ jefe.nombre }}
+                  —
+                  {{ jefe.cargo }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="grupo grupo-checkbox">
+            <label>
+              <input
+                type="checkbox"
+                formControlName="activo"
+              >
+
+              Empleado activo laboralmente
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="bloque-formulario">
+        <h2>Rol y acceso al sistema</h2>
+
+        <p class="descripcion-bloque">
+          El rol determina las funciones que podrá realizar
+          el usuario dentro del sistema.
+        </p>
+
+        <div class="cuadricula">
+          <div class="grupo">
+            <label for="idRol">
+              Rol del usuario
+            </label>
+
+            <select
+              id="idRol"
+              formControlName="idRol"
+            >
+              <option [ngValue]="0">
+                Seleccione un rol
+              </option>
+
+              @for (
+                rol of roles();
+                track rol.id
+              ) {
+                <option [ngValue]="+rol.id">
+                  {{ rol.nombre }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="grupo">
+         <span class="etiqueta-grupo">
+           Módulos habilitados
+           </span>
+
+          <div class="lista-modulos">
+            @for (
+              modulo of modulos();
+              track modulo.id
+            ) {
+              <label class="opcion-modulo">
+                <input
+                  type="checkbox"
+                  [checked]="
+                    moduloEstaSeleccionado(
+                      +modulo.id
+                    )
+                  "
+                  (change)="
+                    cambiarModulo(
+                      +modulo.id,
+                      $any($event.target).checked
+                    )
+                  "
+                >
+
+                <span>
+                  <strong>
+                    {{ modulo.nombre }}
+                  </strong>
+
+                  @if (modulo.descripcion) {
+                    <small>
+                      {{ modulo.descripcion }}
+                    </small>
+                  }
+                </span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <div class="aviso-sesion">
+          Después de cambiar el rol, el usuario deberá
+          cerrar sesión y volver a ingresar para recibir
+          sus nuevos permisos.
+        </div>
+      </section>
+
+      <div class="acciones">
+        <button
+          type="button"
+          class="boton-cancelar"
+          [disabled]="guardando()"
+          (click)="regresar()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="boton-guardar"
+          [disabled]="
+            guardando() ||
+            formulario.invalid ||
+            modulosSeleccionados().length === 0
+          "
+        >
+          {{
+            guardando()
+              ? 'Guardando...'
+              : 'Guardar cambios'
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

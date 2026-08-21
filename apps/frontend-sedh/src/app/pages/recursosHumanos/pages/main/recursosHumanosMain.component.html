@@ -1,4 +1,5 @@
 <div class="rrhh-main-container">
+
   <app-encabezados-pagina
     titulo="Módulo de Recursos Humanos"
     subtitulo="Gestione todo lo relacionado con recursos humanos."
@@ -6,19 +7,35 @@
   />
 
   <div class="modulos-grid">
-    @for (opcion of opcionesDisponibles(); track opcion.route) {
+
+    @for (
+      opcion of opcionesDisponibles();
+      track opcion.route
+    ) {
+
       <app-card
         [title]="opcion.label"
         [imageUrl]="opcion.imageUrl"
         (cardClick)="navegarA(opcion.route)"
       />
+
     }
+
   </div>
 
-  @if (opcionesDisponibles().length === 0) {
+  @if (
+    opcionesDisponibles().length === 0
+  ) {
+
     <div class="no-permissions">
       <i class="pi pi-lock"></i>
-      <p>No tiene permisos asignados para este módulo.</p>
+
+      <p>
+        No tiene permisos asignados para este módulo.
+      </p>
+
     </div>
+
   }
+
 </div>

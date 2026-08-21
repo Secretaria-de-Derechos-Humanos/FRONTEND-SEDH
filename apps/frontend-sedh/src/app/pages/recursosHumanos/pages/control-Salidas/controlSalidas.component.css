@@ -1,0 +1,363 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.pagina-control {
+  width: 100%;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.encabezado h1 {
+  margin: 0;
+  color: #15386c;
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.encabezado p {
+  margin: 0.45rem 0 0;
+  color: #667085;
+  font-size: 0.95rem;
+}
+
+.boton-actualizar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  min-height: 42px;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 9px;
+  background: #24499a;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(36, 73, 154, 0.18);
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
+}
+
+.boton-actualizar:hover:not(:disabled) {
+  background: #1c3c80;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(36, 73, 154, 0.25);
+}
+
+.boton-actualizar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   TARJETAS RESUMEN
+========================================= */
+
+.resumen-agente {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.resumen-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 105px;
+  padding: 1.1rem 1.25rem;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 35, 70, 0.06);
+}
+
+.resumen-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+}
+
+.resumen-card--pendiente::after {
+  background: #c09600;
+}
+
+.resumen-card--fuera::after {
+  background: #d52828;
+}
+
+.resumen-card--completado::after {
+  background: #168a55;
+}
+
+.resumen-card__icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 50px;
+  height: 50px;
+  border-radius: 13px;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.resumen-card--pendiente .resumen-card__icon {
+  background: #f7f1dc;
+  color: #9a7400;
+}
+
+.resumen-card--fuera .resumen-card__icon {
+  background: #fbe6e6;
+  color: #d32222;
+}
+
+.resumen-card--completado .resumen-card__icon {
+  background: #e1f1ea;
+  color: #117548;
+}
+
+.resumen-card__label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #5f6b7a;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.resumen-card__value {
+  display: block;
+  color: #111827;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+.mensaje-error {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #f5bcbc;
+  border-radius: 9px;
+  background: #fff1f1;
+  color: #b42318;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* =========================================
+   ESTADO VACÍO
+========================================= */
+
+.estado-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 35, 70, 0.05);
+  text-align: center;
+}
+
+.estado-vacio h2 {
+  margin: 0 0 0.5rem;
+  color: #111827;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.estado-vacio p {
+  margin: 0;
+  color: #667085;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+.contenedor-tabla {
+  width: 100%;
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #dce3ed;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 35, 70, 0.05);
+}
+
+table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: linear-gradient(
+    135deg,
+    #1f428d,
+    #2d5bb2
+  );
+}
+
+th {
+  padding: 0.85rem 1rem;
+  color: #ffffff;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #27364a;
+  font-size: 0.86rem;
+  vertical-align: middle;
+}
+
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background: #f7f9fc;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: #24499a;
+  font-size: 0.76rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.completado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  background: #e6f4ed;
+  color: #157347;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* =========================================
+   BOTONES
+========================================= */
+
+.boton-salida,
+.boton-retorno {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  min-height: 38px;
+  padding: 0.55rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.boton-salida {
+  background: #24499a;
+}
+
+.boton-retorno {
+  background: #a97900;
+}
+
+.boton-salida:hover,
+.boton-retorno:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 12px rgba(15, 35, 70, 0.18);
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1100px) {
+  .resumen-agente {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resumen-card:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .pagina-control {
+    padding: 1rem;
+  }
+
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .boton-actualizar {
+    align-self: flex-start;
+  }
+
+  .resumen-agente {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-card:last-child {
+    grid-column: auto;
+  }
+}

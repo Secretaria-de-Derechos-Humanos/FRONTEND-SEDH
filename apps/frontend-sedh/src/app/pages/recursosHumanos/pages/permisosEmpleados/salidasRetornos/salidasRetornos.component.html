@@ -1,14 +1,132 @@
-<div class="salidas-container">
-  <div class="header">
-    <h1>Salidas y retornos</h1>
-    <p class="subtitle">Controle las salidas y retornos del personal en tiempo real</p>
+<div class="container-fluid p-4 bg-light min-vh-100">
+
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h2 class="text-dark fw-bold m-0">Control de Salidas y Retornos</h2>
+      <p class="text-muted m-0">Bitácora institucional para el monitoreo del personal de la Secretaría.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+      <div class="bg-primary text-white d-inline-block px-4 py-2 rounded-pill shadow-sm">
+        <span class="fs-6 fw-semibold">Personal Fuera Hoy: {{ registrosHoy() }}</span>
+      </div>
+    </div>
   </div>
 
-  <div class="content-card">
-    <div class="empty-state">
-      <i class="pi pi-sign-out empty-icon"></i>
-      <h3>Módulo en desarrollo</h3>
-      <p>Esta funcionalidad estará disponible próximamente.</p>
+  <div class="row g-4">
+    <div class="col-xl-4 col-lg-5">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h5 class="card-title fw-bold mb-3 text-secondary">Registrar Nueva Salida</h5>
+
+          <form [formGroup]="salidaForm" (ngSubmit)="agregarSalida()">
+            <div class="mb-3">
+              <label for="empleado" class="form-label small fw-bold text-muted">Nombre del Empleado</label>
+              <input type="text" id="empleado" formControlName="empleado" class="form-control" placeholder="Ej. Carlos Mendoza">
+              @if (salidaForm.get('empleado')?.touched && salidaForm.get('empleado')?.invalid) {
+                <div class="text-danger small mt-1">El nombre es obligatorio.</div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="departamento" class="form-label small fw-bold text-muted">Dirección / Departamento</label>
+              <select id="departamento" formControlName="departamento" class="form-select">
+                <option value="" disabled>Seleccione una opción</option>
+                <option value="Recursos Humanos">Recursos Humanos</option>
+                <option value="Legal">Asesoría Legal</option>
+                <option value="Informática">Tecnologías de la Información</option>
+                <option value="Administración">Administración General</option>
+              </select>
+              @if (salidaForm.get('departamento')?.touched && salidaForm.get('departamento')?.invalid) {
+                <div class="text-danger small mt-1">Debe seleccionar un departamento.</div>
+              }
+            </div>
+
+            <div class="mb-3">
+              <label for="motivo" class="form-label small fw-bold text-muted">Motivo Oficial de la Salida</label>
+              <textarea id="motivo" formControlName="motivo" class="form-control" rows="3" placeholder="Describa la diligencia institucional..."></textarea>
+              @if (salidaForm.get('motivo')?.touched && salidaForm.get('motivo')?.invalid) {
+                <div class="text-danger small mt-1">El motivo es obligatorio.</div>
+              }
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+              Registrar Salida
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8 col-lg-7">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h5 class="card-title fw-bold mb-3 text-secondary">Historial de Movimientos</h5>
+
+          @if (cargando()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+              </div>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr class="small text-uppercase fw-bold text-muted">
+                    <th>Empleado</th>
+                    <th>Departamento</th>
+                    <th>Motivo</th>
+                    <th>Salida</th>
+                    <th>Retorno</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of listaSalidas(); track item.id) {
+                    <tr>
+                      <td><strong>{{ item.empleado }}</strong></td>
+                      <td><span class="badge bg-light text-secondary border px-2 py-1">{{ item.departamento }}</span></td>
+                      <td class="text-truncate" style="max-width: 180px;" [title]="item.motivo">{{ item.motivo }}</td>
+                      <td><span class="text-muted small fw-medium">{{ item.horaSalida }}</span></td>
+                      <td>
+                        @if (item.horaRetorno) {
+                          <span class="text-success small fw-bold">{{ item.horaRetorno }}</span>
+                        } @else {
+                          <span class="text-danger small fw-bold">Pendiente...</span>
+                        }
+                      </td>
+                      <td>
+                        <span class="badge rounded-pill px-2.5 py-1.5"
+                              [class.bg-warning]="item.estado === 'Fuera'"
+                              [class.text-dark]="item.estado === 'Fuera'"
+                              [class.bg-success]="item.estado === 'Retornado'">
+                          {{ item.estado }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        @if (item.estado === 'Fuera') {
+                          <button class="btn btn-sm btn-success fw-semibold shadow-sm" (click)="marcarRetorno(item.id)">
+                            Retorno
+                          </button>
+                        } @else {
+                          <button class="btn btn-sm btn-light border" disabled>Listo</button>
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="7" class="text-center py-5 text-muted">
+                        No se han registrado movimientos de personal hoy.
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </div>

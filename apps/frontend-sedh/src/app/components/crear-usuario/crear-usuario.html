@@ -1,0 +1,250 @@
+<div class="form-container">
+  <div class="form-card">
+
+    <div class="form-header">
+      <h2>Registrar Nuevo Usuario</h2>
+
+      <p>
+        Complete los datos correspondientes para dar
+        de alta un usuario en el sistema institucional.
+      </p>
+    </div>
+
+    <form
+      class="main-form"
+      [formGroup]="usuarioForm"
+      (ngSubmit)="guardar()"
+    >
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="priNombre">
+            Primer nombre
+          </label>
+
+          <input
+            id="priNombre"
+            type="text"
+            formControlName="priNombre"
+            maxlength="50"
+            placeholder="Primer nombre"
+            [class.input-error]="
+              usuarioForm.get('priNombre')?.touched &&
+              usuarioForm.get('priNombre')?.invalid
+            "
+          >
+
+          @if (
+            usuarioForm.get('priNombre')?.touched &&
+            usuarioForm.get('priNombre')?.errors?.['required']
+          ) {
+            <span class="error-text">
+              El primer nombre es obligatorio.
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="segNombre">
+            Segundo nombre
+          </label>
+
+          <input
+            id="segNombre"
+            type="text"
+            formControlName="segNombre"
+            maxlength="50"
+            placeholder="Segundo nombre"
+          >
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="priApellido">
+            Primer apellido
+          </label>
+
+          <input
+            id="priApellido"
+            type="text"
+            formControlName="priApellido"
+            maxlength="50"
+            placeholder="Primer apellido"
+            [class.input-error]="
+              usuarioForm.get('priApellido')?.touched &&
+              usuarioForm.get('priApellido')?.invalid
+            "
+          >
+
+          @if (
+            usuarioForm.get('priApellido')?.touched &&
+            usuarioForm.get('priApellido')?.errors?.['required']
+          ) {
+            <span class="error-text">
+              El primer apellido es obligatorio.
+            </span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="segApellido">
+            Segundo apellido
+          </label>
+
+          <input
+            id="segApellido"
+            type="text"
+            formControlName="segApellido"
+            maxlength="50"
+            placeholder="Segundo apellido"
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="emailInstitucional">
+          Correo Electrónico Institucional
+        </label>
+
+        <input
+          id="emailInstitucional"
+          type="email"
+          formControlName="emailInstitucional"
+          placeholder="ejemplo@sedh.gob.hn"
+          [class.input-error]="
+            usuarioForm.get('emailInstitucional')?.touched &&
+            usuarioForm.get('emailInstitucional')?.invalid
+          "
+        >
+
+        @if (
+          usuarioForm.get('emailInstitucional')?.touched &&
+          usuarioForm.get('emailInstitucional')?.errors?.['required']
+        ) {
+          <span class="error-text">
+            El correo institucional es obligatorio.
+          </span>
+        }
+
+        @if (
+          usuarioForm.get('emailInstitucional')?.touched &&
+          usuarioForm.get('emailInstitucional')?.errors?.['email']
+        ) {
+          <span class="error-text">
+            Ingrese un correo electrónico válido.
+          </span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="contrasena">
+          Contraseña Temporal
+        </label>
+
+        <input
+          id="contrasena"
+          type="password"
+          formControlName="contrasena"
+          placeholder="••••••••••••"
+          [class.input-error]="
+            usuarioForm.get('contrasena')?.touched &&
+            usuarioForm.get('contrasena')?.invalid
+          "
+        >
+
+        @if (
+          usuarioForm.get('contrasena')?.touched &&
+          usuarioForm.get('contrasena')?.errors?.['required']
+        ) {
+          <span class="error-text">
+            La contraseña es obligatoria.
+          </span>
+        }
+
+        @if (
+          usuarioForm.get('contrasena')?.touched &&
+          usuarioForm.get('contrasena')?.errors?.['minlength']
+        ) {
+          <span class="error-text">
+            Debe tener un mínimo de 8 caracteres.
+          </span>
+        }
+
+        @if (
+          usuarioForm.get('contrasena')?.touched &&
+          usuarioForm.get('contrasena')?.errors?.['pattern']
+        ) {
+          <span class="error-text">
+            Debe incluir mayúscula, minúscula, número
+            y un carácter especial.
+          </span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="idRol">
+          Rol de Usuario
+        </label>
+
+        <select
+          id="idRol"
+          formControlName="idRol"
+          [class.input-error]="
+            usuarioForm.get('idRol')?.touched &&
+            usuarioForm.get('idRol')?.invalid
+          "
+        >
+          <option [ngValue]="null" disabled>
+            Seleccione un rol para el usuario
+          </option>
+
+          <option [ngValue]="1">
+            Empleado Normal
+          </option>
+
+          <option [ngValue]="2">
+            Jefe Inmediato
+          </option>
+
+          <option [ngValue]="3">
+            Subgerente RRHH
+          </option>
+
+          <option [ngValue]="4">
+            Agente de Seguridad
+          </option>
+
+          <option [ngValue]="5">
+            Admin RRHH
+          </option>
+        </select>
+
+        @if (
+          usuarioForm.get('idRol')?.touched &&
+          usuarioForm.get('idRol')?.errors?.['required']
+        ) {
+          <span class="error-text">
+            Debe seleccionar un rol para continuar.
+          </span>
+        }
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="enviando"
+        >
+          @if (enviando) {
+            <span class="spinner"></span>
+            Procesando...
+          } @else {
+            Registrar Usuario
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

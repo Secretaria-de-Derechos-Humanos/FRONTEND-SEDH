@@ -1,0 +1,764 @@
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.pagina-reporte-vacaciones {
+  min-height: 100%;
+  padding: 32px;
+  background: #f5f7fa;
+  box-sizing: border-box;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.encabezado-reporte {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  background: #ffffff;
+
+  padding: 24px 28px;
+
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.titulo-reporte h1 {
+  margin: 0;
+
+  font-size: 26px;
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.titulo-reporte p {
+  margin: 7px 0 0;
+
+  font-size: 14px;
+
+  color: #6b7280;
+
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   CONTROLES
+   ========================================================= */
+
+.controles-reporte {
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 12px;
+}
+
+.control-anio {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.control-anio label {
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #475569;
+}
+
+.control-anio input {
+  width: 110px;
+
+  height: 42px;
+
+  padding: 0 12px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #1f2937;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.control-anio input:focus {
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   BOTÓN ACTUALIZAR
+   ========================================================= */
+
+.boton-actualizar {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 120px;
+
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.boton-actualizar:hover:not(:disabled) {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px rgba(37, 99, 235, 0.25);
+}
+
+.boton-actualizar:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.mensaje {
+  padding: 14px 18px;
+
+  margin-bottom: 18px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+}
+
+.mensaje.error {
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+}
+
+.mensaje.exito {
+  background: #f0fdf4;
+
+  border: 1px solid #bbf7d0;
+
+  color: #15803d;
+}
+
+
+/* =========================================================
+   RESUMEN
+   ========================================================= */
+
+.resumen-reporte {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 20px;
+}
+
+.tarjeta-resumen {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 20px 22px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+}
+
+.resumen-titulo {
+  font-size: 13px;
+
+  color: #64748b;
+
+  font-weight: 600;
+}
+
+.resumen-valor {
+  font-size: 25px;
+
+  color: #1f2937;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   BARRA DE BÚSQUEDA
+   ========================================================= */
+
+.barra-busqueda {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 18px 20px;
+
+  margin-bottom: 20px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.campo-busqueda {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.campo-busqueda label {
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #475569;
+}
+
+.campo-busqueda input {
+  width: 100%;
+
+  height: 42px;
+
+  padding: 0 14px;
+
+  box-sizing: border-box;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #1f2937;
+
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.campo-busqueda input::placeholder {
+  color: #94a3b8;
+}
+
+.campo-busqueda input:focus {
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.mensaje-carga {
+  min-height: 250px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.cargando-icono {
+  font-size: 28px;
+
+  color: #2563eb;
+
+  animation:
+    girar 1s linear infinite;
+}
+
+@keyframes girar {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   SIN RESULTADOS
+   ========================================================= */
+
+.sin-resultados {
+  min-height: 300px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 40px;
+
+  color: #64748b;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.icono-sin-resultados {
+  width: 64px;
+
+  height: 64px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 16px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  font-size: 28px;
+}
+
+.sin-resultados h2 {
+  margin: 0 0 8px;
+
+  font-size: 18px;
+
+  color: #374151;
+}
+
+.sin-resultados p {
+  margin: 0;
+
+  max-width: 500px;
+
+  color: #94a3b8;
+
+  font-size: 14px;
+
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   CONTENEDOR DE TABLA
+   ========================================================= */
+
+.contenedor-tabla {
+  width: 100%;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  overflow-x: auto;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+
+/* =========================================================
+   TABLA
+   ========================================================= */
+
+.tabla-reporte {
+  width: 100%;
+
+  min-width: 1100px;
+
+  border-collapse: collapse;
+}
+
+.tabla-reporte thead {
+  background: #f8fafc;
+}
+
+.tabla-reporte th {
+  padding: 15px 14px;
+
+  text-align: left;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  color: #475569;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.03em;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  white-space: nowrap;
+}
+
+.tabla-reporte td {
+  padding: 15px 14px;
+
+  font-size: 13px;
+
+  color: #374151;
+
+  border-bottom: 1px solid #f1f5f9;
+
+  vertical-align: middle;
+}
+
+.tabla-reporte tbody tr {
+  transition:
+    background 0.15s ease;
+}
+
+.tabla-reporte tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tabla-reporte tbody tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* =========================================================
+   COLUMNAS
+   ========================================================= */
+
+.numero-fila {
+  width: 40px;
+
+  color: #94a3b8 !important;
+
+  text-align: center;
+}
+
+.empleado {
+  min-width: 220px;
+}
+
+.empleado strong {
+  color: #1f2937;
+
+  font-weight: 600;
+}
+
+.numero {
+  text-align: center;
+
+  font-weight: 600;
+}
+
+.tipo-contratacion {
+  display: inline-block;
+
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   DÍAS UTILIZADOS
+   ========================================================= */
+
+.dias-utilizados {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 32px;
+
+  padding: 5px 8px;
+
+  border-radius: 6px;
+
+  background: #fef3c7;
+
+  color: #92400e;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   DÍAS RESERVADOS
+   ========================================================= */
+
+.dias-reservados {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 32px;
+
+  padding: 5px 8px;
+
+  border-radius: 6px;
+
+  background: #e0e7ff;
+
+  color: #3730a3;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   DÍAS DISPONIBLES
+   ========================================================= */
+
+.dias-disponibles {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 38px;
+
+  padding: 5px 9px;
+
+  border-radius: 6px;
+
+  font-weight: 700;
+}
+
+.dias-disponibles.con-dias {
+  background: #dcfce7;
+
+  color: #166534;
+}
+
+.dias-disponibles.sin-dias {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DE LA TABLA
+   ========================================================= */
+
+.informacion-tabla {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+
+  padding: 14px 4px;
+
+  color: #64748b;
+
+  font-size: 13px;
+}
+
+.informacion-tabla strong {
+  color: #374151;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .pagina-reporte-vacaciones {
+    padding: 20px;
+  }
+
+  .encabezado-reporte {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .controles-reporte {
+    width: 100%;
+  }
+
+  .control-anio {
+    flex: 1;
+  }
+
+  .control-anio input {
+    width: 100%;
+  }
+
+  .boton-actualizar {
+    min-width: 140px;
+  }
+
+  .resumen-reporte {
+    grid-template-columns:
+      1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .pagina-reporte-vacaciones {
+    padding: 16px;
+  }
+
+  .encabezado-reporte {
+    padding: 20px;
+  }
+
+  .titulo-reporte h1 {
+    font-size: 22px;
+  }
+
+  .titulo-reporte p {
+    font-size: 13px;
+  }
+
+  .controles-reporte {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+  .boton-actualizar {
+    width: 100%;
+  }
+
+  .barra-busqueda {
+    padding: 16px;
+  }
+
+  .informacion-tabla {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 6px;
+  }
+
+}

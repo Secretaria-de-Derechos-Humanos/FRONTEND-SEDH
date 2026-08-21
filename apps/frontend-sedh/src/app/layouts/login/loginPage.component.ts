@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ThemeToggleComponent } from '../../components/themeToggle/themeToggle.component';
 import { SystemPreloaderComponent } from '../../components/preloader/systemPreloader.component';
@@ -33,11 +33,11 @@ export class LoginPageComponent {
   });
 
   get emailCtrl() {
-    return this.loginForm.get('email');
+    return this.loginForm.get('email')  as FormControl;
   }
 
   get passwordCtrl() {
-    return this.loginForm.get('password');
+    return this.loginForm.get('password') as FormControl;
   }
 
   onPreloaderComplete(): void {
@@ -45,26 +45,48 @@ export class LoginPageComponent {
   }
 
   onSubmit(): void {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
+
+  if (this.loginForm.invalid) {
+    this.loginForm.markAllAsTouched();
+    return;
+  }
+
+  this.loading.set(true);
+  this.errorMessage.set('');
+
+  const email = this.loginForm.get('email')?.value ?? '';
+  const password = this.loginForm.get('password')?.value ?? '';
+
+  this.authService.login(email, password).subscribe({
+
+  next: (user) => {
+  this.loading.set(false);
+
+  console.log('Usuario:', user);
+  console.log(
+    '¿Debe cambiar contraseña?',
+    user.debeCambiarPassword,
+  );
+
+  if (user.debeCambiarPassword) {
+    this.router.navigateByUrl('/cambiar-password');
+    return;
+  }
+
+  this.router.navigateByUrl('/menu-principal');
+},
+
+    error: (error) => {
+
+      this.loading.set(false);
+
+      this.errorMessage.set(
+        error.message || 'Error al iniciar sesión'
+      );
+
     }
 
-    this.loading.set(true);
-    this.errorMessage.set('');
+  });
 
-    const { email, password } = this.loginForm.value;
-
-    this.authService.login(email!, password!).subscribe({
-      next: (user) => {
-        this.loading.set(false);
-        console.log('Login exitoso:', user);
-        this.router.navigate(['/menu-principal']);
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.errorMessage.set(error.message || 'Error al iniciar sesión');
-      }
-    });
-  }
+}
 }

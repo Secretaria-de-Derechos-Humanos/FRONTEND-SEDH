@@ -1,0 +1,496 @@
+/* ============================
+   Contenedor principal
+============================ */
+
+.gestion-container{
+    padding:30px;
+}
+
+.gestion-header{
+    margin-bottom:20px;
+}
+
+.gestion-title{
+    font-size:34px;
+    color:#0f2b63;
+    font-weight:bold;
+}
+
+.gestion-subtitle{
+    color:#666;
+    margin-top:5px;
+}
+
+.gestion-divider{
+    margin:25px 0;
+    border:none;
+    border-top:1px solid #ddd;
+}
+
+/* ============================
+   Tarjeta
+============================ */
+
+.table-card{
+
+    background:white;
+
+    border-radius:14px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+
+    overflow:hidden;
+
+}
+
+/* ============================
+   Tabla
+============================ */
+
+.table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.table thead{
+
+    background:#0f2b63;
+
+    color:white;
+
+}
+
+.table th{
+
+    padding:18px;
+
+    text-align:left;
+
+    font-size:15px;
+
+    letter-spacing:.5px;
+
+}
+
+.table td{
+
+    padding:16px;
+
+    border-bottom:1px solid #ececec;
+
+    font-size:14px;
+
+}
+
+/* Hover */
+
+.table tbody tr{
+
+    transition:.25s;
+
+}
+
+.table tbody tr:hover{
+
+    background:#f5f9ff;
+
+}
+
+/* Zebra */
+
+.table tbody tr:nth-child(even){
+
+    background:#fafafa;
+
+}
+
+/* ============================
+   Botón editar
+============================ */
+
+.btn-edit{
+
+    background:#0f2b63;
+
+    color:white;
+
+    border:none;
+
+    padding:9px 18px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    font-weight:600;
+
+}
+
+.btn-edit:hover{
+
+    background:#184aa3;
+
+    transform:translateY(-2px);
+
+}
+
+/* ============================
+   Estados
+============================ */
+
+.estado-activo{
+
+    color:#198754;
+
+    font-weight:bold;
+
+}
+
+.estado-inactivo{
+
+    color:#dc3545;
+
+    font-weight:bold;
+
+}
+
+/* ============================
+   Loading
+============================ */
+
+.loading-spinner{
+
+    padding:40px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    color:#0f2b63;
+
+    font-weight:bold;
+
+}
+
+/* ============================
+   Modal
+============================ */
+
+.modal-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.45);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    z-index:1000;
+
+}
+
+.modal-container{
+
+    width:650px;
+
+    background:white;
+
+    border-radius:15px;
+
+    overflow:hidden;
+
+    box-shadow:0 15px 45px rgba(0,0,0,.25);
+
+}
+
+/* Header */
+
+.modal-header{
+
+    background:#0f2b63;
+
+    color:white;
+
+    padding:18px 25px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.modal-header h3{
+
+    margin:0;
+
+}
+
+.modal-close-btn{
+
+    background:none;
+
+    color:white;
+
+    border:none;
+
+    font-size:28px;
+
+    cursor:pointer;
+
+}
+
+/* Body */
+
+.modal-body{
+
+    padding:25px;
+
+}
+
+.modal-inner-divider{
+
+    margin:20px 0;
+
+}
+
+.form-group{
+
+    margin-bottom:20px;
+
+}
+
+.form-group label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+.form-control{
+
+    width:100%;
+
+    padding:12px;
+
+    border-radius:8px;
+
+    border:1px solid #ccc;
+
+    font-size:15px;
+
+}
+
+/* Footer */
+
+.modal-footer{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:15px;
+
+    padding:20px;
+
+    border-top:1px solid #eee;
+
+}
+
+/* Botones */
+
+.btn-primary-save{
+
+    background:#0f2b63;
+
+    color:white;
+
+    border:none;
+
+    padding:12px 20px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
+
+.btn-primary-save:hover{
+
+    background:#184aa3;
+
+}
+
+.btn-secondary{
+
+    background:#eee;
+
+    border:none;
+
+    padding:12px 20px;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+}
+
+.btn-reset-password{
+    background:#d97706;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:8px;
+    cursor:pointer;
+}
+.btn-reset-password:hover{
+    background:#b45309;
+}
+
+/* Responsive */
+@media(max-width:900px){
+.table{
+display:block;
+overflow:auto;
+white-space:nowrap;
+}
+}
+.toolbar{
+display:flex;
+justify-content:flex-end;
+margin-bottom:20px;
+}
+.buscar{
+width:320px;
+padding:12px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:15px;
+}
+.estado-switch{
+display:flex;
+gap:15px;
+margin-top:10px;
+}
+.estado-btn{
+padding:12px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-weight:bold;
+background:#ddd;
+transition:.3s;
+
+}
+.estado-btn.activo{
+background:#28a745;
+color:white;
+
+}
+.estado-btn.inactivo{
+background:#dc3545;
+color:white;
+
+}
+.toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.buscar{
+    width:350px;
+    padding:12px 15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:15px;
+    transition:.3s;
+}
+
+.buscar:focus{
+    outline:none;
+    border-color:#0f2b63;
+    box-shadow:0 0 8px rgba(15,43,99,.2);
+
+}
+.security-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.password-panel {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f7f9fc;
+  border: 1px solid #d9e0ea;
+  border-radius: 10px;
+}
+
+.password-input-wrapper {
+  display: flex;
+  align-items: stretch;
+}
+
+.password-input-wrapper .form-control {
+  border-radius: 8px 0 0 8px;
+}
+
+.btn-show-password {
+  border: 1px solid #ccc;
+  border-left: none;
+  padding: 0 15px;
+  background: #edf1f6;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+}
+
+.password-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-save-password {
+  padding: 11px 18px;
+  color: white;
+  background: #143775;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-save-password:hover {
+  background: #1d4d9b;
+}
+
+.btn-save-password:disabled,
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.password-error {
+  margin: 8px 0 0;
+  color: #c62828;
+  font-size: 14px;
+  font-weight: 600;
+}

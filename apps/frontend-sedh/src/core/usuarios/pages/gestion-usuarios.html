@@ -1,0 +1,333 @@
+<app-encabezados-pagina
+  [titulo]="'Gestión de Usuarios'"
+></app-encabezados-pagina>
+<div class="gestion-container">
+  <div class="gestion-header">
+    <h2 class="gestion-title">Gestión de Cuentas de Usuario</h2>
+    <p class="gestion-subtitle">
+      Administración de roles, estados y contraseñas de las cuentas del sistema
+    </p>
+  </div>
+
+  <hr class="gestion-divider" />
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="buscar"
+      placeholder="🔍 Buscar usuario..."
+      [(ngModel)]="textoBusqueda"
+      (input)="filtrarUsuarios()"
+    />
+  </div>
+
+  @if (cargando) {
+    <div class="loading-spinner">
+      Cargando usuarios...
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Correo</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (user of usuariosFiltrados; track user.idUsuario) {
+            <tr>
+              <td>{{ user.idUsuario }}</td>
+
+              <td>{{ user.emailInstitucional }}</td>
+
+              <td>
+                {{ user.roles?.[0]?.nomRol || 'Sin rol' }}
+              </td>
+
+              <td>
+                <span
+                  class="estado-badge"
+                  [ngClass]="{
+                    'estado-activo': user.activo,
+                    'estado-inactivo': !user.activo
+                  }"
+                >
+                  {{ user.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="btn-edit"
+                  (click)="abrirEdicion(user)"
+                >
+                  ✏️ Editar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5">
+                No hay usuarios registrados.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (mostrarModal && usuarioSeleccionado) {
+    <div class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>
+            Editar:
+            <span class="highlight-user">
+              {{
+                usuarioSeleccionado.nombre ||
+                usuarioSeleccionado.emailInstitucional
+              }}
+            </span>
+          </h3>
+
+          <button
+            type="button"
+            class="modal-close-btn"
+            (click)="cerrarModal()"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="modal-section">
+            <div class="security-header">
+              <div>
+                <h4>Seguridad</h4>
+
+                <p class="section-desc">
+                  Asignar una contraseña temporal al usuario.
+                </p>
+              </div>
+
+              @if (!mostrarCambioPassword) {
+                <button
+                  type="button"
+                  class="btn-reset-password"
+                  (click)="abrirCambioPassword()"
+                >
+                  🔑 Cambiar contraseña
+                </button>
+              }
+            </div>
+
+            @if (mostrarCambioPassword) {
+              <div class="password-panel">
+                <div class="form-group">
+                  <label for="nueva-password">
+                    Nueva contraseña temporal
+                  </label>
+
+                  <div class="password-input-wrapper">
+                    <input
+                      id="nueva-password"
+                      class="form-control"
+                      [type]="mostrarNuevaPassword ? 'text' : 'password'"
+                      [(ngModel)]="nuevaPassword"
+                      placeholder="Mínimo 8 caracteres"
+                      minlength="8"
+                      maxlength="100"
+                      autocomplete="new-password"
+                    />
+
+                    <button
+                      type="button"
+                      class="btn-show-password"
+                      (click)="
+                        mostrarNuevaPassword =
+                          !mostrarNuevaPassword
+                      "
+                    >
+                      {{
+                        mostrarNuevaPassword
+                          ? 'Ocultar'
+                          : 'Mostrar'
+                      }}
+                    </button>
+                  </div>
+
+                  @if (
+                    nuevaPassword &&
+                    nuevaPassword.length < 8
+                  ) {
+                    <p class="password-error">
+                      La contraseña debe tener al menos 8 caracteres.
+                    </p>
+                  }
+                </div>
+
+                <div class="form-group">
+                  <label for="confirmar-password">
+                    Confirmar contraseña
+                  </label>
+
+                  <input
+                    id="confirmar-password"
+                    class="form-control"
+                    [type]="mostrarNuevaPassword ? 'text' : 'password'"
+                    [(ngModel)]="confirmarPassword"
+                    placeholder="Repita la contraseña"
+                    minlength="8"
+                    maxlength="100"
+                    autocomplete="new-password"
+                  />
+                </div>
+
+                @if (
+                  nuevaPassword &&
+                  confirmarPassword &&
+                  nuevaPassword !== confirmarPassword
+                ) {
+                  <p class="password-error">
+                    Las contraseñas no coinciden.
+                  </p>
+                }
+
+                <div class="password-actions">
+                  <button
+                    type="button"
+                    class="btn-secondary"
+                    (click)="cancelarCambioPassword()"
+                    [disabled]="guardandoPassword"
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-save-password"
+                    (click)="guardarPasswordTemporal()"
+                    [disabled]="
+                      guardandoPassword ||
+                      nuevaPassword.length < 8 ||
+                      nuevaPassword !== confirmarPassword
+                    "
+                  >
+                    {{
+                      guardandoPassword
+                        ? 'Guardando...'
+                        : 'Asignar contraseña'
+                    }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <hr class="modal-inner-divider" />
+
+          <div class="modal-form-grid">
+            <div class="form-group">
+              <label for="user-role">
+                Rol del Sistema
+              </label>
+
+              <select
+                id="user-role"
+                class="form-control"
+                [(ngModel)]="rolTemporal"
+              >
+                <option
+                  [ngValue]="null"
+                  disabled
+                >
+                  Seleccione un rol
+                </option>
+
+                <option [ngValue]="1">
+                  Empleado Normal
+                </option>
+
+                <option [ngValue]="2">
+                  Jefe Inmediato
+                </option>
+
+                <option [ngValue]="3">
+                  Sub RRHH
+                </option>
+
+                <option [ngValue]="4">
+                  Agente Seg
+                </option>
+
+                <option [ngValue]="5">
+                  Administrador
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="user-status">
+                Estado
+              </label>
+
+              <div class="estado-switch">
+                <button
+                  type="button"
+                  class="estado-btn"
+                  [ngClass]="{
+                    activo: usuarioSeleccionado.activo
+                  }"
+                  (click)="
+                    usuarioSeleccionado.activo = true
+                  "
+                >
+                  🟢 Activo
+                </button>
+
+                <button
+                  type="button"
+                  class="estado-btn"
+                  [ngClass]="{
+                    inactivo: !usuarioSeleccionado.activo
+                  }"
+                  (click)="
+                    usuarioSeleccionado.activo = false
+                  "
+                >
+                  🔴 Inactivo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cerrarModal()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="btn-primary-save"
+            (click)="guardarCambios()"
+            [disabled]="cargando"
+          >
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

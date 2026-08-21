@@ -1,0 +1,505 @@
+<section class="pagina-solicitar-vacaciones">
+
+  <!-- =========================================================
+       ENCABEZADO
+       ========================================================= -->
+
+  <header class="encabezado">
+
+    <div>
+      <h1>
+        Solicitar vacaciones
+      </h1>
+
+      <p>
+        Registre una nueva solicitud de vacaciones.
+      </p>
+    </div>
+
+  </header>
+
+
+  <!-- =========================================================
+       MENSAJES
+       ========================================================= -->
+
+  @if (errorMessage()) {
+
+    <div class="mensaje error">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+  @if (successMessage()) {
+
+    <div class="mensaje exito">
+      {{ successMessage() }}
+    </div>
+
+  }
+
+
+  <!-- =========================================================
+       SALDO
+       ========================================================= -->
+
+  <section class="tarjeta-saldo">
+
+    <div class="saldo-contenido">
+
+      <div class="saldo-item">
+
+        <span class="saldo-label">
+          Días asignados
+        </span>
+
+        <strong>
+          {{ saldo()?.diasAsignados ?? 0 }}
+        </strong>
+
+      </div>
+
+      <div class="saldo-item">
+
+        <span class="saldo-label">
+          Días utilizados
+        </span>
+
+        <strong>
+          {{ saldo()?.diasUtilizados ?? 0 }}
+        </strong>
+
+      </div>
+
+      <div class="saldo-item">
+
+        <span class="saldo-label">
+          Días reservados
+        </span>
+
+        <strong>
+          {{ saldo()?.diasReservados ?? 0 }}
+        </strong>
+
+      </div>
+
+      <div class="saldo-item disponible">
+
+        <span class="saldo-label">
+          Días disponibles
+        </span>
+
+        <strong>
+          {{ saldo()?.diasDisponibles ?? 0 }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =========================================================
+       FORMULARIO
+       ========================================================= -->
+
+  <form
+    class="formulario"
+    [formGroup]="formulario"
+    (ngSubmit)="guardar()"
+  >
+
+    <section class="bloque-formulario">
+
+      <h2>
+        Período de vacaciones
+      </h2>
+
+      <p class="descripcion-bloque">
+        Seleccione las fechas en las que desea tomar sus vacaciones.
+      </p>
+
+
+      <div class="cuadricula">
+
+        <!-- FECHA INICIO -->
+
+        <div class="grupo">
+
+          <label for="fechaInicio">
+            Fecha inicial
+          </label>
+
+          <input
+            id="fechaInicio"
+            type="date"
+            formControlName="fechaInicio"
+            [min]="fechaMinima"
+            (change)="actualizarFechas()"
+          >
+
+          @if (
+            formulario.controls.fechaInicio.touched &&
+            formulario.controls.fechaInicio.invalid
+          ) {
+
+            <small class="mensaje-validacion">
+              Debe seleccionar la fecha inicial.
+            </small>
+
+          }
+
+        </div>
+
+
+        <!-- FECHA FIN -->
+
+        <div class="grupo">
+
+          <label for="fechaFin">
+            Fecha final
+          </label>
+
+          <input
+            id="fechaFin"
+            type="date"
+            formControlName="fechaFin"
+            [min]="
+              formulario.controls.fechaInicio.value ||
+              fechaMinima
+            "
+            (change)="actualizarFechas()"
+          >
+
+          @if (
+            formulario.controls.fechaFin.touched &&
+            formulario.controls.fechaFin.invalid
+          ) {
+
+            <small class="mensaje-validacion">
+              Debe seleccionar la fecha final.
+            </small>
+
+          }
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           DÍAS SOLICITADOS
+           ===================================================== -->
+
+      <div class="dias-calculados">
+
+        <span>
+          Días solicitados
+        </span>
+
+        <strong>
+          @if (calculandoDias()) {
+            Calculando...
+          } @else {
+            {{ diasSolicitados() }}
+          }
+        </strong>
+
+      </div>
+
+
+      <!-- =====================================================
+           VALIDACIÓN SALDO
+           ===================================================== -->
+
+      @if (
+        diasSolicitados() > 0 &&
+        saldo()
+      ) {
+
+        <div
+          class="resultado-saldo"
+          [class.correcto]="saldoSuficiente()"
+          [class.incorrecto]="!saldoSuficiente()"
+        >
+
+          @if (saldoSuficiente()) {
+
+            Hay suficientes días disponibles para realizar
+            la solicitud.
+
+          } @else {
+
+            Los días solicitados superan el saldo disponible.
+
+          }
+
+        </div>
+
+      }
+
+
+      <!-- =====================================================
+           OBSERVACIONES
+           ===================================================== -->
+
+      <div class="grupo grupo-completo">
+
+        <label for="observaciones">
+          Observaciones
+        </label>
+
+        <textarea
+          id="observaciones"
+          rows="4"
+          maxlength="200"
+          formControlName="observaciones"
+          placeholder="Ingrese alguna observación si es necesario..."
+        ></textarea>
+
+        <small class="contador">
+          {{ formulario.controls.observaciones.value.length }}
+          / 200
+        </small>
+
+      </div>
+
+    </section>
+
+
+    <!-- =======================================================
+         ACCIONES
+         ======================================================= -->
+
+    <div class="acciones-formulario">
+
+      <button
+        type="button"
+        class="boton-cancelar"
+        [disabled]="guardando()"
+        (click)="cancelar()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="boton-guardar"
+        [disabled]="
+          guardando() ||
+          calculandoDias() ||
+          formulario.invalid ||
+          !saldoSuficiente()
+        "
+      >
+
+        {{
+          guardando()
+            ? 'Enviando...'
+            : 'Enviar solicitud'
+        }}
+
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <!-- =========================================================
+       MIS SOLICITUDES
+       ========================================================= -->
+
+  <section class="seccion-solicitudes">
+
+    <div class="seccion-header">
+
+      <div>
+
+        <h2>
+          Mis solicitudes
+        </h2>
+
+        <p>
+          Historial de solicitudes de vacaciones.
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="boton-actualizar"
+        [disabled]="cargandoSolicitudes()"
+        (click)="cargarSolicitudes()"
+      >
+
+        {{
+          cargandoSolicitudes()
+            ? 'Actualizando...'
+            : 'Actualizar'
+        }}
+
+      </button>
+
+    </div>
+
+
+    @if (cargandoSolicitudes()) {
+
+      <div class="mensaje-carga">
+        Consultando solicitudes...
+      </div>
+
+    } @else if (solicitudes().length === 0) {
+
+      <div class="sin-resultados">
+
+        <div class="icono-sin-resultados">
+          📅
+        </div>
+
+        <h3>
+          No hay solicitudes
+        </h3>
+
+        <p>
+          Todavía no ha registrado solicitudes de vacaciones.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="contenedor-tabla">
+
+        <table class="tabla-solicitudes">
+
+          <thead>
+
+            <tr>
+              <th>
+                Solicitud
+              </th>
+
+              <th>
+                Fecha solicitud
+              </th>
+
+              <th>
+                Fecha inicial
+              </th>
+
+              <th>
+                Fecha final
+              </th>
+
+              <th>
+                Días
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+              <th>
+                Observaciones
+              </th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              solicitud of solicitudes();
+              track solicitud.idVacaciones ??
+              solicitud.idVacacion ??
+              $index
+            ) {
+
+              <tr>
+
+                <td>
+                  {{
+                    solicitud.idVacaciones ??
+                    solicitud.idVacacion ??
+                    '-'
+                  }}
+                </td>
+
+                <td>
+                  {{
+                    formatearFecha(
+                      solicitud.fecSolicitud
+                    )
+                  }}
+                </td>
+
+                <td>
+                  {{
+                    formatearFecha(
+                      solicitud.fecInicial
+                    )
+                  }}
+                </td>
+
+                <td>
+                  {{
+                    formatearFecha(
+                      solicitud.fecFinal
+                    )
+                  }}
+                </td>
+
+                <td class="numero">
+                  {{ solicitud.cantVacaciones }}
+                </td>
+
+                <td>
+
+                  <span
+                    class="estado"
+                    [class.aprobada]="
+                      claseEstado(solicitud) ===
+                      'aprobada'
+                    "
+                    [class.rechazada]="
+                      claseEstado(solicitud) ===
+                      'rechazada'
+                    "
+                    [class.proceso]="
+                      claseEstado(solicitud) ===
+                      'proceso'
+                    "
+                  >
+
+                    {{ obtenerEstado(solicitud) }}
+
+                  </span>
+
+                </td>
+
+                <td>
+                  {{
+                    solicitud.observaciones ||
+                    'Sin observaciones'
+                  }}
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</section>

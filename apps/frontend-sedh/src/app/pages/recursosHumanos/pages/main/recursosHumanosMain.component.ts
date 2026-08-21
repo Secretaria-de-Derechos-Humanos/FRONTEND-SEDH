@@ -1,9 +1,27 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+
+import {
+  Router,
+  RouterModule,
+} from '@angular/router';
+
 import { AuthService } from '../../../../services/auth.service';
-import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
-import { CardComponent } from '../../../../components/card/card.component';
+
+import {
+  EncabezadosPaginaComponent,
+} from '../../../../components/encabezadosPagina/encabezadosPagina.component';
+
+import {
+  CardComponent,
+} from '../../../../components/card/card.component';
 
 interface MenuOption {
   label: string;
@@ -15,63 +33,236 @@ interface MenuOption {
 @Component({
   selector: 'app-recursos-humanos-main',
   standalone: true,
-  imports: [CommonModule, RouterModule, EncabezadosPaginaComponent, CardComponent],
+
+  imports: [
+    CommonModule,
+    RouterModule,
+    EncabezadosPaginaComponent,
+    CardComponent,
+  ],
+
   templateUrl: './recursosHumanosMain.component.html',
-  styleUrls: ['./recursosHumanosMain.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+
+  styleUrls: [
+    './recursosHumanosMain.component.css',
+  ],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecursosHumanosMainComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
 
-  private todasLasOpciones = signal<MenuOption[]>([
-    {
-      label: 'Solicitar algo a RRHH',
-      imageUrl: 'LogoSolicitarAlgo-RRHH.png',
-      route: '/rrhh/mis-solicitudes',
-      rolesPermitidos: [1,2,3,4,5]
-    },
-    {
-      label: 'Control de asistencia',
-      imageUrl: 'LogoControlAsistencia-RRHH.png',
-      route: '',
-      rolesPermitidos: [5]
-    },
-    {
-      label: 'Reporte de permisos',
-      imageUrl: 'LogoReportePermisos-RRHH.png',
-      route: '/rrhh/reporte-permisos',
-      rolesPermitidos: [5]
-    },
-    {
-      label: 'Gestión de empleados',
-      imageUrl: 'LogoGestionEmpleados-RRHH.png',
-      route: '/rrhh/gestion-empleados',
-      rolesPermitidos: [5]
-    }
-  ]);
+  private readonly authService = inject(AuthService);
 
-  // Filtrar opciones según el rol del usuario actual
-  opcionesDisponibles = computed(() => {
+  private readonly router = inject(Router);
+
+  // =========================================================
+  // OPCIONES DEL MÓDULO DE RECURSOS HUMANOS
+  // =========================================================
+
+  private readonly todasLasOpciones =
+    signal<MenuOption[]>([
+
+      // =====================================================
+      // SOLICITAR ALGO A RRHH
+      // ROLES: 1, 2, 3, 4, 5
+      // =====================================================
+
+      {
+        label: 'Solicitar algo a RRHH',
+
+        imageUrl: 'LogoSolicitarAlgo-RRHH.png',
+
+        route: '/rrhh/mis-solicitudes',
+
+        rolesPermitidos: [
+          1,
+          2,
+          3,
+          4,
+          5,
+        ],
+      },
+
+      // =====================================================
+      // CONTROL DE SALIDAS Y RETORNOS
+      // ROLES: 4, 5
+      // =====================================================
+
+      {
+        label: 'Control de salidas y retornos',
+
+        imageUrl: 'LogoControlAsistencia-RRHH.png',
+
+        route: '/rrhh/control-salidas',
+
+        rolesPermitidos: [
+          4,
+          5,
+        ],
+      },
+
+      // =====================================================
+      // REPORTE DE PERMISOS
+      // ROLES: 3, 5
+      // =====================================================
+
+      {
+        label: 'Reporte de permisos',
+
+        imageUrl: 'LogoReportePermisos-RRHH.png',
+
+        route: '/rrhh/reporte-permisos',
+
+        rolesPermitidos: [
+          3,
+          5,
+        ],
+      },
+      // =====================================================
+     // REPORTE DE VACACIONES
+      // ROLES: 2, 3, 5
+    // =====================================================
+
+    {
+      label: 'Reporte de vacaciones',
+
+      imageUrl: 'ReporteVacaciones.png',
+
+      route: '/vacaciones/reporte',
+
+      rolesPermitidos: [
+        2,
+        3,
+        5,
+      ],
+    },
+      // =====================================================
+      // GESTIÓN DE EMPLEADOS
+      // ROLES: 3, 5
+      // =====================================================
+
+      {
+        label: 'Gestión de empleados',
+
+        imageUrl: 'LogoGestionEmpleados-RRHH.png',
+
+        route: '/rrhh/gestion-empleados',
+
+        rolesPermitidos: [
+          3,
+          5,
+        ],
+      },
+
+      // =====================================================
+      // VACACIONES PENDIENTES JEFE
+      // ROLES: 2, 5
+      // =====================================================
+
+      {
+        label: 'Aprobación de vacaciones - Jefe',
+
+        imageUrl: 'LogoVacacionesJefe.png',
+
+        route: '/vacaciones/pendientes-jefe',
+
+        rolesPermitidos: [
+          2,
+          5,
+        ],
+      },
+
+      // =====================================================
+      // VACACIONES PENDIENTES SUBGERENCIA
+      // ROLES: 3, 5
+      // =====================================================
+
+      {
+        label: 'Aprobación de vacaciones - Subgerencia',
+
+        imageUrl: 'LogoVacacionesSubG.png',
+
+        route: '/vacaciones/pendientes-subgerente',
+
+        rolesPermitidos: [
+          3,
+          5,
+        ],
+      },
+
+    ]);
+
+  // =========================================================
+  // OPCIONES DISPONIBLES PARA EL USUARIO
+  // =========================================================
+
+  readonly opcionesDisponibles = computed(() => {
+
     const usuario = this.authService.currentUser();
-    if (!usuario) return [];
 
-    const rolUsuario = usuario.roles?.[0]?.r ?? -1;
-    return this.todasLasOpciones().filter(opcion =>
-      opcion.rolesPermitidos.includes(rolUsuario)
-    );
+    if (!usuario) {
+      return [];
+    }
+
+    /*
+     * Un usuario puede tener más de un rol.
+     */
+
+    const rolesUsuario =
+      (usuario.roles ?? [])
+        .map(
+          (rol) => Number(rol.r),
+        );
+
+    return this.todasLasOpciones()
+      .filter(
+        (opcion) =>
+          opcion.rolesPermitidos
+            .some(
+              (rolPermitido) =>
+                rolesUsuario.includes(
+                  rolPermitido,
+                ),
+            ),
+      );
   });
 
-  navegarA(ruta: string): void {
-    if (ruta && ruta !== '') {
-      this.router.navigate([ruta]);
+  // =========================================================
+  // NAVEGACIÓN
+  // =========================================================
+
+  navegarA(
+    ruta: string,
+  ): void {
+
+    if (!ruta) {
+      return;
     }
+
+    this.router.navigateByUrl(
+      ruta,
+    );
   }
 
-  onKeyPress(event: KeyboardEvent, ruta: string): void {
-    if (event.key === 'Enter' || event.key === ' ') {
+  // =========================================================
+  // ACCESIBILIDAD
+  // =========================================================
+
+  onKeyPress(
+    event: KeyboardEvent,
+    ruta: string,
+  ): void {
+
+    if (
+      event.key === 'Enter' ||
+      event.key === ' '
+    ) {
+
       event.preventDefault();
-      this.navegarA(ruta);
+
+      this.navegarA(
+        ruta,
+      );
     }
   }
 }

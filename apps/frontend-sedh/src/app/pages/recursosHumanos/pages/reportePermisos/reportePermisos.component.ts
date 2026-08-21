@@ -1,46 +1,85 @@
-import { Component, ChangeDetectionStrategy, signal, computed, inject, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { EncabezadosPaginaComponent } from '../../../../components/encabezadosPagina/encabezadosPagina.component';
-import { ReportePermisosService, DepGroup, RegistroPermiso } from './reportePermisos.service';
+import {
+  DepGroup,
+  RegistroPermiso,
+  ReportePermisosService,
+} from './reportePermisos.service';
+
+interface PdfConAutoTable {
+  lastAutoTable?: {
+    finalY: number;
+  };
+}
 
 @Component({
   selector: 'app-reporte-permisos',
   standalone: true,
-  imports: [CommonModule, FormsModule, EncabezadosPaginaComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    EncabezadosPaginaComponent,
+  ],
   templateUrl: './reportePermisos.component.html',
   styleUrls: ['./reportePermisos.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReportePermisosComponent implements OnInit {
-  private readonly reporteService = inject(ReportePermisosService);
+  private readonly reporteService =
+    inject(ReportePermisosService);
 
-  dependencias    = signal<DepGroup[]>([]);
+  dependencias = signal<DepGroup[]>([]);
   depSeleccionada = signal<DepGroup | null>(null);
-  modalAbierto    = signal(false);
-  cargando        = signal(false);
-  error           = signal<string | null>(null);
-  buscado         = signal(false);
-  exportando      = signal(false);
+  modalAbierto = signal(false);
+  cargando = signal(false);
+  error = signal<string | null>(null);
+  buscado = signal(false);
+  exportando = signal(false);
 
-  mesBusqueda  = new Date().getMonth() + 1;
+  mesBusqueda = new Date().getMonth() + 1;
   anioBusqueda = new Date().getFullYear();
 
   readonly anios: number[] = [2025, 2026];
+
   readonly nombresMeses: string[] = [
-    'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-    'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    'Enero',
+    'Febrero',
+    'Marzo',
+    'Abril',
+    'Mayo',
+    'Junio',
+    'Julio',
+    'Agosto',
+    'Septiembre',
+    'Octubre',
+    'Noviembre',
+    'Diciembre',
   ];
 
-  registrosSeleccionados = computed(() => this.depSeleccionada()?.registros ?? []);
-  hayDatos               = computed(() => this.dependencias().length > 0);
+  registrosSeleccionados = computed(
+    () => this.depSeleccionada()?.registros ?? [],
+  );
+
+  hayDatos = computed(
+    () => this.dependencias().length > 0,
+  );
 
   ngOnInit(): void {
     this.buscarPorMes();
   }
 
-  abrirModal(dep: DepGroup): void {
-    this.depSeleccionada.set(dep);
+  abrirModal(dependencia: DepGroup): void {
+    this.depSeleccionada.set(dependencia);
     this.modalAbierto.set(true);
   }
 
@@ -55,174 +94,360 @@ export class ReportePermisosComponent implements OnInit {
     this.dependencias.set([]);
     this.buscado.set(false);
 
-    this.reporteService.getReportePorMes(this.mesBusqueda, this.anioBusqueda).subscribe({
-      next: (grupos) => {
-        this.dependencias.set(grupos);
-        this.cargando.set(false);
-        this.buscado.set(true);
-      },
-      error: () => {
-        this.error.set('No fue posible obtener el reporte. Intente de nuevo más tarde.');
-        this.cargando.set(false);
-        this.buscado.set(true);
-      }
-    });
+    this.reporteService
+      .getReportePorMes(
+        Number(this.mesBusqueda),
+        Number(this.anioBusqueda),
+        1,
+      )
+      .subscribe({
+        next: (grupos) => {
+          this.dependencias.set(grupos);
+          this.cargando.set(false);
+          this.buscado.set(true);
+        },
+        error: (error) => {
+          console.error(
+            'Error al obtener reporte:',
+            error,
+          );
+
+          console.error(
+            'Respuesta del backend:',
+            error?.error,
+          );
+
+          const detalles = error?.error?.error?.details;
+
+          let mensaje =
+            error?.error?.error?.message ??
+            error?.error?.message ??
+            'No fue posible obtener el reporte. Intente de nuevo más tarde.';
+
+          if (
+            Array.isArray(detalles) &&
+            detalles.length > 0
+          ) {
+            mensaje = detalles.join(', ');
+          }
+
+          this.error.set(mensaje);
+          this.cargando.set(false);
+          this.buscado.set(true);
+        },
+      });
   }
 
   async exportarExcel(): Promise<void> {
-    if (!this.hayDatos()) return;
+    if (!this.hayDatos()) {
+      return;
+    }
+
     this.exportando.set(true);
 
     try {
-      const { utils, writeFile } = await import('xlsx');
+      const { utils, writeFile } =
+        await import('xlsx');
 
       const encabezados = [
-        'Dependencia', 'Empleado', 'Fecha', 'Tipo de permiso',
-        'Hora salida', 'Hora retorno', 'Tiempo de permiso', 'Horas disponibles'
+        'Dependencia',
+        'Empleado',
+        'Fecha',
+        'Tipo de permiso',
+        'Hora salida',
+        'Hora retorno',
+        'Tiempo de permiso',
+        'Horas disponibles',
       ];
 
-      const filas: (string | number)[][] = [encabezados];
+      const filas: (string | number)[][] = [
+        encabezados,
+      ];
 
-      for (const dep of this.dependencias()) {
-        for (const reg of dep.registros) {
+      for (const dependencia of this.dependencias()) {
+        for (const registro of dependencia.registros) {
           filas.push([
-            reg.dependencia,
-            reg.empleado,
-            this.formatearFecha(reg.fecha),
-            reg.tipo,
-            reg.horaSalida,
-            reg.horaRetorno,
-            this.formatearHorasPermiso(reg.horasPermiso),
-            reg.horasDisponibles
+            registro.dependencia,
+            registro.empleado,
+            this.formatearFecha(registro.fecha),
+            registro.tipo,
+            registro.horaSalida,
+            registro.horaRetorno,
+            this.formatearHorasPermiso(
+              registro.horasPermiso,
+            ),
+            registro.horasDisponibles ?? '',
           ]);
         }
       }
 
-      const ws = utils.aoa_to_sheet(filas);
+      const hoja = utils.aoa_to_sheet(filas);
 
-      // Ancho de columnas
-      ws['!cols'] = [
-        { wch: 35 }, { wch: 25 }, { wch: 14 }, { wch: 22 },
-        { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 16 }
+      hoja['!cols'] = [
+        { wch: 35 },
+        { wch: 25 },
+        { wch: 14 },
+        { wch: 22 },
+        { wch: 14 },
+        { wch: 14 },
+        { wch: 18 },
+        { wch: 20 },
       ];
 
-      const wb = utils.book_new();
-      utils.book_append_sheet(wb, ws, 'Permisos');
+      const libro = utils.book_new();
 
-      const nombreArchivo = `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.xlsx`;
-      writeFile(wb, nombreArchivo);
+      utils.book_append_sheet(
+        libro,
+        hoja,
+        'Permisos',
+      );
+
+      const nombreArchivo =
+        `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.xlsx`;
+
+      writeFile(libro, nombreArchivo);
+    } catch (error) {
+      console.error(
+        'Error al exportar Excel:',
+        error,
+      );
+
+      this.error.set(
+        'No fue posible generar el archivo de Excel.',
+      );
     } finally {
       this.exportando.set(false);
     }
   }
 
   async exportarPDF(): Promise<void> {
-    if (!this.hayDatos()) return;
+    if (!this.hayDatos()) {
+      return;
+    }
+
     this.exportando.set(true);
 
     try {
-      const { default: jsPDF } = await import('jspdf');
-      const { default: autoTable } = await import('jspdf-autotable');
+      const { default: jsPDF } =
+        await import('jspdf');
 
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-      const mesTitulo = this.nombresMeses[this.mesBusqueda - 1];
+      const { default: autoTable } =
+        await import('jspdf-autotable');
 
-      // ── Título ──────────────────────────────────────────────────────────
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(38, 77, 160);
-      doc.text(`Reporte de permisos — ${mesTitulo} ${this.anioBusqueda}`, 14, 18);
+      const documento = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      });
 
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(120, 120, 120);
-      doc.text(`Generado el ${this.formatearFecha(new Date().toISOString().split('T')[0])}`, 14, 24);
+      const mesTitulo =
+        this.nombresMeses[this.mesBusqueda - 1];
+
+      documento.setFontSize(14);
+      documento.setFont('helvetica', 'bold');
+      documento.setTextColor(38, 77, 160);
+
+      documento.text(
+        `Reporte de permisos — ${mesTitulo} ${this.anioBusqueda}`,
+        14,
+        18,
+      );
+
+      documento.setFontSize(9);
+      documento.setFont('helvetica', 'normal');
+      documento.setTextColor(120, 120, 120);
+
+      documento.text(
+        `Generado el ${this.formatearFecha(
+          new Date().toISOString().split('T')[0],
+        )}`,
+        14,
+        24,
+      );
 
       let currentY = 30;
 
-      // ── Tabla por dependencia ────────────────────────────────────────────
-      for (const dep of this.dependencias()) {
-        // Agrupar por empleado
-        const porEmpleado = new Map<string, RegistroPermiso[]>();
-        for (const reg of dep.registros) {
-          if (!porEmpleado.has(reg.empleado)) porEmpleado.set(reg.empleado, []);
-          porEmpleado.get(reg.empleado)!.push(reg);
+      for (const dependencia of this.dependencias()) {
+        const porEmpleado = new Map<
+          string,
+          RegistroPermiso[]
+        >();
+
+        for (const registro of dependencia.registros) {
+          const registrosEmpleado =
+            porEmpleado.get(registro.empleado);
+
+          if (registrosEmpleado) {
+            registrosEmpleado.push(registro);
+          } else {
+            porEmpleado.set(
+              registro.empleado,
+              [registro],
+            );
+          }
         }
 
-        // Filas: empleado solo en primera fila del grupo
         const body: string[][] = [];
-        for (const [empleado, regs] of porEmpleado) {
-          regs.forEach((reg, i) => {
+
+        for (const [empleado, registros] of porEmpleado) {
+          registros.forEach((registro, indice) => {
             body.push([
-              i === 0 ? empleado : '',
-              this.formatearFecha(reg.fecha),
-              reg.tipo,
-              reg.horaSalida,
-              reg.horaRetorno,
-              this.formatearHorasPermiso(reg.horasPermiso),
-              reg.horasDisponibles
+              indice === 0 ? empleado : '',
+              this.formatearFecha(registro.fecha),
+              registro.tipo,
+              registro.horaSalida,
+              registro.horaRetorno,
+              this.formatearHorasPermiso(
+                registro.horasPermiso,
+              ),
+              registro.horasDisponibles ?? '',
             ]);
           });
         }
 
-        autoTable(doc, {
+        autoTable(documento, {
           startY: currentY,
-          head: [[
-            { content: dep.dependencia, colSpan: 7, styles: { fillColor: [38, 77, 160], fontStyle: 'bold', fontSize: 10 } }
-          ], [
-            'Empleado', 'Fecha', 'Tipo de permiso', 'Hora salida', 'Hora retorno', 'Tiempo de permiso', 'Horas disponibles'
-          ]],
+          head: [
+            [
+              {
+                content: dependencia.dependencia,
+                colSpan: 7,
+                styles: {
+                  fillColor: [38, 77, 160],
+                  textColor: [255, 255, 255],
+                  fontStyle: 'bold',
+                  fontSize: 10,
+                },
+              },
+            ],
+            [
+              'Empleado',
+              'Fecha',
+              'Tipo de permiso',
+              'Hora salida',
+              'Hora retorno',
+              'Tiempo de permiso',
+              'Horas disponibles',
+            ],
+          ],
           body,
           theme: 'striped',
-          headStyles:     { fillColor: [230, 235, 245], textColor: [38, 77, 160], fontStyle: 'bold', fontSize: 8 },
-          bodyStyles:     { fontSize: 8, textColor: [50, 50, 50] },
-          alternateRowStyles: { fillColor: [247, 249, 252] },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        columnStyles: {
-          0: { cellWidth: 44 }, // eslint-disable-line
-          1: { cellWidth: 22 }, // eslint-disable-line
-          2: { cellWidth: 42 }, // eslint-disable-line
-          3: { cellWidth: 22 }, // eslint-disable-line
-          4: { cellWidth: 22 }, // eslint-disable-line
-          5: { cellWidth: 26 }, // eslint-disable-line
-          6: { cellWidth: 26 }  // eslint-disable-line
-        },
-        margin: { left: 14, right: 14 }, // eslint-disable-line
+          headStyles: {
+            fillColor: [230, 235, 245],
+            textColor: [38, 77, 160],
+            fontStyle: 'bold',
+            fontSize: 8,
+          },
+          bodyStyles: {
+            fontSize: 8,
+            textColor: [50, 50, 50],
+          },
+          alternateRowStyles: {
+            fillColor: [247, 249, 252],
+          },
+          columnStyles: {
+            0: { cellWidth: 44 },
+            1: { cellWidth: 22 },
+            2: { cellWidth: 42 },
+            3: { cellWidth: 22 },
+            4: { cellWidth: 22 },
+            5: { cellWidth: 26 },
+            6: { cellWidth: 26 },
+          },
+          margin: {
+            left: 14,
+            right: 14,
+          },
           didParseCell: (data) => {
-            // Fila de encabezado de dependencia (fila 0 del head)
-            if (data.section === 'head' && data.row.index === 0) {
-              data.cell.styles.fillColor = [38, 77, 160];
-              data.cell.styles.textColor = [255, 255, 255];
+            if (
+              data.section === 'head' &&
+              data.row.index === 0
+            ) {
+              data.cell.styles.fillColor = [
+                38,
+                77,
+                160,
+              ];
+
+              data.cell.styles.textColor = [
+                255,
+                255,
+                255,
+              ];
             }
-          }
+          },
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        currentY = (doc as any).lastAutoTable.finalY + 8;
+        const pdfConTabla =
+          documento as typeof documento &
+            PdfConAutoTable;
+
+        currentY =
+          (pdfConTabla.lastAutoTable?.finalY ??
+            currentY) + 8;
       }
 
-      const nombreArchivo = `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.pdf`;
-      doc.save(nombreArchivo);
+      const nombreArchivo =
+        `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.pdf`;
+
+      documento.save(nombreArchivo);
+    } catch (error) {
+      console.error(
+        'Error al exportar PDF:',
+        error,
+      );
+
+      this.error.set(
+        'No fue posible generar el archivo PDF.',
+      );
     } finally {
       this.exportando.set(false);
     }
   }
 
-  // ── Helpers privados ────────────────────────────────────────────────────
-
   private formatearFecha(fecha: string): string {
-    const [y, m, d] = fecha.split('-');
-    return `${d}/${m}/${y}`;
+    if (!fecha) {
+      return '';
+    }
+
+    const partes = fecha.split('-');
+
+    if (partes.length !== 3) {
+      return fecha;
+    }
+    const [anio, mes, dia] = partes;
+    return `${dia}/${mes}/${anio}`;
   }
 
-  private formatearHorasPermiso(raw: string): string {
-    const match = raw.match(/([\d.]+)h\s*([\d.]+)m/);
-    if (!match) return raw;
-    const h = Math.round(parseFloat(match[1]));
-    const m = Math.round(parseFloat(match[2]));
-    if (h > 0 && m > 0) return `${h}h ${m}m`;
-    if (h > 0) return `${h}h`;
-    if (m > 0) return `${m}m`;
-    return raw;
+  private formatearHorasPermiso(
+    valor: string,
+  ): string {
+    if (!valor) {
+      return '';
+    }
+    const match = valor.match(
+      /([\d.]+)h\s*([\d.]+)m/,
+    );
+
+    if (!match) {
+      return valor;
+    }
+    const horas = Math.round(
+      Number.parseFloat(match[1]),
+    );
+    const minutos = Math.round(
+      Number.parseFloat(match[2]),
+    );
+    if (horas > 0 && minutos > 0) {
+      return `${horas}h ${minutos}m`;
+    }
+    if (horas > 0) {
+      return `${horas}h`;
+    }
+    if (minutos > 0) {
+      return `${minutos}m`;
+    }
+
+    return valor;
   }
 }

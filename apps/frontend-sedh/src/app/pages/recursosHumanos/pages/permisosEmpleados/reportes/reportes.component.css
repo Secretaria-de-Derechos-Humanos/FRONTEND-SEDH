@@ -1,81 +1,136 @@
-:host {
-  display: block;
-  width: 100%;
+.container-fluid {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.reportes-container {
-  padding: var(--sedh-space-lg);
-  max-width: 1400px;
-  margin: 0 auto;
+/* Animación de entrada suave para la interfaz */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.header {
-  margin-bottom: var(--sedh-space-xl);
+/* ==========================================================================
+   Tarjetas Informativas (KPIs)
+   ========================================================================== */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 10px !important;
 }
 
-.header h1 {
-  color: var(--sedh-text);
-  font-size: 2rem;
+/* Efecto sutil al pasar el cursor sobre las tarjetas de métricas */
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05) !important;
+}
+
+.text-uppercase {
+  letter-spacing: 0.5px;
+  font-size: 0.75rem !important;
+}
+
+/* ==========================================================================
+   Filtros y Selectores
+   ========================================================================== */
+.form-select, .form-control {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-select:focus, .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* ==========================================================================
+   Tabla de Datos Administrativos
+   ========================================================================== */
+.table-responsive {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table {
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody tr {
+  transition: background-color 0.15s ease-in-out;
+}
+
+.table tbody td {
+  padding: 14px 16px;
+  color: #333333;
+}
+
+/* Efecto hover en las filas de empleados */
+.table-hover tbody tr:hover {
+  background-color: rgba(13, 110, 253, 0.02) !important;
+}
+
+/* Truncado de texto seguro para descripciones largas */
+.text-truncate {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   Insignias de Estado (Badges) Personalizadas
+   ========================================================================== */
+.badge {
   font-weight: 600;
-  margin: 0 0 var(--sedh-space-sm) 0;
+  font-size: 0.8rem;
+  padding: 0.4em 0.75em !important;
 }
 
-.subtitle {
-  color: var(--sedh-text-muted);
-  font-size: 1rem;
-  margin: 0;
+/* Ajustes de contraste para que resalten sobre Bootstrap */
+.bg-success {
+  background-color: #d1e7dd !important;
+  color: #0f5132 !important;
+  border: 1px solid #badbcc;
 }
 
-.content-card {
-  background: var(--sedh-surface);
-  border: 1px solid var(--sedh-border);
-  border-radius: var(--sedh-radius);
-  padding: var(--sedh-space-2xl);
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.bg-warning {
+  background-color: #fff3cd !important;
+  color: #664d03 !important;
+  border: 1px solid #ffecb5;
 }
 
-.empty-state {
-  text-align: center;
-  max-width: 400px;
+.bg-danger {
+  background-color: #f8d7da !important;
+  color: #842029 !important;
+  border: 1px solid #f5c2c7;
 }
 
-.empty-icon {
-  font-size: 4rem;
-  color: var(--sedh-secondary-500);
-  margin-bottom: var(--sedh-space-lg);
-  opacity: 0.7;
+/* ==========================================================================
+   Botones de Acción
+   ========================================================================== */
+.btn {
+  border-radius: 8px;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.9rem;
+  transition: all 0.2s ease-in-out;
 }
 
-.empty-state h3 {
-  color: var(--sedh-text);
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin: 0 0 var(--sedh-space-sm) 0;
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
 }
 
-.empty-state p {
-  color: var(--sedh-text-muted);
-  font-size: 0.875rem;
-  margin: 0;
-}
-
-@media (max-width: 576px) {
-  .reportes-container {
-    padding: var(--sedh-space-md);
-  }
-
-  .header h1 {
-    font-size: 1.5rem;
-  }
-
-  .content-card {
-    padding: var(--sedh-space-lg);
-  }
-
-  .empty-icon {
-    font-size: 3rem;
-  }
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+  transform: translateY(-1px);
 }

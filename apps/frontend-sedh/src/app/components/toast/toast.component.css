@@ -1,81 +1,175 @@
 :host {
   position: fixed;
-  inset-block-start: var(--sedh-space-lg);
-  inset-inline-end: var(--sedh-space-lg);
-  z-index: 9999;
+
+  inset-block-start:
+    var(--sedh-space-lg);
+
+  inset-inline-end:
+    var(--sedh-space-lg);
+
+  z-index: 99999;
+
   display: flex;
+
   flex-direction: column;
+
   gap: var(--sedh-space-sm);
+
   pointer-events: none;
 }
 
-/* — Toast base — */
+
+/* =========================================================
+   TOAST BASE
+   ========================================================= */
+
 .toast {
   display: flex;
+
   align-items: center;
+
   gap: var(--sedh-space-sm);
-  padding: var(--sedh-space-sm) var(--sedh-space-md);
-  border-radius: var(--sedh-radius);
-  box-shadow: var(--sedh-shadow);
-  min-inline-size: 280px;
-  max-inline-size: 420px;
+
+  padding:
+    var(--sedh-space-sm)
+    var(--sedh-space-md);
+
+  border-radius:
+    var(--sedh-radius);
+
+  box-shadow:
+    var(--sedh-shadow);
+
+  min-inline-size:
+    280px;
+
+  max-inline-size:
+    420px;
+
   pointer-events: all;
+
   color: white;
-  animation: toastEntrada 0.3s ease-out;
+
+  animation:
+    toastEntrada
+    0.3s
+    ease-out;
 }
+
+
+/* =========================================================
+   ANIMACIÓN
+   ========================================================= */
 
 @keyframes toastEntrada {
+
   from {
     opacity: 0;
-    transform: translateX(110%);
+
+    transform:
+      translateX(110%);
   }
+
   to {
     opacity: 1;
-    transform: translateX(0);
+
+    transform:
+      translateX(0);
   }
+
 }
 
-/* — Éxito: primario en modo claro — */
+
+/* =========================================================
+   ÉXITO
+   ========================================================= */
+
 .toast--exito {
-  background: var(--sedh-primary-500);
+  background:
+    var(--sedh-primary-500);
 }
 
-/* — Éxito: secundario en modo oscuro — */
-:host-context(.dark-theme) .toast--exito {
-  background: var(--sedh-secondary-500);
+:host-context(.dark-theme)
+.toast--exito {
+  background:
+    var(--sedh-secondary-500);
 }
 
-/* — Error: rojo en ambos modos — */
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
 .toast--error {
-  background: var(--sedh-danger);
+  background:
+    var(--sedh-danger);
 }
 
-/* — Partes internas — */
+
+/* =========================================================
+   ICONO
+   ========================================================= */
+
 .toast__icono {
   flex-shrink: 0;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
 }
+
+
+/* =========================================================
+   MENSAJE
+   ========================================================= */
 
 .toast__mensaje {
   flex: 1;
-  font-size: 0.875rem;
+
+  font-size:
+    0.875rem;
+
   font-weight: 500;
+
   line-height: 1.4;
 }
 
+
+/* =========================================================
+   CERRAR
+   ========================================================= */
+
 .toast__cerrar {
   flex-shrink: 0;
+
   background: none;
+
   border: none;
-  color: rgba(255, 255, 255, 0.75);
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.75
+    );
+
   cursor: pointer;
+
   padding: 0;
+
   display: flex;
+
   align-items: center;
+
   justify-content: center;
-  transition: color 0.15s ease;
+
+  transition:
+    color
+    0.15s
+    ease;
 }
 
 .toast__cerrar:hover {
@@ -83,23 +177,46 @@
 }
 
 .toast__cerrar:focus {
-  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline:
+    2px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.5
+    );
+
   outline-offset: 2px;
+
   border-radius: 2px;
 }
 
-/* — Responsive — */
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 480px) {
+
   :host {
     inset-block-start: auto;
-    inset-block-end: var(--sedh-space-lg);
-    inset-inline-end: var(--sedh-space-md);
-    inset-inline-start: var(--sedh-space-md);
+
+    inset-block-end:
+      var(--sedh-space-lg);
+
+    inset-inline-end:
+      var(--sedh-space-md);
+
+    inset-inline-start:
+      var(--sedh-space-md);
   }
 
   .toast {
     min-inline-size: unset;
+
     max-inline-size: unset;
+
     inline-size: 100%;
   }
+
 }

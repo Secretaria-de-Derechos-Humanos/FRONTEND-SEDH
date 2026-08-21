@@ -1,0 +1,204 @@
+<section class="pagina-control">
+
+  <header class="encabezado">
+    <div>
+      <h1>
+        Control de salidas y retornos
+      </h1>
+
+      <p>
+        Registre la salida y el retorno de empleados
+        con permisos personales aprobados.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="boton-actualizar"
+      [disabled]="cargando()"
+      (click)="cargarSolicitudes()"
+    >
+      Actualizar
+    </button>
+  </header>
+
+  <section class="resumen-agente">
+
+    <article class="resumen-card resumen-card--pendiente">
+      <div class="resumen-card__icon">
+        →
+      </div>
+
+      <div>
+        <span class="resumen-card__label">
+          Pendientes de salida
+        </span>
+
+        <strong class="resumen-card__value">
+          {{ pendientesSalida() }}
+        </strong>
+      </div>
+    </article>
+
+    <article class="resumen-card resumen-card--fuera">
+      <div class="resumen-card__icon">
+        ◷
+      </div>
+
+      <div>
+        <span class="resumen-card__label">
+          Empleados fuera
+        </span>
+
+        <strong class="resumen-card__value">
+          {{ empleadosFuera() }}
+        </strong>
+      </div>
+    </article>
+
+    <article class="resumen-card resumen-card--completado">
+      <div class="resumen-card__icon">
+        ✓
+      </div>
+
+      <div>
+        <span class="resumen-card__label">
+          Retornos registrados
+        </span>
+
+        <strong class="resumen-card__value">
+          {{ retornosRegistrados() }}
+        </strong>
+      </div>
+    </article>
+
+  </section>
+
+  @if (errorMessage()) {
+    <div class="mensaje-error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (cargando()) {
+    <div class="estado-vacio">
+      Cargando permisos...
+    </div>
+  } @else if (solicitudes().length === 0) {
+    <div class="estado-vacio">
+      <div>
+        <h2>
+          No hay permisos para controlar
+        </h2>
+
+        <p>
+          Cuando existan permisos personales aprobados
+          aparecerán en esta pantalla.
+        </p>
+      </div>
+    </div>
+  } @else {
+
+    <div class="contenedor-tabla">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Empleado</th>
+            <th>Dependencia</th>
+            <th>Tiempo solicitado</th>
+            <th>Hora salida</th>
+            <th>Hora retorno</th>
+            <th>Situación</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (
+            solicitud of solicitudes();
+            track solicitud.idpermiso
+          ) {
+            <tr>
+
+              <td>
+                {{ solicitud.fecha }}
+              </td>
+
+              <td>
+                {{ obtenerNombre(solicitud) }}
+              </td>
+
+              <td>
+                {{ solicitud.dependencia }}
+              </td>
+
+              <td>
+                {{
+                  solicitud.horasSolicitadas ??
+                  '—'
+                }}
+              </td>
+
+              <td>
+                {{
+                  formatearHora(
+                    solicitud.horaSalida
+                  )
+                }}
+              </td>
+
+              <td>
+                {{
+                  formatearHora(
+                    solicitud.horaRetorno
+                  )
+                }}
+              </td>
+
+              <td>
+                {{
+                  obtenerSituacion(
+                    solicitud
+                  )
+                }}
+              </td>
+
+              <td>
+
+                @if (!solicitud.horaSalida) {
+                  <button
+                    type="button"
+                    class="boton-salida"
+                  >
+                    Registrar salida
+                  </button>
+                }
+
+                @else if (!solicitud.horaRetorno) {
+                  <button
+                    type="button"
+                    class="boton-retorno"
+                  >
+                    Registrar retorno
+                  </button>
+                }
+
+                @else {
+                  <span class="completado">
+                    Completado
+                  </span>
+                }
+
+              </td>
+
+            </tr>
+          }
+        </tbody>
+      </table>
+
+    </div>
+  }
+
+</section>

@@ -1,81 +1,94 @@
+/* Personalización de la tipografía y fondo general */
 :host {
   display: block;
-  width: 100%;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-.salidas-container {
-  padding: var(--sedh-space-lg);
-  max-width: 1400px;
-  margin: 0 auto;
+/* Ajuste fino para las tarjetas (Cards) */
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.header {
-  margin-bottom: var(--sedh-space-xl);
+/* Estilos para el formulario */
+.form-label {
+  letter-spacing: 0.5px;
 }
 
-.header h1 {
-  color: var(--sedh-text);
-  font-size: 2rem;
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  padding: 0.6rem 0.75rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+}
+
+/* Corrección y estilización de Badges en la Tabla */
+.badge {
   font-weight: 600;
-  margin: 0 0 var(--sedh-space-sm) 0;
+  letter-spacing: 0.3px;
 }
 
-.subtitle {
-  color: var(--sedh-text-muted);
-  font-size: 1rem;
-  margin: 0;
+/* Corrección específica para las clases personalizadas px-2.5 y py-1.5 del HTML */
+.px-2\.5 {
+  padding-left: 0.625rem !important;
+  padding-right: 0.625rem !important;
 }
 
-.content-card {
-  background: var(--sedh-surface);
-  border: 1px solid var(--sedh-border);
-  border-radius: var(--sedh-radius);
-  padding: var(--sedh-space-2xl);
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.py-1\.5 {
+  padding-top: 0.375rem !important;
+  padding-bottom: 0.375rem !important;
 }
 
-.empty-state {
-  text-align: center;
-  max-width: 400px;
+/* Efectos y estados en la tabla de historial */
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.empty-icon {
-  font-size: 4rem;
-  color: var(--sedh-warning);
-  margin-bottom: var(--sedh-space-lg);
-  opacity: 0.7;
+.table thead th {
+  font-size: 0.75rem;
+  letter-spacing: 0.8px;
+  border-bottom: 2px solid #dee2e6;
+  background-color: #f8f9fa;
 }
 
-.empty-state h3 {
-  color: var(--sedh-text);
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin: 0 0 var(--sedh-space-sm) 0;
+.table tbody tr {
+  transition: background-color 0.2s ease;
 }
 
-.empty-state p {
-  color: var(--sedh-text-muted);
-  font-size: 0.875rem;
-  margin: 0;
+/* Truncado de texto del motivo con puntos suspensivos */
+.text-truncate {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help; /* Muestra un cursor de ayuda indicando que hay un tooltip [title] */
 }
 
-@media (max-width: 576px) {
-  .salidas-container {
-    padding: var(--sedh-space-md);
-  }
+/* Animaciones suaves para los botones de acción */
+.btn {
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
 
-  .header h1 {
-    font-size: 1.5rem;
-  }
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);
+}
 
-  .content-card {
-    padding: var(--sedh-space-lg);
-  }
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(13, 110, 253, 0.2);
+}
 
-  .empty-icon {
-    font-size: 3rem;
+/* Diseño responsivo para el contador de la cabecera */
+@media (max-width: 767.98px) {
+  .text-md-end {
+    text-align: left !important;
   }
 }

@@ -1,94 +1,126 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, map } from 'rxjs';
+
 import { environment } from '../../../../../environments/environment';
-import { AuthService } from '../../../../services/auth.service';
 import { EP_RRHH_REPORTES_PERMISOS_POR_MES } from '../../../../config/api.endpoints';
 
 // ── Modelos públicos ─────────────────────────────────────────────────────────
 
 export interface RegistroPermiso {
-  dependencia:      string;
-  empleado:         string;
-  fecha:            string;
-  tipo:             string;
-  horaSalida:       string;
-  horaRetorno:      string;
-  horasPermiso:     string;
+  dependencia: string;
+  empleado: string;
+  fecha: string;
+  tipo: string;
+  horaSalida: string;
+  horaRetorno: string;
+  horasPermiso: string;
   horasDisponibles: string;
 }
 
 export interface DepGroup {
-  dependencia:    string;
+  dependencia: string;
   totalEmpleados: number;
-  totalPermisos:  number;
-  registros:      RegistroPermiso[];
+  totalPermisos: number;
+  registros: RegistroPermiso[];
 }
 
-// ── Tipos internos de respuesta API ─────────────────────────────────────────
+// ── Solicitud enviada al backend ─────────────────────────────────────────────
+
+interface ReportePermisosMesRequest {
+  mes: number;
+  anio: number;
+  idmodulo: number;
+}
+
+// ── Respuesta del backend ────────────────────────────────────────────────────
 
 interface ReportePermisosData {
-  status:           string;
-  reportePermisos:  RegistroPermiso[];
+  status: string;
+  reportePermisos: RegistroPermiso[];
 }
 
 interface ApiResponse<T> {
-  success:   boolean;
-  data:      T;
-  message:   string;
+  success: boolean;
+  data: T;
+  message: string;
   timestamp: string;
-  path:      string;
+  path?: string;
 }
 
 // ── Servicio ─────────────────────────────────────────────────────────────────
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class ReportePermisosService {
-  private readonly http        = inject(HttpClient);
-  private readonly authService = inject(AuthService);
-  private readonly base        = environment.apiBaseUrl;
+  private readonly http = inject(HttpClient);
+  private readonly base = environment.apiBaseUrl;
 
-  getReportePorMes(mes: number, anio: number): Observable<DepGroup[]> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
-
-    const body = {
-      mes,
-      anio,
-      email:    user?.email ?? '',
-      rol:      rol?.r ?? 5,
-      idmodulo: typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol.m[0] : 1),
+  getReportePorMes(
+    mes: number,
+    anio: number,
+    idmodulo: number,
+  ): Observable<DepGroup[]> {
+    const body: ReportePermisosMesRequest = {
+      mes: Number(mes),
+      anio: Number(anio),
+      idmodulo: Number(idmodulo),
     };
+
+    console.log('BODY REPORTE:', body);
 
     return this.http
       .post<ApiResponse<ReportePermisosData>>(
         `${this.base}${EP_RRHH_REPORTES_PERMISOS_POR_MES}`,
-        body
+        body,
       )
-      .pipe(map(r => agruparPorDependencia(r.data?.reportePermisos ?? [])));
+      .pipe(
+        map((respuesta) => {
+          const registros =
+            respuesta?.data?.reportePermisos ?? [];
+
+          return agruparPorDependencia(registros);
+        }),
+      );
   }
 }
 
 // ── Función de agrupamiento ──────────────────────────────────────────────────
 
-function agruparPorDependencia(registros: RegistroPermiso[]): DepGroup[] {
+function agruparPorDependencia(
+  registros: RegistroPermiso[],
+): DepGroup[] {
   const mapa = new Map<string, DepGroup>();
 
-  for (const reg of registros) {
-    const dep = reg.dependencia;
-    if (!mapa.has(dep)) {
-      mapa.set(dep, { dependencia: dep, totalEmpleados: 0, totalPermisos: 0, registros: [] });
+  for (const registro of registros) {
+    const dependencia =
+      registro.dependencia?.trim() || 'SIN DEPENDENCIA';
+
+    let grupo = mapa.get(dependencia);
+
+    if (!grupo) {
+      grupo = {
+        dependencia,
+        totalEmpleados: 0,
+        totalPermisos: 0,
+        registros: [],
+      };
+
+      mapa.set(dependencia, grupo);
     }
-    const grupo = mapa.get(dep)!;
-    grupo.registros.push(reg);
-    grupo.totalPermisos++;
+
+    grupo.registros.push(registro);
+    grupo.totalPermisos += 1;
   }
 
-  // Contar empleados únicos por dependencia
   for (const grupo of mapa.values()) {
-    grupo.totalEmpleados = new Set(grupo.registros.map(r => r.empleado)).size;
+    grupo.totalEmpleados = new Set(
+      grupo.registros.map((registro) => registro.empleado),
+    ).size;
   }
 
-  return Array.from(mapa.values());
+  return Array.from(mapa.values()).sort((a, b) =>
+    a.dependencia.localeCompare(b.dependencia),
+  );
 }

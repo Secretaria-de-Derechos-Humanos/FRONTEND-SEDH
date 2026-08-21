@@ -1,0 +1,362 @@
+<section class="pagina-reporte-vacaciones">
+
+  <!-- =========================================================
+       ENCABEZADO
+       ========================================================= -->
+
+  <header class="encabezado-reporte">
+
+    <div class="titulo-reporte">
+
+      <h1>
+        Reporte de vacaciones
+      </h1>
+
+      <p>
+        Consulta los días de vacaciones asignados,
+        utilizados, reservados y disponibles por empleado.
+      </p>
+
+    </div>
+
+    <div class="controles-reporte">
+
+      <div class="control-anio">
+
+        <label for="anio">
+          Año
+        </label>
+
+        <input
+          id="anio"
+          type="number"
+          [value]="anio()"
+          min="2000"
+          max="2100"
+          (change)="cambiarAnio($event)"
+        />
+
+      </div>
+
+      <button
+        type="button"
+        class="boton-actualizar"
+        [disabled]="cargando()"
+        (click)="cargarReporte()"
+      >
+
+        {{
+          cargando()
+            ? 'Actualizando...'
+            : 'Actualizar'
+        }}
+
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- =========================================================
+       MENSAJE DE ERROR
+       ========================================================= -->
+
+  @if (errorMessage()) {
+
+    <div
+      class="mensaje error"
+      role="alert"
+    >
+
+      {{ errorMessage() }}
+
+    </div>
+
+  }
+
+
+  <!-- =========================================================
+       MENSAJE DE ÉXITO
+       ========================================================= -->
+
+  @if (successMessage()) {
+
+    <div
+      class="mensaje exito"
+      role="status"
+    >
+
+      {{ successMessage() }}
+
+    </div>
+
+  }
+
+
+  <!-- =========================================================
+       RESUMEN
+       ========================================================= -->
+
+  <div class="resumen-reporte">
+
+    <div class="tarjeta-resumen">
+
+      <span class="resumen-titulo">
+        Año
+      </span>
+
+      <strong class="resumen-valor">
+        {{ anio() }}
+      </strong>
+
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+      <span class="resumen-titulo">
+        Total de empleados
+      </span>
+
+      <strong class="resumen-valor">
+        {{ totalEmpleados() }}
+      </strong>
+
+    </div>
+
+
+    <div class="tarjeta-resumen">
+
+      <span class="resumen-titulo">
+        Empleados mostrados
+      </span>
+
+      <strong class="resumen-valor">
+        {{ empleadosFiltrados().length }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       BÚSQUEDA
+       ========================================================= -->
+
+  <div class="barra-busqueda">
+
+    <div class="campo-busqueda">
+
+      <label for="buscarEmpleado">
+        Buscar empleado
+      </label>
+
+      <input
+        id="buscarEmpleado"
+        type="text"
+        placeholder="Buscar por nombre o identidad..."
+        [value]="busqueda()"
+        (input)="cambiarBusqueda($event)"
+      />
+
+    </div>
+
+  </div>
+
+
+  <!-- =========================================================
+       CARGANDO
+       ========================================================= -->
+
+  @if (cargando()) {
+
+    <div
+      class="mensaje-carga"
+      role="status"
+    >
+
+      <div class="cargando-icono">
+        ⟳
+      </div>
+
+      <span>
+        Consultando reporte de vacaciones...
+      </span>
+
+    </div>
+
+  }
+
+
+  <!-- =========================================================
+       SIN RESULTADOS
+       ========================================================= -->
+
+  @else if (empleadosFiltrados().length === 0) {
+
+    <div class="sin-resultados">
+
+      <div class="icono-sin-resultados">
+        📅
+      </div>
+
+      <h2>
+        No hay resultados
+      </h2>
+
+      @if (busqueda()) {
+
+        <p>
+          No se encontraron empleados que coincidan
+          con "{{ busqueda() }}".
+        </p>
+
+      } @else {
+
+        <p>
+          No existen registros de vacaciones para
+          el año {{ anio() }}.
+        </p>
+
+      }
+
+    </div>
+
+  }
+
+
+  <!-- =========================================================
+       TABLA
+       ========================================================= -->
+
+  @else {
+
+    <div class="contenedor-tabla">
+
+      <table class="tabla-reporte">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              #
+            </th>
+
+            <th>
+              Empleado
+            </th>
+
+            <th>
+              Identidad
+            </th>
+
+            <th>
+              Tipo de contratación
+            </th>
+
+            <th>
+              Año
+            </th>
+
+            <th>
+              Días asignados
+            </th>
+
+            <th>
+              Días utilizados
+            </th>
+
+            <th>
+              Días reservados
+            </th>
+
+            <th>
+              Días disponibles
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (
+            empleado of empleadosFiltrados();
+            track empleado.idUsuario;
+            let i = $index
+          ) {
+
+            <tr>
+              <td class="numero-fila">
+                {{ i + 1 }}
+              </td>
+              <td class="empleado">
+                <strong>
+                  {{ empleado.nombreCompleto }}
+                </strong>
+              </td>
+              <td>
+                {{ empleado.identidad || '-' }}
+              </td>
+              <td>
+                <span class="tipo-contratacion">
+                  {{ empleado.tipoContratacion || '-' }}
+                </span>
+              </td>
+              <td>
+                {{ empleado.anio }}
+              </td>
+              <td class="numero">
+                {{ formatearDias(empleado.diasAsignados) }}
+              </td>
+              <td class="numero">
+                <span class="dias-utilizados">
+                  {{ formatearDias(empleado.diasUtilizados) }}
+                </span>
+              </td>
+              <td class="numero">
+                <span class="dias-reservados">
+                  {{ formatearDias(empleado.diasReservados) }}
+                </span>
+              </td>
+              <td class="numero">
+
+                <span
+                  class="dias-disponibles"
+                  [class.sin-dias]="empleado.diasDisponibles <= 0"
+                  [class.con-dias]="empleado.diasDisponibles > 0"
+                >
+                  {{ formatearDias(empleado.diasDisponibles) }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <!-- =======================================================
+         INFORMACIÓN DE LA TABLA
+         ======================================================= -->
+
+    <div class="informacion-tabla">
+      <span>
+        Mostrando
+        <strong>
+          {{ empleadosFiltrados().length }}
+        </strong>
+        de
+        <strong>
+          {{ totalEmpleados() }}
+        </strong>
+        empleados
+      </span>
+      <span>
+        Año:
+        <strong>
+          {{ anio() }}
+        </strong>
+      </span>
+    </div>
+  }
+
+</section>
+

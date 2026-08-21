@@ -1,0 +1,181 @@
+.pagina-crear-empleado {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.encabezado h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.75rem;
+}
+
+.encabezado p {
+  margin: 0;
+  color: #64748b;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bloque-formulario {
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.titulo-bloque {
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.titulo-bloque h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.cuadricula {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.grupo label {
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.grupo input,
+.grupo select {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  outline: none;
+}
+
+.grupo input:focus,
+.grupo select:focus {
+  border-color: #1d4ed8;
+  box-shadow:
+    0 0 0 3px rgba(29, 78, 216, 0.12);
+}
+
+.grupo input.ng-invalid.ng-touched,
+.grupo select.ng-invalid.ng-touched {
+  border-color: #dc2626;
+}
+
+.grupo-checkbox {
+  justify-content: center;
+}
+
+.grupo-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.grupo-checkbox input {
+  width: auto;
+}
+
+.campo-error {
+  color: #b91c1c;
+}
+
+.ayuda {
+  color: #64748b;
+}
+
+.mensaje {
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.mensaje.carga {
+  color: #1e40af;
+  background: #dbeafe;
+}
+
+.mensaje.error {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.mensaje.exito {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.boton-regresar,
+.boton-cancelar,
+.boton-guardar {
+  padding: 0.75rem 1.1rem;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-regresar,
+.boton-cancelar {
+  color: #334155;
+  background: #e2e8f0;
+}
+
+.boton-guardar {
+  color: #ffffff;
+  background: #1d4ed8;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 800px) {
+  .cuadricula {
+    grid-template-columns: 1fr;
+  }
+
+  .encabezado {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acciones {
+    flex-direction: column-reverse;
+  }
+
+  .acciones button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,805 @@
+.pagina-vacaciones {
+  min-height: 100%;
+
+  padding: 32px;
+
+  background: #f5f7fa;
+
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.encabezado {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 24px;
+
+  background: #ffffff;
+
+  padding: 24px 28px;
+
+  border-radius: 12px;
+
+  border: 1px solid #e5e7eb;
+
+  margin-bottom: 24px;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.encabezado h1 {
+  margin: 0;
+
+  font-size: 26px;
+
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.encabezado p {
+  margin: 7px 0 0;
+
+  font-size: 14px;
+
+  color: #6b7280;
+}
+
+/* =========================================================
+   BOTÓN ACTUALIZAR
+========================================================= */
+
+.boton-actualizar {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 120px;
+
+  height: 42px;
+
+  padding: 0 18px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.boton-actualizar:hover:not(:disabled) {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 4px 10px
+    rgba(37, 99, 235, 0.25);
+}
+
+.boton-actualizar:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.contenedor-tabla {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  overflow-x: auto;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0, 0, 0, 0.04);
+}
+
+.tabla-solicitudes {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  min-width: 1000px;
+}
+
+.tabla-solicitudes thead {
+  background: #f8fafc;
+}
+
+.tabla-solicitudes th {
+  padding: 15px 16px;
+
+  text-align: left;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  color: #475569;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.03em;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabla-solicitudes td {
+  padding: 16px;
+
+  font-size: 14px;
+
+  color: #374151;
+
+  border-bottom: 1px solid #f1f5f9;
+
+  vertical-align: middle;
+}
+
+.tabla-solicitudes tbody tr {
+  transition:
+    background 0.15s ease;
+}
+
+.tabla-solicitudes tbody tr:hover {
+  background: #f8fafc;
+}
+
+.tabla-solicitudes tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   EMPLEADO
+========================================================= */
+
+.empleado {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 190px;
+
+  font-weight: 600;
+
+  color: #1f2937;
+}
+
+.avatar {
+  width: 34px;
+
+  height: 34px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #dbeafe;
+
+  color: #1d4ed8;
+
+  font-size: 13px;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   DÍAS
+========================================================= */
+
+.badge-dias {
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  min-width: 32px;
+
+  height: 28px;
+
+  padding: 0 8px;
+
+  border-radius: 20px;
+
+  background: #eff6ff;
+
+  color: #1d4ed8;
+
+  font-weight: 700;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   APROBACIÓN JEFE
+========================================================= */
+
+.badge-aprobado {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding: 6px 10px;
+
+  border-radius: 20px;
+
+  background: #dcfce7;
+
+  color: #15803d;
+
+  font-size: 12px;
+
+  font-weight: 600;
+
+  white-space: nowrap;
+}
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.acciones {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  white-space: nowrap;
+}
+
+.boton-aprobar,
+.boton-rechazar {
+  height: 36px;
+
+  padding: 0 13px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.boton-aprobar {
+  background: #16a34a;
+
+  color: #ffffff;
+}
+
+.boton-aprobar:hover:not(:disabled) {
+  background: #15803d;
+
+  transform: translateY(-1px);
+}
+
+.boton-rechazar {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+.boton-rechazar:hover:not(:disabled) {
+  background: #fecaca;
+
+  transform: translateY(-1px);
+}
+
+.boton-aprobar:disabled,
+.boton-rechazar:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   CARGANDO
+========================================================= */
+
+.mensaje-carga {
+  min-height: 250px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  color: #64748b;
+
+  font-size: 15px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0, 0, 0, 0.04);
+}
+
+/* =========================================================
+   SIN RESULTADOS
+========================================================= */
+
+.sin-resultados {
+  min-height: 320px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 40px;
+
+  color: #64748b;
+
+  box-shadow:
+    0 2px 8px
+    rgba(0, 0, 0, 0.04);
+}
+
+.icono-vacio {
+  width: 64px;
+
+  height: 64px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 18px;
+
+  border-radius: 50%;
+
+  background: #eff6ff;
+
+  font-size: 28px;
+}
+
+.sin-resultados strong {
+  color: #334155;
+
+  font-size: 16px;
+}
+
+.sin-resultados p {
+  max-width: 520px;
+
+  margin: 10px 0 0;
+
+  color: #94a3b8;
+
+  font-size: 13px;
+
+  line-height: 1.6;
+}
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.mensaje {
+  padding: 14px 18px;
+
+  margin-bottom: 18px;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+}
+
+.mensaje.error {
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #b91c1c;
+}
+
+.mensaje.exito {
+  background: #f0fdf4;
+
+  border: 1px solid #bbf7d0;
+
+  color: #15803d;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(15, 23, 42, 0.55);
+
+  z-index: 1000;
+
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  width: 100%;
+
+  max-width: 500px;
+
+  background: #ffffff;
+
+  border-radius: 16px;
+
+  padding: 30px;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 20px 50px
+    rgba(0, 0, 0, 0.20);
+
+  animation: aparecerModal 0.2s ease;
+}
+
+@keyframes aparecerModal {
+
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(-10px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+.modal-icono {
+  width: 52px;
+
+  height: 52px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin: 0 auto 16px;
+
+  border-radius: 50%;
+
+  font-size: 26px;
+
+  font-weight: 700;
+}
+
+.modal-icono.aprobar {
+  background: #dcfce7;
+
+  color: #15803d;
+}
+
+.modal-icono.rechazar {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+.modal h2 {
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 22px;
+
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.modal-descripcion {
+  margin: 10px 0 20px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  color: #64748b;
+}
+
+.resumen-solicitud {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 15px 16px;
+
+  margin-bottom: 20px;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  font-size: 13px;
+
+  color: #64748b;
+}
+
+.resumen-solicitud strong {
+  color: #1f2937;
+
+  font-size: 14px;
+}
+
+.modal label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  color: #374151;
+}
+
+.modal label span {
+  font-weight: 400;
+
+  color: #94a3b8;
+}
+
+.modal label .obligatorio {
+  color: #dc2626;
+
+  font-weight: 700;
+}
+
+.modal textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 12px 14px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 8px;
+
+  resize: vertical;
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  color: #1f2937;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.modal textarea:focus {
+  border-color: #2563eb;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(37, 99, 235, 0.10);
+}
+
+.modal textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* =========================================================
+   BOTONES DEL MODAL
+========================================================= */
+
+.modal-acciones {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 24px;
+}
+
+.boton-modal {
+  height: 40px;
+
+  padding: 0 17px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.15s ease;
+}
+
+.boton-modal:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.boton-modal.cancelar {
+  background: #f1f5f9;
+
+  color: #475569;
+}
+
+.boton-modal.cancelar:hover {
+  background: #e2e8f0;
+}
+
+.boton-modal.confirmar-aprobar {
+  background: #16a34a;
+
+  color: #ffffff;
+}
+
+.boton-modal.confirmar-aprobar:hover {
+  background: #15803d;
+}
+
+.boton-modal.confirmar-rechazar {
+  background: #dc2626;
+
+  color: #ffffff;
+}
+
+.boton-modal.confirmar-rechazar:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.boton-modal:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .pagina-vacaciones {
+    padding: 18px;
+  }
+
+  .encabezado {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    padding: 20px;
+  }
+
+  .boton-actualizar {
+    width: 100%;
+  }
+
+  .encabezado h1 {
+    font-size: 22px;
+  }
+
+  .sin-resultados {
+    min-height: 260px;
+
+    padding: 25px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .modal {
+    padding: 22px;
+  }
+
+  .modal-acciones {
+    flex-direction: column-reverse;
+  }
+
+  .boton-modal {
+    width: 100%;
+  }
+
+}

@@ -22,6 +22,7 @@ export interface User {
   dependencia: string;
   fechaIngreso: string;
   roles: UserRol[];
+  debeCambiarPassword: boolean;
 }
 
 interface LoginApiResponse {
@@ -40,19 +41,17 @@ interface RefreshApiResponse {
   providedIn: 'root'
 })
 export class AuthService {
+  getUsuarioLogueado() {
+  const usuario = localStorage.getItem('usuario'); // O de donde sea que guardes la sesión
+  return usuario ? JSON.parse(usuario) : null;
+}
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly isBrowser = isPlatformBrowser(this.platformId);
-
   private readonly ACCESS_TOKEN_KEY = 'sedh_access_token';
   public readonly currentUser = signal<User | null>(this.getUserFromToken());
-
-  /** Guarda el Observable de refresh en vuelo para deduplicar peticiones concurrentes */
   private refreshTokenInFlight$: Observable<string> | null = null;
-
-  // ── JWT helpers ─────────────────────────────────────────────────────────────
-
   private decodeJwtPayload(token: string): Record<string, unknown> | null {
     try {
       const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -75,6 +74,8 @@ export class AuthService {
       dependencia: p['dependencia'] as string,
       fechaIngreso: p['fechaIngreso'] as string,
       roles: p['roles'] as UserRol[],
+      debeCambiarPassword:
+      p['debeCambiarPassword'] === true,
     };
   }
 
@@ -83,19 +84,15 @@ export class AuthService {
     if (!p || typeof p['exp'] !== 'number') return true;
     return Date.now() >= (p['exp'] as number) * 1000;
   }
-
   // ── sessionStorage helpers ───────────────────────────────────────────────────
-
   private getStoredToken(): string | null {
     if (!this.isBrowser) return null;
     try { return sessionStorage.getItem(this.ACCESS_TOKEN_KEY); } catch { return null; }
   }
-
   private saveToken(token: string): void {
     if (!this.isBrowser) return;
     try { sessionStorage.setItem(this.ACCESS_TOKEN_KEY, token); } catch { /* no disponible */ }
   }
-
   private clearToken(): void {
     if (!this.isBrowser) return;
     try { sessionStorage.removeItem(this.ACCESS_TOKEN_KEY); } catch { /* no disponible */ }
@@ -221,4 +218,11 @@ export class AuthService {
   getCurrentUser(): User | null {
     return this.currentUser();
   }
+public getRol(): number {
+  const user = this.currentUser();
+  if (user && user.roles && user.roles.length > 0) {
+    return user.roles[0].r;
+  }
+  return 0;
+}
 }

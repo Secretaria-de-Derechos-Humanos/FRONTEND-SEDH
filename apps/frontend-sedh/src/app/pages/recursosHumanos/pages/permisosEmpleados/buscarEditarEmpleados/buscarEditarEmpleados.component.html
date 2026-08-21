@@ -1,14 +1,103 @@
-<div class="buscar-container">
-  <div class="header">
-    <h1>Buscar y editar empleados</h1>
-    <p class="subtitle">Busque y actualice la información de los empleados del sistema</p>
-  </div>
-
-  <div class="content-card">
-    <div class="empty-state">
-      <i class="pi pi-search empty-icon"></i>
-      <h3>Módulo en desarrollo</h3>
-      <p>Esta funcionalidad estará disponible próximamente.</p>
+<section class="pagina-empleados">
+  <header class="encabezado">
+    <div>
+      <h1>Buscar y editar empleados</h1>
+      <p>Consulte los empleados registrados y seleccione uno para editarlo.</p>
     </div>
-  </div>
-</div>
+    <article class="contador">
+      <span>Empleados encontrados</span>
+      <strong>{{ totalEmpleados() }}</strong>
+    </article>
+    <button type="button" class="boton-agregar" (click)="agregarEmpleado()">
+      <span class="icono">+</span>
+      Agregar empleado
+    </button>
+  </header>
+  <section class="panel-busqueda">
+    <label for="buscarEmpleado"> Buscar empleado </label>
+    <div class="campo-busqueda">
+      <input
+        id="buscarEmpleado"
+        type="search"
+        [formControl]="buscador"
+        placeholder="Nombre, identidad, correo o teléfono"
+      />
+      @if (buscador.value) {
+        <button type="button" class="boton-limpiar" (click)="limpiarBusqueda()">
+          Limpiar
+        </button>
+      }
+    </div>
+  </section>
+  @if (errorMessage()) {
+    <div class="mensaje error">
+      {{ errorMessage() }}
+    </div>
+  }
+  @if (cargando()) {
+    <div class="mensaje-carga">Consultando empleados...</div>
+  } @else if (!tieneResultados()) {
+    <div class="sin-resultados">No se encontraron empleados.</div>
+  } @else {
+    <div class="contenedor-tabla">
+      <table class="tabla-empleados">
+        <thead>
+          <tr>
+            <th>Empleado</th>
+            <th>Identidad</th>
+            <th>Correo institucional</th>
+            <th>Teléfono</th>
+            <th>Cargo</th>
+            <th>Contratación</th>
+            <th>Estado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (empleado of empleados(); track empleado.emailInstitucional) {
+            <tr>
+              <td>
+                <strong>
+                  {{ nombreEmpleado(empleado) }}
+                </strong>
+              </td>
+              <td>
+                {{ empleado.numIdentidad }}
+              </td>
+              <td>
+                {{ empleado.emailInstitucional }}
+              </td>
+              <td>
+                {{ empleado.numTelefono || 'Sin teléfono' }}
+              </td>
+              <td>
+                {{ nombreCargo(empleado) }}
+              </td>
+              <td>
+                {{ nombreTipoContratacion(empleado) }}
+              </td>
+              <td>
+                <span
+                  class="estado"
+                  [class.activo]="empleado.activo"
+                  [class.inactivo]="!empleado.activo"
+                >
+                  {{ empleado.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="boton-editar"
+                  (click)="editarEmpleado(empleado)"
+                >
+                  Editar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

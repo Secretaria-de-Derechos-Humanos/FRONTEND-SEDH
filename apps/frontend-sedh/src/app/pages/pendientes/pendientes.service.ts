@@ -1,9 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, map } from 'rxjs';
+
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
+
 import {
   EP_RRHH_JEFE_INMEDIATO_PENDIENTES,
   EP_RRHH_JEFE_INMEDIATO_RESPONDER,
@@ -11,14 +12,19 @@ import {
   EP_RRHH_SUBGERENTE_RESPONDER,
   EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES,
   EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA,
-  EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO
+  EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO,
 } from '../../config/api.endpoints';
+
+interface RolUsuario {
+  r?: number;
+  m?: number | number[];
+}
 
 interface EmpleadoPendienteApi {
   nombre: string;
   apellido: string;
-  segundoNombre: string;
-  segundoApellido: string;
+  segundoNombre: string | null;
+  segundoApellido: string | null;
 }
 
 export interface PendienteJefeInmediatoApi {
@@ -61,8 +67,8 @@ interface PendientesSubgerenteResponse {
 interface SolicitudAgenteEmpleadoApi {
   nombre: string;
   apellido: string;
-  segundoNombre: string;
-  segundoApellido: string;
+  segundoNombre: string | null;
+  segundoApellido: string | null;
 }
 
 export interface SolicitudAgenteApi {
@@ -116,7 +122,6 @@ interface ResponderPermisoResponse {
 
 export interface RegistrarHoraSalidaParams {
   idpermiso: string;
-  tipo: string;
   horaSalida: string;
 }
 
@@ -127,6 +132,7 @@ interface RegistrarHoraSalidaResponse {
     tipo: string;
     idpermiso: string;
     mensaje: string;
+    horaSalida?: string;
   };
   message: string;
   timestamp: string;
@@ -134,7 +140,6 @@ interface RegistrarHoraSalidaResponse {
 
 export interface RegistrarHoraRetornoParams {
   idpermiso: string;
-  tipo: string;
   horaRetorno: string;
 }
 
@@ -145,56 +150,132 @@ interface RegistrarHoraRetornoResponse {
     tipo: string;
     idpermiso: string;
     mensaje: string;
+    horaRetorno?: string;
+    minutosSolicitados?: number;
+    minutosReales?: number;
+    minutosDevueltos?: number;
   };
   message: string;
   timestamp: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class PendientesService {
-  private readonly http        = inject(HttpClient);
+  private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
-  private readonly base        = environment.apiBaseUrl;
+  private readonly base = environment.apiBaseUrl;
 
-  getPendientesJefeInmediato(): Observable<PendienteJefeInmediatoApi[]> {
-    const user = this.authService.currentUser();
-    const rol = this.authService.currentUser()?.roles[0];
+ getPendientesJefeInmediato(): Observable<PendienteJefeInmediatoApi[]> {
+  const acceso =
+    this.obtenerAccesoPreferido([2, 5]);
 
-    const body = {
-      email:    user?.email ?? '',
-      rol:      rol?.r ?? 2,
-      idmodulo: typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-    };
+  const body = {
+    modulo: this.obtenerIdModulo(acceso),
+  };
 
-    return this.http
-      .post<PendientesJefeInmediatoResponse>(
-        `${this.base}${EP_RRHH_JEFE_INMEDIATO_PENDIENTES}`,
-        body
-      )
-      .pipe(map(response => response.data?.pendientes ?? []));
-  }
-
+  return this.http
+    .post<PendientesJefeInmediatoResponse>(
+      `${this.base}${EP_RRHH_JEFE_INMEDIATO_PENDIENTES}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.pendientes ?? [],
+      ),
+    );
+}
   getPendientesSubgerente(): Observable<PendienteJefeInmediatoApi[]> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
+  const usuario = this.authService.currentUser();
 
-    const body = {
-      email:    user?.email ?? '',
-      rol:      rol?.r ?? 3,
-      modulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-    };
+  const acceso =
+    this.obtenerAccesoPreferido([3, 5]);
 
-    return this.http
-      .post<PendientesSubgerenteResponse>(
-        `${this.base}${EP_RRHH_SUBGERENTE_PENDIENTES}`,
-        body
-      )
-      .pipe(map(response => response.data?.pendientesRRHH ?? []));
+  const email =
+    usuario?.email?.trim() ?? '';
+
+  const rol =
+    Number(acceso?.r ?? 3);
+
+  const modulo =
+    this.obtenerIdModulo(acceso);
+
+  if (!email) {
+    throw new Error(
+      'El usuario actual no tiene un correo electrónico registrado.',
+    );
   }
 
-  responderPermiso(params: ResponderPermisoParams): Observable<string> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
+  const body = {
+    email,
+    rol,
+    modulo,
+  };
+
+  console.log(
+    'Solicitud pendientes subgerente:',
+    body,
+  );
+
+  return this.http
+    .post<PendientesSubgerenteResponse>(
+      `${this.base}${EP_RRHH_SUBGERENTE_PENDIENTES}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.pendientesRRHH ?? [],
+      ),
+    );
+}
+  responderPermiso(
+  params: ResponderPermisoParams,
+): Observable<string> {
+  const acceso =
+    this.obtenerAccesoPreferido([2, 5]);
+
+  const body: {
+    idpermiso: string;
+    tipo: string;
+    modulo: number;
+    motRechazo?: string;
+    horas?: string;
+  } = {
+    idpermiso: params.idpermiso,
+    tipo: params.tipo,
+    modulo: this.obtenerIdModulo(acceso),
+  };
+  if (params.motRechazo?.trim()) {
+    body.motRechazo =
+      params.motRechazo.trim();
+  }
+  if (params.horas?.trim()) {
+    body.horas =
+      params.horas.trim();
+  }
+
+  return this.http
+    .post<ResponderPermisoResponse>(
+      `${this.base}${EP_RRHH_JEFE_INMEDIATO_RESPONDER}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.resultado ??
+          response.message ??
+          'Solicitud procesada correctamente.',
+      ),
+    );
+}
+  responderPermisoSubgerente(
+    params: ResponderPermisoParams,
+  ): Observable<string> {
+    const usuario = this.authService.currentUser();
+    const acceso = this.obtenerAccesoPreferido([3, 5]);
 
     const body: {
       idpermiso: string;
@@ -206,123 +287,137 @@ export class PendientesService {
       horas?: string;
     } = {
       idpermiso: params.idpermiso,
-      tipo:      params.tipo,
-      email:     user?.email ?? '',
-      rol:       rol?.r ?? 2,
-      modulo:    typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
+      tipo: params.tipo,
+      email: usuario?.email ?? '',
+      rol: Number(acceso?.r ?? 3),
+      modulo: this.obtenerIdModulo(acceso),
     };
 
-    if (params.motRechazo) {
-      body.motRechazo = params.motRechazo;
+    if (params.motRechazo?.trim()) {
+      body.motRechazo = params.motRechazo.trim();
     }
 
-    // Solo agrega horas cuando viene informada (rechazo de permiso personal).
-    if (params.horas) {
-      body.horas = params.horas;
-    }
-
-    return this.http
-      .post<ResponderPermisoResponse>(
-        `${this.base}${EP_RRHH_JEFE_INMEDIATO_RESPONDER}`,
-        body
-      )
-      .pipe(map(r => r.data?.resultado ?? r.message));
-  }
-
-  responderPermisoSubgerente(params: ResponderPermisoParams): Observable<string> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
-
-    const body: {
-      idpermiso: string;
-      tipo: string;
-      email: string;
-      rol: number;
-      modulo: number;
-      motRechazo?: string;
-      horas?: string;
-    } = {
-      idpermiso: params.idpermiso,
-      tipo:      params.tipo,
-      email:     user?.email ?? '',
-      rol:       rol?.r ?? 3,
-      modulo:    typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-    };
-
-    if (params.motRechazo) {
-      body.motRechazo = params.motRechazo;
-    }
-
-    // Solo agrega horas cuando viene informada (rechazo de permiso personal).
-    if (params.horas) {
-      body.horas = params.horas;
+    if (params.horas?.trim()) {
+      body.horas = params.horas.trim();
     }
 
     return this.http
       .post<ResponderPermisoResponse>(
         `${this.base}${EP_RRHH_SUBGERENTE_RESPONDER}`,
-        body
+        body,
       )
-      .pipe(map(r => r.data?.resultado ?? r.message));
+      .pipe(
+        map(
+          (response) =>
+            response.data?.resultado ??
+            response.message ??
+            'Solicitud procesada correctamente.',
+        ),
+      );
   }
 
   getSolicitudesAgente(): Observable<SolicitudAgenteApi[]> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
+  const acceso =
+    this.obtenerAccesoPreferido([4, 5]);
+
+  return this.http
+    .post<SolicitudesAgenteResponse>(
+      `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES}`,
+      {
+        idmodulo:
+          this.obtenerIdModulo(acceso),
+      },
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.solicitudesAgente ?? [],
+      ),
+    );
+}
+
+  registrarHoraSalida(
+    params: RegistrarHoraSalidaParams,
+  ): Observable<string> {
+    const acceso = this.obtenerAccesoPreferido([4, 5]);
 
     const body = {
-      email:    user?.email ?? '',
-      rol:      rol?.r ?? 4,
-      idmodulo: typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
-    };
-
-    return this.http
-      .post<SolicitudesAgenteResponse>(
-        `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES}`,
-        body
-      )
-      .pipe(map(response => response.data?.solicitudesAgente ?? []));
-  }
-
-  registrarHoraSalida(params: RegistrarHoraSalidaParams): Observable<string> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
-
-    const body = {
-      idpermiso:  params.idpermiso,
-      tipo:       params.tipo,
-      email:      user?.email ?? '',
+      idpermiso: params.idpermiso,
       horaSalida: params.horaSalida,
-      rol:        rol?.r ?? 4,
-      idmodulo:   typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
+      idmodulo: this.obtenerIdModulo(acceso),
     };
 
     return this.http
       .post<RegistrarHoraSalidaResponse>(
         `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA}`,
-        body
+        body,
       )
-      .pipe(map(r => r.data?.mensaje ?? r.message));
+      .pipe(
+        map(
+          (response) =>
+            response.data?.mensaje ??
+            response.message ??
+            'Hora de salida registrada correctamente.',
+        ),
+      );
   }
 
-  registrarHoraRetorno(params: RegistrarHoraRetornoParams): Observable<string> {
-    const user = this.authService.currentUser();
-    const rol  = user?.roles[0];
+  registrarHoraRetorno(
+    params: RegistrarHoraRetornoParams,
+  ): Observable<string> {
+    const acceso = this.obtenerAccesoPreferido([4, 5]);
 
     const body = {
-      idpermiso:   params.idpermiso,
-      tipo:        params.tipo,
-      email:       user?.email ?? '',
+      idpermiso: params.idpermiso,
       horaRetorno: params.horaRetorno,
-      rol:         rol?.r ?? 4,
-      idmodulo:    typeof rol?.m === 'number' ? rol.m : (Array.isArray(rol?.m) ? rol?.m[0] : 1),
+      idmodulo: this.obtenerIdModulo(acceso),
     };
 
     return this.http
       .post<RegistrarHoraRetornoResponse>(
         `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO}`,
-        body
+        body,
       )
-      .pipe(map(r => r.data?.mensaje ?? r.message));
+      .pipe(
+        map(
+          (response) =>
+            response.data?.mensaje ??
+            response.message ??
+            'Hora de retorno registrada correctamente.',
+        ),
+      );
+  }
+
+  private obtenerAccesoPreferido(
+    rolesPermitidos: number[],
+  ): RolUsuario | null {
+    const roles =
+      this.authService.currentUser()?.roles ?? [];
+
+    return (
+      roles.find((acceso) =>
+        rolesPermitidos.includes(
+          Number(acceso.r),
+        ),
+      ) ??
+      roles[0] ??
+      null
+    );
+  }
+
+  private obtenerIdModulo(
+    acceso: RolUsuario | null | undefined,
+  ): number {
+    if (typeof acceso?.m === 'number') {
+      return Number(acceso.m);
+    }
+
+    if (Array.isArray(acceso?.m)) {
+      return Number(
+        acceso.m[0] ?? 1,
+      );
+    }
+
+    return 1;
   }
 }

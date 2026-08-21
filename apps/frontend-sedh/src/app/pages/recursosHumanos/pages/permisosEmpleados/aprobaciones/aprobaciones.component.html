@@ -1,14 +1,940 @@
-<div class="aprobaciones-container">
-  <div class="header">
-    <h1>Aprobaciones</h1>
-    <p class="subtitle">Revise y apruebe las solicitudes de permisos pendientes</p>
-  </div>
+<section class="aprobaciones-container">
+  <header class="encabezado-principal">
+    <div>
+      <h1>Gestión de Aprobaciones</h1>
 
-  <div class="content-card">
-    <div class="empty-state">
-      <i class="pi pi-check-circle empty-icon"></i>
-      <h3>Módulo en desarrollo</h3>
-      <p>Esta funcionalidad estará disponible próximamente.</p>
+      <p>
+        Revise las solicitudes pendientes y consulte
+        el historial de solicitudes procesadas.
+      </p>
     </div>
+
+    <div class="resumen-pendientes">
+      @if (pestanaActiva() === 'pendientes') {
+        <span>Pendientes</span>
+
+        <strong>
+          {{ solicitudesPendientes() }}
+        </strong>
+      } @else {
+        <span>Procesadas</span>
+
+        <strong>
+          {{ solicitudesProcesadas() }}
+        </strong>
+      }
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="mensaje error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="mensaje exito">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <nav class="pestanas">
+    <button
+      type="button"
+      class="pestana"
+      [class.activa]="
+        pestanaActiva() === 'pendientes'
+      "
+      (click)="cambiarPestana('pendientes')"
+    >
+      Pendientes
+
+      <span class="contador-pestana">
+        {{ solicitudesPendientes() }}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="pestana"
+      [class.activa]="
+        pestanaActiva() === 'historial'
+      "
+      (click)="cambiarPestana('historial')"
+    >
+      Historial
+
+      <span class="contador-pestana">
+        {{ solicitudesProcesadas() }}
+      </span>
+    </button>
+  </nav>
+
+  <section class="tarjeta-filtros">
+    <div
+      class="filtros"
+      [class.filtros-historial]="
+        pestanaActiva() === 'historial'
+      "
+    >
+      <div class="campo">
+        <label for="buscar">
+          Buscar
+        </label>
+
+        <input
+          id="buscar"
+          type="search"
+          placeholder="Empleado, tipo o motivo"
+          [ngModel]="busqueda()"
+          (ngModelChange)="actualizarBusqueda($event)"
+        >
+      </div>
+
+      <div class="campo">
+        <label for="tipo">
+          Tipo
+        </label>
+
+        <select
+          id="tipo"
+          [ngModel]="filtroTipo()"
+          (ngModelChange)="actualizarTipo($event)"
+        >
+          <option value="TODOS">
+            Todos
+          </option>
+
+          @for (
+            tipo of tiposDisponibles();
+            track tipo
+          ) {
+            <option [value]="tipo">
+              {{ tipo }}
+            </option>
+          }
+        </select>
+      </div>
+
+      @if (pestanaActiva() === 'pendientes') {
+        <div class="campo">
+          <label for="emergencia">
+            Emergencia
+          </label>
+
+          <select
+            id="emergencia"
+            [ngModel]="filtroEmergencia()"
+            (ngModelChange)="
+              actualizarEmergencia($event)
+            "
+          >
+            <option value="TODOS">
+              Todos
+            </option>
+
+            <option value="SI">
+              Sí
+            </option>
+
+            <option value="NO">
+              No
+            </option>
+          </select>
+        </div>
+      } @else {
+        <div class="campo">
+          <label for="estado">
+            Estado
+          </label>
+
+          <select
+            id="estado"
+            [ngModel]="filtroEstado()"
+            (ngModelChange)="actualizarEstado($event)"
+          >
+            <option value="TODOS">
+              Todos
+            </option>
+
+            <option value="APROBADO">
+              Aprobado
+            </option>
+
+            <option value="RECHAZADO">
+              Rechazado
+            </option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="fechaDesde">
+            Fecha desde
+          </label>
+
+          <div class="input-fecha">
+            <input
+              id="fechaDesde"
+              type="date"
+              [ngModel]="fechaDesde()"
+              (ngModelChange)="
+                actualizarFechaDesde($event)
+              "
+            >
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="fechaHasta">
+            Fecha hasta
+          </label>
+
+          <div class="input-fecha">
+            <input
+              id="fechaHasta"
+              type="date"
+              [ngModel]="fechaHasta()"
+              (ngModelChange)="
+                actualizarFechaHasta($event)
+              "
+            >
+          </div>
+        </div>
+      }
+
+      <button
+        type="button"
+        class="boton-secundario"
+        (click)="limpiarFiltros()"
+      >
+        Limpiar filtros
+      </button>
+    </div>
+  </section>
+
+  @if (pestanaActiva() === 'pendientes') {
+    <section class="content-card">
+      <div class="barra-acciones">
+        <div>
+          <h2>Solicitudes pendientes</h2>
+
+          <p class="descripcion-tabla">
+            Solicitudes que todavía requieren una decisión.
+          </p>
+        </div>
+
+        <div class="botones-reporte">
+          <button
+            type="button"
+            class="boton actualizar"
+            [disabled]="cargando()"
+            (click)="cargarAprobaciones()"
+          >
+            {{
+              cargando()
+                ? 'Actualizando...'
+                : 'Actualizar'
+            }}
+          </button>
+        </div>
+      </div>
+
+      @if (cargando()) {
+        <div class="estado-carga">
+          Cargando solicitudes pendientes...
+        </div>
+      } @else if (
+        aprobacionesFiltradas().length === 0
+      ) {
+        <div class="empty-state">
+          <h3>No hay solicitudes pendientes</h3>
+
+          <p>
+            No existen registros que coincidan
+            con los filtros seleccionados.
+          </p>
+        </div>
+      } @else {
+        <div class="contenedor-tabla">
+          <table class="tabla-aprobaciones">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Horario</th>
+                <th>Tiempo</th>
+                <th>Motivo</th>
+                <th>Emergencia</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                aprobacion of
+                  aprobacionesFiltradas();
+                track aprobacion.idPermisoPersonal
+              ) {
+                <tr>
+                  <td>
+                    <strong>
+                      {{
+                        aprobacion
+                          .emailInstitucional
+                      }}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <span class="categoria">
+                      Permiso
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ aprobacion.tipoSolicitud.nomTipo }}
+                  </td>
+
+                  <td>
+                    {{
+                      aprobacion.fecSolicitud |
+                        date:'dd/MM/yyyy'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      aprobacion.horSalida ??
+                      '-'
+                    }}
+
+                    a
+
+                    {{
+                      aprobacion.horRetorno ??
+                      '-'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      aprobacion.horSolicitadas
+                    }}
+                  </td>
+
+                  <td class="celda-motivo">
+                    {{
+                      aprobacion.motivo ||
+                      'Sin motivo'
+                    }}
+                  </td>
+
+                  <td>
+                    <span
+                      class="etiqueta"
+                      [class.emergencia]="
+                        aprobacion.catEmergencia
+                      "
+                    >
+                      {{
+                        aprobacion.catEmergencia
+                          ? 'Sí'
+                          : 'No'
+                      }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="estado pendiente">
+                      Pendiente
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="acciones">
+                      <button
+                        type="button"
+                        class="accion ver"
+                        (click)="
+                          verDetalle(aprobacion)
+                        "
+                      >
+                        Ver
+                      </button>
+
+                      <button
+                        type="button"
+                        class="accion aprobar"
+                        [disabled]="
+                          procesandoId() ===
+                          aprobacion
+                            .idPermisoPersonal
+                        "
+                        (click)="aprobar(aprobacion)"
+                      >
+                        Aprobar
+                      </button>
+
+                      <button
+                        type="button"
+                        class="accion rechazar"
+                        [disabled]="
+                          procesandoId() ===
+                          aprobacion
+                            .idPermisoPersonal
+                        "
+                        (click)="
+                          abrirModalRechazo(
+                            aprobacion
+                          )
+                        "
+                      >
+                        Rechazar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  } @else {
+    <section class="content-card">
+      <div class="barra-acciones">
+        <div>
+          <h2>Historial de solicitudes</h2>
+
+          <p class="descripcion-tabla">
+            Solicitudes que ya fueron aprobadas
+            o rechazadas.
+          </p>
+        </div>
+
+        <div class="botones-reporte">
+          <button
+            type="button"
+            class="boton excel"
+            [disabled]="
+              exportando() ||
+              historialFiltrado().length === 0
+            "
+            (click)="exportarExcelHistorial()"
+          >
+            Exportar Excel
+          </button>
+
+          <button
+            type="button"
+            class="boton pdf"
+            [disabled]="
+              exportando() ||
+              historialFiltrado().length === 0
+            "
+            (click)="exportarPDFHistorial()"
+          >
+            Exportar PDF
+          </button>
+
+          <button
+            type="button"
+            class="boton actualizar"
+            [disabled]="cargando()"
+            (click)="cargarHistorial()"
+          >
+            {{
+              cargando()
+                ? 'Actualizando...'
+                : 'Actualizar'
+            }}
+          </button>
+        </div>
+      </div>
+
+      @if (cargando()) {
+        <div class="estado-carga">
+          Cargando historial...
+        </div>
+      } @else if (
+        historialFiltrado().length === 0
+      ) {
+        <div class="empty-state">
+          <h3>No hay solicitudes procesadas</h3>
+
+          <p>
+            No existen registros que coincidan
+            con los filtros seleccionados.
+          </p>
+        </div>
+      } @else {
+        <div class="contenedor-tabla">
+          <table class="tabla-aprobaciones">
+            <thead>
+              <tr>
+                <th>Empleado</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Procesado por</th>
+                <th>Segunda aprobación</th>
+                <th>Motivo de rechazo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                registro of historialFiltrado();
+                track registro.id
+              ) {
+                <tr>
+                  <td>
+                    <strong>
+                      {{
+                        registro.emailInstitucional
+                      }}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <span class="categoria">
+                      {{ registro.categoria }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ registro.tipoSolicitud }}
+                  </td>
+
+                  <td>
+                    {{
+                      registro.fechaSolicitud |
+                        date:'dd/MM/yyyy'
+                    }}
+                  </td>
+
+                  <td>
+                    <span
+                      class="estado"
+                      [class.aprobado]="
+                        registro.estado ===
+                        'APROBADO'
+                      "
+                      [class.rechazado]="
+                        registro.estado ===
+                        'RECHAZADO'
+                      "
+                    >
+                      {{ registro.estado }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{
+                      registro.procesadoPor ??
+                      'Sin información'
+                    }}
+                  </td>
+
+                  <td>
+                    {{
+                      registro.segundaAprobacion ??
+                      'No aplica'
+                    }}
+                  </td>
+
+                  <td class="celda-motivo">
+                    {{
+                      registro.motivoRechazo ??
+                      'No aplica'
+                    }}
+                  </td>
+
+                  <td>
+                    <button
+                      type="button"
+                      class="accion ver"
+                      (click)="
+                        verDetalleHistorial(
+                          registro
+                        )
+                      "
+                    >
+                      Ver detalle
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>
+
+@if (
+  mostrarModalDetalle() &&
+  aprobacionSeleccionada();
+  as detalle
+) {
+  <div class="modal-fondo">
+    <section class="modal modal-detalle">
+      <header class="modal-header">
+        <div>
+          <h2>Detalle de la solicitud</h2>
+
+          <p>
+            Revise la información antes de
+            aprobar o rechazar.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="cerrar"
+          (click)="cerrarDetalle()"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <span>Empleado</span>
+
+          <strong>
+            {{ detalle.emailInstitucional }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Tipo de solicitud</span>
+
+          <strong>
+            {{ detalle.tipoSolicitud.nomTipo}}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Fecha</span>
+
+          <strong>
+            {{
+              detalle.fecSolicitud |
+                date:'dd/MM/yyyy'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Hora de salida</span>
+
+          <strong>
+            {{ detalle.horSalida ?? '-' }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Hora de retorno</span>
+
+          <strong>
+            {{ detalle.horRetorno ?? '-' }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Tiempo solicitado</span>
+
+          <strong>
+            {{
+              detalle.horSolicitadas
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Horas disponibles</span>
+
+          <strong>
+            {{
+              detalle.idHorasDisponibles
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Emergencia</span>
+
+          <strong>
+            {{
+              detalle.catEmergencia
+                ? 'Sí'
+                : 'No'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item detalle-completo">
+          <span>Motivo</span>
+
+          <strong>
+            {{
+              detalle.motivo ||
+              'Sin motivo'
+            }}
+          </strong>
+        </div>
+      </div>
+
+      <footer class="modal-acciones">
+        <button
+          type="button"
+          class="boton cancelar"
+          (click)="cerrarDetalle()"
+        >
+          Cerrar
+        </button>
+
+        <button
+          type="button"
+          class="boton rechazar"
+          (click)="abrirModalRechazo(detalle)"
+        >
+          Rechazar
+        </button>
+
+        <button
+          type="button"
+          class="boton aprobar"
+          (click)="aprobar(detalle)"
+        >
+          Aprobar
+        </button>
+      </footer>
+    </section>
   </div>
-</div>
+}
+
+@if (
+  mostrarModalHistorial() &&
+  historialSeleccionado();
+  as registro
+) {
+  <div class="modal-fondo">
+    <section class="modal modal-detalle">
+      <header class="modal-header">
+        <div>
+          <h2>Detalle del historial</h2>
+
+          <p>
+            Información de la solicitud procesada.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="cerrar"
+          (click)="cerrarDetalleHistorial()"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <span>Empleado</span>
+
+          <strong>
+            {{ registro.emailInstitucional }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Categoría</span>
+
+          <strong>
+            {{ registro.categoria }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Tipo de solicitud</span>
+
+          <strong>
+            {{ registro.tipoSolicitud }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Fecha</span>
+
+          <strong>
+            {{
+              registro.fechaSolicitud |
+                date:'dd/MM/yyyy'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Estado</span>
+
+          <strong>
+            {{ registro.estado }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Procesado por</span>
+
+          <strong>
+            {{
+              registro.procesadoPor ??
+              'Sin información'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Segunda aprobación</span>
+
+          <strong>
+            {{
+              registro.segundaAprobacion ??
+              'No aplica'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Emergencia</span>
+
+          <strong>
+            {{
+              registro.emergencia
+                ? 'Sí'
+                : 'No'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Hora de salida</span>
+
+          <strong>
+            {{ registro.horaSalida ?? '-' }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Hora de retorno</span>
+
+          <strong>
+            {{ registro.horaRetorno ?? '-' }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Horas solicitadas</span>
+
+          <strong>
+            {{
+              registro.horasSolicitadas ??
+              '-'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item">
+          <span>Horas disponibles</span>
+
+          <strong>
+            {{
+              registro.horasDisponibles ??
+              '-'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item detalle-completo">
+          <span>Motivo</span>
+
+          <strong>
+            {{
+              registro.motivo ||
+              'Sin motivo'
+            }}
+          </strong>
+        </div>
+
+        <div class="detalle-item detalle-completo">
+          <span>Motivo de rechazo</span>
+
+          <strong>
+            {{
+              registro.motivoRechazo ??
+              'No aplica'
+            }}
+          </strong>
+        </div>
+      </div>
+
+      <footer class="modal-acciones">
+        <button
+          type="button"
+          class="boton cancelar"
+          (click)="cerrarDetalleHistorial()"
+        >
+          Cerrar
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+@if (mostrarModalRechazo()) {
+  <div class="modal-fondo">
+    <section class="modal">
+      <h2>Rechazar permiso</h2>
+
+      <p>
+        Ingrese el motivo por el cual se
+        rechazará la solicitud.
+      </p>
+
+      <textarea
+        [(ngModel)]="motivoRechazo"
+        rows="5"
+        maxlength="100"
+        placeholder="Motivo del rechazo"
+      ></textarea>
+
+      <div class="modal-acciones">
+        <button
+          type="button"
+          class="boton cancelar"
+          (click)="cerrarModalRechazo()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="boton rechazar"
+          [disabled]="procesandoId() !== null"
+          (click)="confirmarRechazo()"
+        >
+          Confirmar rechazo
+        </button>
+      </div>
+    </section>
+  </div>
+}

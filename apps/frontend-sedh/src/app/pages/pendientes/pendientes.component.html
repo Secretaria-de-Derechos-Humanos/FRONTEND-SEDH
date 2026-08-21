@@ -1,10 +1,18 @@
 <div class="pendientes-container">
+
+  <!-- ========================================= -->
+  <!-- ENCABEZADO                                -->
+  <!-- ========================================= -->
+
   <div class="page-header-row">
+
     <app-encabezados-pagina
       titulo="Solicitudes pendientes"
       subtitulo="Revise y gestione las solicitudes de permisos que requieren su aprobación"
     />
+
     <button
+      type="button"
       class="btn-refresh"
       [class.btn-refresh--loading]="cargando()"
       [disabled]="cargando()"
@@ -12,130 +20,450 @@
       title="Actualizar solicitudes"
       aria-label="Actualizar solicitudes"
     >
-      <svg class="btn-refresh__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M23 4v6h-6" />
-        <path d="M1 20v-6h6" />
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+
+      <svg
+        class="btn-refresh__icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path
+          d="M23 4v6h-6"
+        />
+
+        <path
+          d="M1 20v-6h6"
+        />
+
+        <path
+          d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"
+        />
       </svg>
-      <span>Actualizar</span>
+
+      <span>
+        {{
+          cargando()
+            ? 'Actualizando...'
+            : 'Actualizar'
+        }}
+      </span>
+
     </button>
+
   </div>
 
+
+  <!-- ========================================= -->
+  <!-- CARGANDO                                  -->
+  <!-- ========================================= -->
+
   @if (cargando()) {
+
     <div class="loading-state">
+
       <div class="spinner"></div>
-      <p>Cargando solicitudes...</p>
-    </div>
-  } @else if (solicitudes().length === 0) {
-    <div class="empty-state">
-      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <p class="empty-message">No hay solicitudes pendientes en este momento</p>
-    </div>
-  } @else {
-    <div class="table-container">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>
-              <div class="th-content">
-                <span class="th-label">Fecha solicitud</span>
-                <input
-                  type="text"
-                  class="filter-input"
-                  placeholder="Buscar fecha..."
-                  [(ngModel)]="filtroFecha"
-                  (ngModelChange)="filtroFecha.set($event)"
-                />
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-label">Empleado</span>
-                <input
-                  type="text"
-                  class="filter-input"
-                  placeholder="Buscar empleado..."
-                  [(ngModel)]="filtroEmpleado"
-                  (ngModelChange)="filtroEmpleado.set($event)"
-                />
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-label">Estado</span>
-                <input
-                  type="text"
-                  class="filter-input"
-                  placeholder="Buscar estado..."
-                  [(ngModel)]="filtroEstado"
-                  (ngModelChange)="filtroEstado.set($event)"
-                />
-              </div>
-            </th>
-            <th>
-              <div class="th-content">
-                <span class="th-label">Dependencia</span>
-                <input
-                  type="text"
-                  class="filter-input"
-                  placeholder="Buscar dependencia..."
-                  [(ngModel)]="filtroDependencia"
-                  (ngModelChange)="filtroDependencia.set($event)"
-                />
-              </div>
-            </th>
-            <th class="th-actions">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (solicitud of solicitudes(); track solicitud.idPermiso) {
-            <tr>
-              <td class="td-fecha">{{ formatearFecha(solicitud.fechaSolicitud) }}</td>
-              <td class="td-empleado">
-                <div class="empleado-info">
-                  <span class="empleado-nombre">{{ solicitud.empleado }}</span>
-                </div>
-              </td>
-              <td class="td-estado">
-                <span class="badge badge-estado">{{ solicitud.estado }}</span>
-              </td>
-              <td class="td-dependencia">{{ solicitud.dependencia }}</td>
-              <td class="td-actions">
-                <app-action-button
-                  (actionSelected)="handleAction($event, solicitud.idPermiso)" />
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
+
+      <p>
+        Cargando solicitudes...
+      </p>
+
     </div>
 
-    <div class="table-footer">
-      <p class="results-count">
-        Mostrando <strong>{{ solicitudes().length }}</strong> solicitud{{solicitudes().length !== 1 ? 'es' : ''}} pendiente{{solicitudes().length !== 1 ? 's' : ''}}
-      </p>
-    </div>
   }
+
+
+  <!-- ========================================= -->
+  <!-- SIN SOLICITUDES                           -->
+  <!-- ========================================= -->
+
+  @else if (
+    solicitudesOriginales().length === 0
+  ) {
+
+    <div class="empty-state">
+
+      <svg
+        class="empty-icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"
+        />
+
+      </svg>
+
+
+      <p class="empty-title">
+        No hay solicitudes pendientes
+      </p>
+
+
+      <p class="empty-message">
+        No existen solicitudes que requieran
+        aprobación en este momento.
+      </p>
+
+    </div>
+
+  }
+
+
+  <!-- ========================================= -->
+  <!-- TABLA                                     -->
+  <!-- ========================================= -->
+
+  @else {
+
+    <section class="tabla-seccion">
+
+      <!-- CABECERA DE LA TABLA -->
+
+      <div class="tabla-encabezado">
+
+        <div>
+
+          <h2>
+            Solicitudes por revisar
+          </h2>
+
+          <p>
+            Utilice los filtros para localizar
+            una solicitud.
+          </p>
+
+        </div>
+
+
+        <span class="total-registros">
+
+          {{ solicitudesOriginales().length }}
+
+          registro{{
+            solicitudesOriginales().length !== 1
+              ? 's'
+              : ''
+          }}
+
+        </span>
+
+      </div>
+
+
+      <!-- TABLA -->
+
+      <div class="table-container">
+
+        <table class="table">
+
+          <thead>
+
+            <tr>
+
+              <!-- FECHA -->
+
+              <th>
+
+                <div class="th-content">
+
+                  <span class="th-label">
+                    Fecha solicitud
+                  </span>
+
+                  <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="Buscar fecha..."
+                    [ngModel]="filtroFecha()"
+                    (ngModelChange)="filtroFecha.set($event)"
+                  />
+
+                </div>
+
+              </th>
+
+
+              <!-- EMPLEADO -->
+
+              <th>
+
+                <div class="th-content">
+
+                  <span class="th-label">
+                    Empleado
+                  </span>
+
+                  <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="Buscar empleado..."
+                    [ngModel]="filtroEmpleado()"
+                    (ngModelChange)="filtroEmpleado.set($event)"
+                  />
+
+                </div>
+
+              </th>
+
+
+              <!-- ESTADO -->
+
+              <th>
+
+                <div class="th-content">
+
+                  <span class="th-label">
+                    Estado
+                  </span>
+
+                  <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="Buscar estado..."
+                    [ngModel]="filtroEstado()"
+                    (ngModelChange)="filtroEstado.set($event)"
+                  />
+
+                </div>
+
+              </th>
+
+
+              <!-- DEPENDENCIA -->
+
+              <th>
+
+                <div class="th-content">
+
+                  <span class="th-label">
+                    Dependencia
+                  </span>
+
+                  <input
+                    type="text"
+                    class="filter-input"
+                    placeholder="Buscar dependencia..."
+                    [ngModel]="filtroDependencia()"
+                    (ngModelChange)="filtroDependencia.set($event)"
+                  />
+
+                </div>
+
+              </th>
+
+
+              <!-- ACCIONES -->
+
+              <th class="th-actions">
+                Acciones
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody>
+
+            <!-- SIN RESULTADOS DESPUÉS DE FILTRAR -->
+
+            @if (
+              solicitudes().length === 0
+            ) {
+
+              <tr>
+
+                <td
+                  class="sin-resultados"
+                  colspan="5"
+                >
+
+                  No se encontraron solicitudes
+                  con los filtros aplicados.
+
+                </td>
+
+              </tr>
+
+            }
+
+
+            <!-- REGISTROS -->
+
+            @for (
+              solicitud of solicitudes();
+              track solicitud.idPermiso
+            ) {
+
+              <tr>
+
+                <!-- FECHA -->
+
+                <td class="td-fecha">
+
+                  {{
+                    formatearFecha(
+                      solicitud.fechaSolicitud
+                    )
+                  }}
+
+                </td>
+
+
+                <!-- EMPLEADO -->
+
+                <td class="td-empleado">
+
+                  <div class="empleado-avatar">
+
+                    {{
+                      solicitud.empleado
+                        .charAt(0)
+                        .toUpperCase()
+                    }}
+
+                  </div>
+
+
+                  <div class="empleado-info">
+
+                    <span class="empleado-nombre">
+
+                      {{
+                        solicitud.empleado
+                      }}
+
+                    </span>
+
+                  </div>
+
+                </td>
+
+
+                <!-- ESTADO -->
+
+                <td class="td-estado">
+
+                  <span class="badge badge-estado">
+
+                    {{
+                      solicitud.estado
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- DEPENDENCIA -->
+
+                <td class="td-dependencia">
+
+                  {{
+                    solicitud.dependencia
+                  }}
+
+                </td>
+
+
+                <!-- ACCIONES -->
+
+                <td class="td-actions">
+
+                  <app-action-button
+                    (actionSelected)="
+                      handleAction(
+                        $event,
+                        solicitud.idPermiso
+                      )
+                    "
+                  />
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- PIE -->
+
+      <div class="table-footer">
+
+        <p class="results-count">
+
+          Mostrando
+
+          <strong>
+            {{ solicitudes().length }}
+          </strong>
+
+          de
+
+          <strong>
+            {{ solicitudesOriginales().length }}
+          </strong>
+
+          solicitud{{
+            solicitudesOriginales().length !== 1
+              ? 'es'
+              : ''
+          }}
+
+        </p>
+
+      </div>
+
+    </section>
+
+  }
+
 </div>
 
-@if (solicitudSeleccionada(); as solicitudActual) {
-  <app-modal-aprobar-permisos-rrhh
-    [solicitud]="solicitudActual"
-    [visible]="modalPermisoVisible()"
-    (cerrar)="cerrarModalPermiso()"
-    (aprobar)="aprobarSolicitud($event)"
-    (rechazar)="rechazarSolicitud($event)"
-  />
-}
 
-@if (solicitudAgenteSeleccionada(); as solicitudAgente) {
-  <app-modal-agente-permisos-rrhh
-    [solicitud]="solicitudAgente"
-    [visible]="modalAgenteVisible()"
-    (cerrar)="cerrarModalAgente()"
-    (registrarSalida)="onRegistrarSalida($event)"
-    (registrarRetorno)="onRegistrarRetorno($event)"
+<!-- ========================================= -->
+<!-- MODAL APROBACIÓN                          -->
+<!-- ========================================= -->
+
+@if (
+  solicitudSeleccionada();
+  as solicitudActual
+) {
+
+  <app-modal-aprobar-permisos-rrhh
+
+    [solicitud]="solicitudActual"
+
+    [visible]="modalPermisoVisible()"
+
+    (cerrar)="
+      cerrarModalPermiso()
+    "
+
+    (aprobar)="
+      aprobarSolicitud($event)
+    "
+
+    (rechazar)="
+      rechazarSolicitud($event)
+    "
+
   />
+
 }

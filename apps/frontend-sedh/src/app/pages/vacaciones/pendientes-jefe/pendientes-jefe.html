@@ -1,0 +1,345 @@
+<section class="pagina-vacaciones">
+
+  <header class="encabezado">
+
+    <div>
+      <h1>Solicitudes de vacaciones</h1>
+
+      <p>
+        Solicitudes pendientes de aprobación del Jefe Inmediato.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="boton-actualizar"
+      [disabled]="cargando()"
+      (click)="cargarSolicitudes()"
+    >
+      {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+    </button>
+
+  </header>
+
+  @if (errorMessage()) {
+
+    <div class="mensaje error">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+  @if (successMessage()) {
+
+    <div class="mensaje exito">
+      {{ successMessage() }}
+    </div>
+
+  }
+
+  @if (cargando()) {
+
+    <div class="mensaje-carga">
+      Consultando solicitudes pendientes...
+    </div>
+
+  } @else if (solicitudes().length === 0) {
+
+    <div class="sin-resultados">
+
+      <div class="icono-vacio">
+        📅
+      </div>
+
+      <strong>
+        No hay solicitudes pendientes
+      </strong>
+
+      <p>
+        Cuando un empleado solicite vacaciones,
+        la solicitud aparecerá aquí para su aprobación.
+      </p>
+
+    </div>
+
+  } @else {
+
+    <div class="contenedor-tabla">
+
+      <table class="tabla-solicitudes">
+
+        <thead>
+
+          <tr>
+            <th>Empleado</th>
+            <th>Identidad</th>
+            <th>Fecha solicitud</th>
+            <th>Fecha inicial</th>
+            <th>Fecha final</th>
+            <th>Días</th>
+            <th>Observaciones</th>
+            <th>Acciones</th>
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          @for (
+            solicitud of solicitudes();
+            track solicitud.idVacaciones ??
+            solicitud.idVacacion ??
+            $index
+          ) {
+
+            <tr>
+
+              <td>
+
+                <div class="empleado">
+
+                  <div class="avatar">
+                    {{ obtenerNombreEmpleado(solicitud).charAt(0) }}
+                  </div>
+
+                  <span>
+                    {{ obtenerNombreEmpleado(solicitud) }}
+                  </span>
+
+                </div>
+
+              </td>
+
+              <td>
+                {{ solicitud.numIdentidad || '-' }}
+              </td>
+
+              <td>
+                {{ formatearFecha(solicitud.fecSolicitud) }}
+              </td>
+
+              <td>
+                {{ formatearFecha(solicitud.fecInicial) }}
+              </td>
+
+              <td>
+                {{ formatearFecha(solicitud.fecFinal) }}
+              </td>
+
+              <td>
+
+                <span class="badge-dias">
+                  {{ solicitud.cantVacaciones }}
+                </span>
+
+              </td>
+
+              <td>
+                {{ solicitud.observaciones || 'Sin observaciones' }}
+              </td>
+
+              <td>
+
+                <div class="acciones">
+
+                  <button
+                    type="button"
+                    class="boton-aprobar"
+                    [disabled]="procesando() !== null"
+                    (click)="aprobar(solicitud)"
+                  >
+
+                    {{
+                      procesando() === obtenerId(solicitud)
+                        ? 'Procesando...'
+                        : 'Aprobar'
+                    }}
+
+                  </button>
+
+                  <button
+                    type="button"
+                    class="boton-rechazar"
+                    [disabled]="procesando() !== null"
+                    (click)="rechazar(solicitud)"
+                  >
+                    Rechazar
+                  </button>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  }
+
+  <!-- =====================================================
+       MODAL
+  ====================================================== -->
+
+ @if (modalAbierto()) {
+
+  <div class="modal-overlay">
+
+    <div class="modal">
+
+      @if (tipoAccion() === 'aprobar') {
+
+        <div class="modal-icono aprobar">
+          ✓
+        </div>
+
+        <h2>
+          Aprobar solicitud
+        </h2>
+
+        <p class="modal-descripcion">
+          ¿Está seguro de aprobar esta solicitud de vacaciones?
+        </p>
+
+        @if (solicitudSeleccionada(); as solicitud) {
+
+          <div class="resumen-solicitud">
+
+            <strong>
+              {{ obtenerNombreEmpleado(solicitud) }}
+            </strong>
+
+            <span>
+              {{ formatearFecha(solicitud.fecInicial) }}
+              -
+              {{ formatearFecha(solicitud.fecFinal) }}
+            </span>
+
+            <span>
+              {{ solicitud.cantVacaciones }} días
+            </span>
+
+          </div>
+
+        }
+
+        <label for="observacionModalJefe">
+          Observación
+          <span>(opcional)</span>
+        </label>
+
+        <textarea
+          id="observacionModalJefe"
+          [value]="observacionModal()"
+          (input)="observacionModal.set($any($event.target).value)"
+          placeholder="Ingrese una observación..."
+          rows="4"
+        ></textarea>
+
+        <div class="modal-acciones">
+
+          <button
+            type="button"
+            class="boton-modal cancelar"
+            (click)="cancelarModal()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="boton-modal confirmar-aprobar"
+            (click)="confirmarAccion()"
+          >
+            Aprobar solicitud
+          </button>
+
+        </div>
+
+      } @else {
+
+        <div class="modal-icono rechazar">
+          !
+        </div>
+
+        <h2>
+          Rechazar solicitud
+        </h2>
+
+        <p class="modal-descripcion">
+          Indique el motivo por el cual desea rechazar esta solicitud.
+        </p>
+
+        @if (solicitudSeleccionada(); as solicitud) {
+
+          <div class="resumen-solicitud">
+
+            <strong>
+              {{ obtenerNombreEmpleado(solicitud) }}
+            </strong>
+
+            <span>
+              {{ formatearFecha(solicitud.fecInicial) }}
+              -
+              {{ formatearFecha(solicitud.fecFinal) }}
+            </span>
+
+            <span>
+              {{ solicitud.cantVacaciones }} días
+            </span>
+
+          </div>
+
+        }
+
+        <label for="motivoModalJefe">
+          Motivo del rechazo
+
+          <span class="obligatorio">
+            *
+          </span>
+        </label>
+
+        <textarea
+          id="motivoModalJefe"
+          [value]="motivoModal()"
+          (input)="motivoModal.set($any($event.target).value)"
+          placeholder="Escriba el motivo del rechazo..."
+          rows="4"
+        ></textarea>
+
+        <div class="modal-acciones">
+
+          <button
+            type="button"
+            class="boton-modal cancelar"
+            (click)="cancelarModal()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="boton-modal confirmar-rechazar"
+            [disabled]="!motivoModal().trim()"
+            (click)="confirmarAccion()"
+          >
+            Rechazar solicitud
+          </button>
+
+        </div>
+
+      }
+
+    </div>
+
+  </div>
+
+}
+
+</section>

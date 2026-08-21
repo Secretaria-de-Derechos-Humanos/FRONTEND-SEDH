@@ -1,0 +1,223 @@
+:host {
+  display: block;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+/* ===========================
+   CONTENEDOR
+=========================== */
+
+.pagina-editar-empleado {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px;
+}
+
+/* ===========================
+   ENCABEZADO
+=========================== */
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.encabezado h1 {
+  margin: 0;
+  font-size: 34px;
+  color: #12284b;
+}
+
+.encabezado p {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* ===========================
+   TARJETAS
+=========================== */
+
+.bloque-formulario {
+  background: white;
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 25px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+
+.bloque-formulario h2 {
+  margin: 0 0 20px;
+  color: #12284b;
+  font-size: 22px;
+}
+
+/* ===========================
+   GRID
+=========================== */
+
+.cuadricula {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 22px;
+}
+
+/* ===========================
+   CAMPOS
+=========================== */
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+}
+
+.grupo label {
+  margin-bottom: 7px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.grupo input,
+.grupo select,
+.grupo textarea {
+  padding: 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: .25s;
+  background: white;
+}
+
+.grupo input:focus,
+.grupo select:focus,
+.grupo textarea:focus {
+  outline: none;
+  border-color: #1d4ed8;
+  box-shadow:
+      0 0 0 4px
+      rgba(29,78,216,.12);
+
+}
+
+.grupo-checkbox{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+.grupo-checkbox label{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+}
+.grupo-checkbox input{
+    width:18px;
+    height:18px;
+}
+
+/* ===========================
+   MENSAJES
+=========================== */
+
+.mensaje{
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.carga{
+    background:#dbeafe;
+    color:#1d4ed8;
+}
+
+.error{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+.exito{
+    background:#dcfce7;
+    color:#15803d;
+}
+/* ===========================
+   BOTONES
+=========================== */
+.acciones{
+    display:flex;
+    justify-content:flex-end;
+    gap:15px;
+
+}
+
+.boton-regresar,
+.boton-cancelar{
+    background:#e5e7eb;
+    color:#374151;
+    border:none;
+    padding:12px 22px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.25s;
+
+}
+
+.boton-regresar:hover,
+.boton-cancelar:hover{
+    background:#d1d5db;
+
+}
+
+.boton-guardar{
+    background:linear-gradient(
+        135deg,
+        #0d47a1,
+        #2563eb
+    );
+    color:white;
+    border:none;
+    padding:12px 26px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+    transition:.25s;
+    box-shadow:
+        0 5px 15px rgba(37,99,235,.30);
+
+}
+
+.boton-guardar:hover{
+    transform:translateY(-2px);
+    box-shadow:
+        0 8px 22px rgba(37,99,235,.40);
+
+}
+button:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media(max-width:900px){
+    .cuadricula{
+        grid-template-columns:1fr;
+    }
+
+    .encabezado{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:15px;
+    }
+
+    .acciones{
+        flex-direction:column;
+    }
+    .acciones button{
+        width:100%;
+    }
+
+}

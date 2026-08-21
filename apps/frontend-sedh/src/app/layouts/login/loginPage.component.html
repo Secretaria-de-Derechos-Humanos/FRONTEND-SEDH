@@ -41,10 +41,10 @@
               placeholder="usuario@sedh.gob.hn"
               autocomplete="username"
               class="form-field__input" />
-            @if (emailCtrl?.invalid && emailCtrl?.touched) {
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
               <small class="form-field__error">
-                @if (emailCtrl?.errors?.['required']) { El email es requerido. }
-                @if (emailCtrl?.errors?.['email']) { Email inválido. }
+                @if (loginForm.get('email')?.hasError ('required')) { El email es requerido. }
+                @if (loginForm.get('email')?.hasError('email')) { Email inválido. }
               </small>
             }
           </div>
@@ -77,10 +77,10 @@
                 }
               </button>
             </div>
-            @if (passwordCtrl?.invalid && passwordCtrl?.touched) {
+            @if (loginForm.get ('password')?.invalid && loginForm.get('password')?.touched) {
               <small class="form-field__error">
-                @if (passwordCtrl?.errors?.['required']) { La contraseña es requerida. }
-                @if (passwordCtrl?.errors?.['minlength']) { Mínimo 6 caracteres. }
+                @if (loginForm.get('password')?.hasError ('required')) { La contraseña es requerida. }
+                @if (loginForm.get('password')?.hasError('minlength')) { Mínimo 6 caracteres. }
               </small>
             }
           </div>

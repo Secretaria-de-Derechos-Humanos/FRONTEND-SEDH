@@ -1,204 +1,74 @@
 <section class="pagina-solicitar-vacaciones">
 
-  <!-- =========================================================
-       ENCABEZADO
-       ========================================================= -->
-
   <header class="encabezado">
-
     <div>
-      <h1>
-        Solicitar vacaciones
-      </h1>
-
-      <p>
-        Registre una nueva solicitud de vacaciones.
-      </p>
+      <h1>Solicitar vacaciones</h1>
+      <p>Registre una nueva solicitud de vacaciones.</p>
     </div>
-
   </header>
 
-
-  <!-- =========================================================
-       MENSAJES
-       ========================================================= -->
-
-  @if (errorMessage()) {
-
-    <div class="mensaje error">
-      {{ errorMessage() }}
+  <section class="seccion-solicitud">
+    <div class="seccion-header">
+      <div>
+        <h2>Período de vacaciones</h2>
+        <p>Seleccione las fechas en las que desea tomar sus vacaciones.</p>
+      </div>
     </div>
 
-  }
-
-  @if (successMessage()) {
-
-    <div class="mensaje exito">
-      {{ successMessage() }}
+    <div class="resumen-saldo">
+      <div class="tarjeta-resumen">
+        <span class="resumen-titulo">Días asignados</span>
+        <strong class="resumen-valor">{{ saldo()?.diasAsignados ?? 0 }}</strong>
+      </div>
+      <div class="tarjeta-resumen">
+        <span class="resumen-titulo">Días utilizados</span>
+        <strong class="resumen-valor">{{ saldo()?.diasUtilizados ?? 0 }}</strong>
+      </div>
+      <div class="tarjeta-resumen">
+        <span class="resumen-titulo">Días reservados</span>
+        <strong class="resumen-valor">{{ saldo()?.diasReservados ?? 0 }}</strong>
+      </div>
+      <div class="tarjeta-resumen disponible">
+        <span class="resumen-titulo">Días disponibles</span>
+        <strong class="resumen-valor">{{ saldo()?.diasDisponibles ?? 0 }}</strong>
+      </div>
     </div>
 
-  }
+    @if (cargandoSaldo()) {
+      <div class="mensaje-carga">Consultando saldo de vacaciones...</div>
+    }
 
-
-  <!-- =========================================================
-       SALDO
-       ========================================================= -->
-
-  <section class="tarjeta-saldo">
-
-    <div class="saldo-contenido">
-
-      <div class="saldo-item">
-
-        <span class="saldo-label">
-          Días asignados
-        </span>
-
-        <strong>
-          {{ saldo()?.diasAsignados ?? 0 }}
-        </strong>
-
-      </div>
-
-      <div class="saldo-item">
-
-        <span class="saldo-label">
-          Días utilizados
-        </span>
-
-        <strong>
-          {{ saldo()?.diasUtilizados ?? 0 }}
-        </strong>
-
-      </div>
-
-      <div class="saldo-item">
-
-        <span class="saldo-label">
-          Días reservados
-        </span>
-
-        <strong>
-          {{ saldo()?.diasReservados ?? 0 }}
-        </strong>
-
-      </div>
-
-      <div class="saldo-item disponible">
-
-        <span class="saldo-label">
-          Días disponibles
-        </span>
-
-        <strong>
-          {{ saldo()?.diasDisponibles ?? 0 }}
-        </strong>
-
-      </div>
-
-    </div>
-
-  </section>
-
-
-  <!-- =========================================================
-       FORMULARIO
-       ========================================================= -->
-
-  <form
-    class="formulario"
-    [formGroup]="formulario"
-    (ngSubmit)="guardar()"
-  >
-
-    <section class="bloque-formulario">
-
-      <h2>
-        Período de vacaciones
-      </h2>
-
-      <p class="descripcion-bloque">
-        Seleccione las fechas en las que desea tomar sus vacaciones.
-      </p>
-
-
-      <div class="cuadricula">
-
-        <!-- FECHA INICIO -->
-
-        <div class="grupo">
-
-          <label for="fechaInicio">
-            Fecha inicial
-          </label>
-
+    <form class="formulario-vacaciones" [formGroup]="formulario" (ngSubmit)="guardar()">
+      <div class="campos-fechas">
+        <div class="campo">
+          <label for="fechaInicio">Fecha inicial</label>
           <input
             id="fechaInicio"
             type="date"
             formControlName="fechaInicio"
             [min]="fechaMinima"
             (change)="actualizarFechas()"
-          >
-
-          @if (
-            formulario.controls.fechaInicio.touched &&
-            formulario.controls.fechaInicio.invalid
-          ) {
-
-            <small class="mensaje-validacion">
-              Debe seleccionar la fecha inicial.
-            </small>
-
-          }
-
+          />
         </div>
 
-
-        <!-- FECHA FIN -->
-
-        <div class="grupo">
-
-          <label for="fechaFin">
-            Fecha final
-          </label>
-
+        <div class="campo">
+          <label for="fechaFin">Fecha final</label>
           <input
             id="fechaFin"
             type="date"
             formControlName="fechaFin"
-            [min]="
-              formulario.controls.fechaInicio.value ||
-              fechaMinima
-            "
+            [min]="formulario.controls.fechaInicio.value || fechaMinima"
             (change)="actualizarFechas()"
-          >
-
-          @if (
-            formulario.controls.fechaFin.touched &&
-            formulario.controls.fechaFin.invalid
-          ) {
-
-            <small class="mensaje-validacion">
-              Debe seleccionar la fecha final.
-            </small>
-
-          }
-
+          />
         </div>
-
       </div>
 
+      @if (formulario.controls.fechaFin.value && formulario.controls.fechaInicio.value && formulario.controls.fechaFin.value < formulario.controls.fechaInicio.value) {
+        <span class="error-message">La fecha final no puede ser menor que la fecha inicial.</span>
+      }
 
-      <!-- =====================================================
-           DÍAS SOLICITADOS
-           ===================================================== -->
-
-      <div class="dias-calculados">
-
-        <span>
-          Días solicitados
-        </span>
-
+      <div class="vacaciones-dias">
+        <span>Días solicitados</span>
         <strong>
           @if (calculandoDias()) {
             Calculando...
@@ -206,51 +76,16 @@
             {{ diasSolicitados() }}
           }
         </strong>
-
       </div>
 
-
-      <!-- =====================================================
-           VALIDACIÓN SALDO
-           ===================================================== -->
-
-      @if (
-        diasSolicitados() > 0 &&
-        saldo()
-      ) {
-
-        <div
-          class="resultado-saldo"
-          [class.correcto]="saldoSuficiente()"
-          [class.incorrecto]="!saldoSuficiente()"
-        >
-
-          @if (saldoSuficiente()) {
-
-            Hay suficientes días disponibles para realizar
-            la solicitud.
-
-          } @else {
-
-            Los días solicitados superan el saldo disponible.
-
-          }
-
+      @if (diasSolicitados() > 0 && saldo() && diasSolicitados() > (saldo()?.diasDisponibles ?? 0)) {
+        <div class="error-message">
+          Los días solicitados superan el saldo disponible.
         </div>
-
       }
 
-
-      <!-- =====================================================
-           OBSERVACIONES
-           ===================================================== -->
-
-      <div class="grupo grupo-completo">
-
-        <label for="observaciones">
-          Observaciones
-        </label>
-
+      <div class="campo campo-ancho">
+        <label for="observaciones">Observaciones</label>
         <textarea
           id="observaciones"
           rows="4"
@@ -258,55 +93,693 @@
           formControlName="observaciones"
           placeholder="Ingrese alguna observación si es necesario..."
         ></textarea>
-
-        <small class="contador">
-          {{ formulario.controls.observaciones.value.length }}
-          / 200
-        </small>
-
+        <div class="contador">{{ formulario.controls.observaciones.value.length }} / 200</div>
       </div>
 
-    </section>
+      @if (errorMessage()) {
+        <div class="mensaje-error" role="alert">
+          {{ errorMessage() }}
+        </div>
+      }
 
+      @if (successMessage()) {
+        <div class="mensaje-exito" role="status">
+          {{ successMessage() }}
+        </div>
+      }
+
+      <div class="acciones-formulario">
+        <button type="button" class="boton-secundario" (click)="formulario.reset({fechaInicio: '', fechaFin: '', observaciones: ''}); diasSolicitados.set(0); errorMessage.set(''); successMessage.set('')">Cancelar</button>
+        <button
+          type="submit"
+          class="boton-principal"
+          [disabled]="guardando() || calculandoDias() || !saldoSuficiente()"
+        >
+          {{ guardando() ? 'Enviando...' : 'Enviar solicitud' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  @if (puedeVerReporte()) {
+    <!-- =========================================================
+         GESTIÓN / REPORTE DE VACACIONES
+         ========================================================= -->
+
+    <section class="seccion-gestion-vacaciones">
+
+      <div class="seccion-header">
+        <div>
+          <h2>Gestión de vacaciones</h2>
+          <p>
+            Consulte los saldos de los empleados y, según sus permisos,
+            cargue saldos, agregue o descuente días y consulte el historial.
+          </p>
+        </div>
+
+        <div class="gestion-controles">
+          <div class="control-anio">
+            <label for="anioGestion">Año</label>
+            <input
+              id="anioGestion"
+              type="number"
+              [value]="anio()"
+              min="2000"
+              max="2100"
+              (change)="cambiarAnio($event)"
+            />
+          </div>
+
+          <button
+            type="button"
+            class="boton-actualizar"
+            [disabled]="cargando() || procesando()"
+            (click)="cargarReporte()"
+          >
+            {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="resumen-reporte">
+        <div class="tarjeta-resumen">
+          <span class="resumen-titulo">Total de empleados</span>
+          <strong class="resumen-valor">{{ totalEmpleados() }}</strong>
+        </div>
+
+        <div class="tarjeta-resumen">
+          <span class="resumen-titulo">Empleados mostrados</span>
+          <strong class="resumen-valor">{{ empleadosFiltrados().length }}</strong>
+        </div>
+
+        <div class="tarjeta-resumen">
+          <span class="resumen-titulo">Año</span>
+          <strong class="resumen-valor">{{ anio() }}</strong>
+        </div>
+      </div>
+
+  @if (puedeAdministrarSaldos()) {
+  <details class="panel-administracion" open>
+    <summary>
+      <span class="titulo-panel">Administración de saldos de vacaciones</span>
+      <span class="subtitulo-panel">
+        Carga inicial, ajustes y descuentos
+      </span>
+    </summary>
+
+    <div class="contenido-administracion">
+
+      <div class="bloque-administracion">
+        <div class="titulo-bloque">
+          <h2>Cargar saldo inicial</h2>
+          <p>
+            Registre el saldo inicial real de un empleado.
+            La justificación es obligatoria.
+          </p>
+        </div>
+
+        <div class="formulario-administracion">
+          <div class="campo-administracion">
+            <label for="cargaEmpleado">Empleado</label>
+            <select
+              id="cargaEmpleado"
+              [value]="cargaInicial().idUsuario"
+              (change)="actualizarCargaInicial({
+                idUsuario: $any($event.target).value
+              })"
+            >
+              <option value="">Seleccione un empleado</option>
+
+              @for (
+                empleado of empleados();
+                track empleado.idUsuario
+              ) {
+                <option [value]="empleado.idUsuario">
+                  {{ empleado.nombreCompleto }} — {{ empleado.identidad }}
+                </option>
+              }
+            </select>
+
+            @if (cargaInicial().idUsuario) {
+              <div class="empleado-seleccionado">
+                <strong>Empleado seleccionado:</strong>
+                {{ obtenerNombreEmpleado(cargaInicial().idUsuario) }}
+              </div>
+            }
+          </div>
+
+          <div class="campo-administracion">
+            <label for="cargaAnio">Año</label>
+            <input
+              id="cargaAnio"
+              type="number"
+              min="2000"
+              max="2100"
+              [value]="cargaInicial().anio"
+              (input)="actualizarCargaInicial({
+                anio: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion">
+            <label for="cargaAsignados">Días asignados</label>
+            <input
+              id="cargaAsignados"
+              type="number"
+              min="0"
+              max="365"
+              [value]="cargaInicial().diasAsignados"
+              (input)="actualizarCargaInicial({
+                diasAsignados: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion">
+            <label for="cargaUtilizados">Días utilizados</label>
+            <input
+              id="cargaUtilizados"
+              type="number"
+              min="0"
+              max="365"
+              [value]="cargaInicial().diasUtilizados"
+              (input)="actualizarCargaInicial({
+                diasUtilizados: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion">
+            <label for="cargaReservados">Días reservados</label>
+            <input
+              id="cargaReservados"
+              type="number"
+              min="0"
+              max="365"
+              [value]="cargaInicial().diasReservados"
+              (input)="actualizarCargaInicial({
+                diasReservados: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion campo-ancho">
+            <label for="cargaObservacion">Justificación</label>
+            <textarea
+              id="cargaObservacion"
+              rows="3"
+              maxlength="500"
+              placeholder="Indique la justificación de la carga inicial..."
+              [value]="cargaInicial().observacion"
+              (input)="actualizarCargaInicial({
+                observacion: $any($event.target).value
+              })"
+            ></textarea>
+          </div>
+
+          <div class="acciones-administracion">
+            <button
+              type="button"
+              class="boton-principal"
+              [disabled]="procesando()"
+              (click)="cargarSaldoInicialEmpleado()"
+            >
+              {{ procesando() ? 'Guardando...' : 'Guardar saldo inicial' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloque-administracion">
+        <div class="titulo-bloque">
+          <h2>Ajuste individual</h2>
+          <p>
+            Agregue o descuente días de un empleado.
+            La justificación es obligatoria.
+          </p>
+        </div>
+
+        <div class="formulario-administracion">
+          <div class="campo-administracion">
+            <label for="ajusteEmpleado">Empleado</label>
+            <select
+              id="ajusteEmpleado"
+              [value]="ajusteIndividual().idUsuario"
+              (change)="actualizarAjusteIndividual({
+                idUsuario: $any($event.target).value
+              })"
+            >
+              <option value="">Seleccione un empleado</option>
+
+              @for (
+                empleado of empleados();
+                track empleado.idUsuario
+              ) {
+                <option [value]="empleado.idUsuario">
+                  {{ empleado.nombreCompleto }} — {{ empleado.identidad }}
+                </option>
+              }
+            </select>
+
+            @if (ajusteIndividual().idUsuario) {
+              <div class="empleado-seleccionado">
+                <strong>Empleado seleccionado:</strong>
+                {{ obtenerNombreEmpleado(ajusteIndividual().idUsuario) }}
+              </div>
+            }
+          </div>
+
+          <div class="campo-administracion">
+            <label for="tipoAjuste">Operación</label>
+            <select
+              id="tipoAjuste"
+              [value]="ajusteIndividual().tipo"
+              (change)="actualizarAjusteIndividual({
+                tipo: $any($event.target).value
+              })"
+            >
+              <option value="DESCONTAR">Descontar días</option>
+              <option value="AGREGAR">Agregar días</option>
+            </select>
+          </div>
+
+          <div class="campo-administracion">
+            <label for="diasAjuste">Días</label>
+            <input
+              id="diasAjuste"
+              type="number"
+              min="1"
+              max="365"
+              [value]="ajusteIndividual().dias"
+              (input)="actualizarAjusteIndividual({
+                dias: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion campo-ancho">
+            <label for="justificacionAjuste">Justificación</label>
+            <textarea
+              id="justificacionAjuste"
+              rows="3"
+              maxlength="500"
+              placeholder="Indique por qué se modifica el saldo..."
+              [value]="ajusteIndividual().justificacion"
+              (input)="actualizarAjusteIndividual({
+                justificacion: $any($event.target).value
+              })"
+            ></textarea>
+          </div>
+
+          <div class="acciones-administracion">
+            <button
+              type="button"
+              class="boton-principal"
+              [disabled]="procesando()"
+              (click)="ejecutarAjusteIndividual()"
+            >
+              {{ procesando() ? 'Procesando...' : 'Aplicar ajuste' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloque-administracion">
+        <div class="titulo-bloque">
+          <h2>Descuento masivo</h2>
+          <p>
+            Si no selecciona empleados, al aplicar el descuento
+            se seleccionarán automáticamente todos los empleados
+            del reporte. Luego puede quitar los que no correspondan.
+          </p>
+        </div>
+
+        <div class="acciones-masivo">
+          <button
+            type="button"
+            class="boton-secundario"
+            [disabled]="procesando()"
+            (click)="seleccionarTodosEmpleados()"
+          >
+            Seleccionar todos
+          </button>
+
+          <button
+            type="button"
+            class="boton-secundario"
+            [disabled]="procesando()"
+            (click)="deseleccionarTodosEmpleados()"
+          >
+            Quitar selección
+          </button>
+
+          <div class="resumen-seleccion">
+            <strong>{{ empleadosSeleccionados().length }}</strong>
+            empleados seleccionados
+          </div>
+        </div>
+
+        <div class="formulario-administracion">
+          <div class="campo-administracion">
+            <label for="diasMasivo">Días a descontar</label>
+            <input
+              id="diasMasivo"
+              type="number"
+              min="1"
+              max="365"
+              [value]="descuentoMasivo().dias"
+              (input)="actualizarDescuentoMasivo({
+                dias: convertirNumero($any($event.target).value)
+              })"
+            />
+          </div>
+
+          <div class="campo-administracion campo-ancho">
+            <label for="justificacionMasivo">Justificación</label>
+            <textarea
+              id="justificacionMasivo"
+              rows="3"
+              maxlength="500"
+              placeholder="Indique la justificación del descuento masivo..."
+              [value]="descuentoMasivo().justificacion"
+              (input)="actualizarDescuentoMasivo({
+                justificacion: $any($event.target).value
+              })"
+            ></textarea>
+          </div>
+
+          <div class="acciones-administracion">
+            <button
+              type="button"
+              class="boton-principal"
+              [disabled]="procesando()"
+              (click)="ejecutarDescuentoMasivo()"
+            >
+              {{
+                procesando()
+                  ? 'Procesando...'
+                  : 'Aplicar descuento masivo'
+              }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </details>
+  }
+
+  <div class="barra-busqueda">
+    <div class="campo-busqueda">
+      <label for="buscarEmpleado">
+        Buscar empleado
+      </label>
+
+      <input
+        id="buscarEmpleado"
+        type="text"
+        placeholder="Buscar por nombre, identidad o contratación..."
+        [value]="busqueda()"
+        (input)="cambiarBusqueda($event)"
+      />
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CONTENIDO
+       ========================================================= -->
+
+  @if (cargando()) {
+    <div class="mensaje-carga" role="status">
+      <div class="cargando-icono">⟳</div>
+      <span>Consultando empleados y saldos de vacaciones...</span>
+    </div>
+  } @else if (empleadosFiltrados().length === 0) {
+    <div class="sin-resultados">
+      <div class="icono-sin-resultados">📅</div>
+
+      <h2>No hay resultados</h2>
+
+      @if (busqueda()) {
+        <p>
+          No se encontraron empleados que coincidan
+          con "{{ busqueda() }}".
+        </p>
+      } @else {
+        <p>
+          No existen registros de vacaciones para el año {{ anio() }}.
+        </p>
+      }
+    </div>
+  } @else {
 
     <!-- =======================================================
-         ACCIONES
+         TABLA COMPLETA
          ======================================================= -->
 
-    <div class="acciones-formulario">
+    <div class="contenedor-tabla">
+      <table class="tabla-reporte">
 
-      <button
-        type="button"
-        class="boton-cancelar"
-        [disabled]="guardando()"
-        (click)="cancelar()"
-      >
-        Cancelar
-      </button>
+        <thead>
+          <tr>
+            @if (puedeAdministrarSaldos()) {
+              <th class="columna-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="todosSeleccionados()"
+                  (change)="alternarSeleccionTodos()"
+                  title="Seleccionar todos los empleados visibles"
+                />
+              </th>
+            }
+            <th>#</th>
+            <th>Empleado</th>
+            <th>Identidad</th>
+            <th>Tipo de contratación</th>
+            <th>Año</th>
+            <th>Días asignados</th>
+            <th>Días utilizados</th>
+            <th>Días reservados</th>
+            <th>Días disponibles</th>
+            <th>Estado</th>
+            @if (puedeAdministrarSaldos()) {
+              <th>Acciones</th>
+            }
+          </tr>
+        </thead>
 
-      <button
-        type="submit"
-        class="boton-guardar"
-        [disabled]="
-          guardando() ||
-          calculandoDias() ||
-          formulario.invalid ||
-          !saldoSuficiente()
-        "
-      >
+        <tbody>
+          @for (
+            empleado of empleadosFiltrados();
+            track empleado.idUsuario;
+            let i = $index
+          ) {
+            <tr>
 
-        {{
-          guardando()
-            ? 'Enviando...'
-            : 'Enviar solicitud'
-        }}
+              @if (puedeAdministrarSaldos()) {
+                <td class="columna-checkbox">
+                  <input
+                    type="checkbox"
+                    [checked]="estaSeleccionado(empleado.idUsuario)"
+                    (change)="alternarSeleccionEmpleado(empleado.idUsuario)"
+                  />
+                </td>
+              }
 
-      </button>
+              <td class="numero-fila">
+                {{ i + 1 }}
+              </td>
 
+              <td class="empleado">
+                <strong>{{ empleado.nombreCompleto }}</strong>
+              </td>
+
+              <td>
+                {{ empleado.identidad || '-' }}
+              </td>
+
+              <td>
+                <span class="tipo-contratacion">
+                  {{ empleado.tipoContratacion || '-' }}
+                </span>
+              </td>
+
+              <td>
+                {{ empleado.anio }}
+              </td>
+
+              <td class="numero">
+                {{ formatearDias(empleado.diasAsignados) }}
+              </td>
+
+              <td class="numero">
+                <span class="dias-utilizados">
+                  {{ formatearDias(empleado.diasUtilizados) }}
+                </span>
+              </td>
+
+              <td class="numero">
+                <span class="dias-reservados">
+                  {{ formatearDias(empleado.diasReservados) }}
+                </span>
+              </td>
+
+              <td class="numero">
+                <span
+                  class="dias-disponibles"
+                  [class.sin-dias]="empleado.diasDisponibles <= 0"
+                  [class.con-dias]="empleado.diasDisponibles > 0"
+                >
+                  {{ formatearDias(empleado.diasDisponibles) }}
+                </span>
+              </td>
+
+              <td>
+                @if (empleado.saldoInicialPendiente) {
+                  <span class="estado-pendiente">
+                    Saldo pendiente
+                  </span>
+                } @else {
+                  <span class="estado-cargado">
+                    Saldo cargado
+                  </span>
+                }
+              </td>
+
+              @if (puedeAdministrarSaldos()) {
+                <td>
+                  <button
+                    type="button"
+                    class="boton-historial"
+                    [disabled]="procesando()"
+                    (click)="verHistorial(empleado)"
+                  >
+                    Historial
+                  </button>
+                </td>
+              }
+
+            </tr>
+          }
+        </tbody>
+
+      </table>
     </div>
 
-  </form>
+    <div class="informacion-tabla">
+      <span>
+        Mostrando
+        <strong>{{ empleadosFiltrados().length }}</strong>
+        de
+        <strong>{{ totalEmpleados() }}</strong>
+        empleados
+      </span>
 
+      @if (puedeAdministrarSaldos()) {
+        <span>
+          Seleccionados:
+          <strong>{{ empleadosSeleccionados().length }}</strong>
+        </span>
+      }
+
+      <span>
+        Año:
+        <strong>{{ anio() }}</strong>
+      </span>
+    </div>
+  }
+
+  <!-- =========================================================
+       HISTORIAL
+       ========================================================= -->
+
+  @if (puedeAdministrarSaldos() && mostrandoHistorial()) {
+    <div class="panel-historial">
+
+      <div class="encabezado-historial">
+        <div>
+          <h2>Historial de vacaciones</h2>
+
+          @if (empleadoHistorial()) {
+            <p>
+              {{ empleadoHistorial()?.nombreCompleto }}
+              —
+              {{ empleadoHistorial()?.identidad }}
+            </p>
+          }
+        </div>
+
+        <button
+          type="button"
+          class="boton-cerrar"
+          (click)="cerrarHistorial()"
+        >
+          Cerrar
+        </button>
+      </div>
+
+      @if (historial().length === 0) {
+        <div class="historial-vacio">
+          <div class="icono-sin-resultados">📋</div>
+          <h3>No hay movimientos registrados</h3>
+          <p>
+            Este empleado todavía no tiene movimientos
+            en el historial de vacaciones.
+          </p>
+        </div>
+      } @else {
+        <div class="contenedor-tabla historial-tabla">
+          <table class="tabla-reporte">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Acción</th>
+                <th>Observación</th>
+                <th>Solicitud</th>
+                <th>Saldo</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (
+                movimiento of historial();
+                track movimiento.idHistorial
+              ) {
+                <tr>
+                  <td>
+                    {{
+                      movimiento.fechaAccion
+                        | date:'dd/MM/yyyy HH:mm'
+                    }}
+                  </td>
+
+                  <td>
+                    <span class="tipo-movimiento">
+                      {{ movimiento.accion }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ movimiento.observacion || '-' }}
+                  </td>
+
+                  <td>
+                    {{ movimiento.idPermisoVaca || '-' }}
+                  </td>
+
+                  <td>
+                    {{ movimiento.idSaldoVacacion || '-' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+    </section>
+  }
 
   <!-- =========================================================
        MIS SOLICITUDES

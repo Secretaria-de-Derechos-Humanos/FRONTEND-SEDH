@@ -702,26 +702,13 @@ export class SolicitudesEmpleadoComponent
         },
 
 
-        error: (error) => {
-
-          console.error(
-            'Error al cargar los datos del empleado para el permiso:',
-            error
-          );
+        error: () => {
 
           this.resetModal();
 
           this.cargandoModal.set(false);
 
-          this.errorMessage.set(
-            error?.error?.message ??
-            error?.error?.mensaje ??
-            error?.message ??
-            'No fue posible cargar los datos del empleado. Verifique el endpoint de datos del permiso.'
-          );
-
-          // No abrir el modal con los campos vacíos.
-          this.modalAbierto.set(false);
+          this.modalAbierto.set(true);
 
         }
 

@@ -26,6 +26,8 @@ export const EP_RRHH_MIS_SOLICITUDES_EMERGENCIA        = '/rrhh/solicitudes-empl
 export const EP_RRHH_DATOS_PERMISO                     = '/rrhh/solicitudes-empleados/datos-permiso';
 export const EP_RRHH_PERMISOS_PERSONALES_INSERTAR      = '/rrhh/permisos-personales/insertar';
 export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficiales/insertar';
+export const EP_RRHH_PERMISOS_PERSONALES_ANULAR = '/rrhh/permisos-personales/anular';
+export const EP_RRHH_PERMISOS_OFICIALES_ANULAR =  '/rrhh/permisos-oficiales/anular';
 export const EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD = '/rrhh/permisos-personales/disponibilidad';
 
 

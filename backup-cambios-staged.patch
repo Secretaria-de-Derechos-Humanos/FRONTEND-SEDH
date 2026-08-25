@@ -1,0 +1,2833 @@
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
+index fd32cc6..26be60b 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
+@@ -5,69 +5,46 @@
+       titulo="Mis solicitudes"
+       subtitulo="Consulte el estado de sus solicitudes de permisos y ausencias"
+     />
+-
+     <div class="header-actions">
+       <button
+-        type="button"
+         class="btn-nueva-solicitud"
+         title="Solicitar un nuevo permiso"
+         [disabled]="cargandoModal()"
+-        (click)="abrirModal()"
+-      >
++        (click)="abrirModal()">
+         @if (cargandoModal()) {
+           <span class="spinner"></span>
+           <span>Cargando...</span>
+         } @else {
+-          <span>+ Nueva solicitud</span>
++          + Nueva solicitud
+         }
+       </button>
+-
+       <button
+-        type="button"
+         class="btn-actualizar"
+         title="Actualizar solicitudes"
+         [disabled]="isActualizando()"
+-        (click)="actualizarDatos()"
+-      >
+-        @if (isActualizando()) {
++        (click)="actualizarDatos()">
++        @if (!isActualizando()) {
++          <span>&#x21BB; Actualizar</span>
++        } @else {
+           <span class="spinner"></span>
+           <span>Cargando...</span>
+-        } @else {
+-          <span>&#x21BB; Actualizar</span>
+         }
+       </button>
+     </div>
+   </div>
+ 
+   @if (errorMessage()) {
+-    <div class="se-error-alert">
+-      {{ errorMessage() }}
+-    </div>
++    <div class="se-error-alert">{{ errorMessage() }}</div>
+   }
+ 
+-  <!-- Solicitudes normales -->
+-  @if (
+-    !isActualizando() &&
+-    solicitudes().length === 0
+-  ) {
++  <!-- ── Tabla: Solicitudes normales ── -->
++  @if (!isActualizando() && solicitudes().length === 0) {
+     <div class="empty-state">
+-      <svg
+-        class="empty-icon"
+-        fill="none"
+-        stroke="currentColor"
+-        viewBox="0 0 24 24"
+-      >
+-        <path
+-          stroke-linecap="round"
+-          stroke-linejoin="round"
+-          stroke-width="2"
+-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+-        />
++      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+       </svg>
+-
+-      <p class="empty-message">
+-        No hay solicitudes registradas en este momento.
+-      </p>
++      <p class="empty-message">No hay solicitudes registradas en este momento.</p>
+     </div>
+   } @else {
+     <div class="table-container">
+@@ -76,135 +53,59 @@
+           <tr>
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Fecha solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar fecha..."
+-                  [ngModel]="filtroFecha()"
+-                  (ngModelChange)="filtroFecha.set($event)"
+-                >
++                <span class="th-label">Fecha solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar fecha..."
++                  [ngModel]="filtroFecha()" (ngModelChange)="filtroFecha.set($event)" />
+               </div>
+             </th>
+-
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Tipo solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar tipo..."
+-                  [ngModel]="filtroTipo()"
+-                  (ngModelChange)="filtroTipo.set($event)"
+-                >
++                <span class="th-label">Tipo solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar tipo..."
++                  [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)" />
+               </div>
+             </th>
+-
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Estado solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar estado..."
+-                  [ngModel]="filtroEstado()"
+-                  (ngModelChange)="filtroEstado.set($event)"
+-                >
++                <span class="th-label">Estado solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar estado..."
++                  [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)" />
+               </div>
+             </th>
+-
+-            <th>Primera revisión</th>
++            <th>Primer revisión</th>
+             <th>Segunda revisión</th>
+             <th>Motivo rechazo</th>
+           </tr>
+         </thead>
+-
+         <tbody>
+-          @if (
+-            solicitudesFiltradas().length === 0
+-          ) {
++          @if (solicitudesFiltradas().length === 0) {
+             <tr>
+-              <td
+-                colspan="6"
+-                class="empty-cell"
+-              >
+-                Sin resultados para los filtros aplicados.
+-              </td>
++              <td colspan="6" class="empty-cell">Sin resultados para los filtros aplicados.</td>
+             </tr>
+           }
+-
+-          @for (
+-            solicitud of solicitudesFiltradas();
+-            track $index
+-          ) {
++          @for (s of solicitudesFiltradas(); track $index) {
+             <tr>
+-              <td class="td-fecha">
+-                {{
+-                  solicitud.fec_solicitud |
+-                    date:'dd/MM/yyyy'
+-                }}
+-              </td>
+-
+-              <td>
+-                {{ solicitud.nom_tipo_solicitud }}
+-              </td>
+-
+-              <td>
+-                <span [class]="badgeClass">
+-                  {{ solicitud.nom_estado }}
+-                </span>
+-              </td>
+-
+-              <td>
+-                {{ primerRevision(solicitud) }}
+-              </td>
+-
+-              <td>
+-                {{ segundaRevision(solicitud) }}
+-              </td>
+-
+-              <td>
+-                {{
+-                  solicitud.mot_rechazo ??
+-                    'N/A'
+-                }}
+-              </td>
++              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
++              <td>{{ s.nom_tipo_solicitud }}</td>
++              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
++              <td>{{ primerRevision(s) }}</td>
++              <td>{{ segundaRevision(s) }}</td>
++              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
+             </tr>
+           }
+         </tbody>
+       </table>
+     </div>
+-
+     <div class="table-footer">
+       <p class="results-count">
+-        Mostrando
+-        <strong>
+-          {{ solicitudesFiltradas().length }}
+-        </strong>
+-        de
+-        <strong>
+-          {{ solicitudes().length }}
+-        </strong>
+-
+-        solicitud{{
+-          solicitudes().length !== 1
+-            ? 'es'
+-            : ''
+-        }}
++        Mostrando <strong>{{ solicitudesFiltradas().length }}</strong> de
++        <strong>{{ solicitudes().length }}</strong>
++        solicitud{{ solicitudes().length !== 1 ? 'es' : '' }}
+       </p>
+     </div>
+   }
+ 
+-  <!-- Solicitudes de emergencia -->
++  <!-- ── Sección: Solicitudes de emergencia ── -->
+   <div class="se-section">
+     <app-encabezados-pagina
+       titulo="Mis solicitudes de emergencia"
+@@ -212,28 +113,13 @@
+     />
+   </div>
+ 
+-  @if (
+-    !isActualizando() &&
+-    solicitudesEmergencia().length === 0
+-  ) {
++  @if (!isActualizando() && solicitudesEmergencia().length === 0) {
+     <div class="empty-state">
+-      <svg
+-        class="empty-icon"
+-        fill="none"
+-        stroke="currentColor"
+-        viewBox="0 0 24 24"
+-      >
+-        <path
+-          stroke-linecap="round"
+-          stroke-linejoin="round"
+-          stroke-width="2"
+-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+-        />
++      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+       </svg>
+-
+-      <p class="empty-message">
+-        No hay solicitudes de emergencia registradas en este momento.
+-      </p>
++      <p class="empty-message">No hay solicitudes de emergencia registradas en este momento.</p>
+     </div>
+   } @else {
+     <div class="table-container">
+@@ -242,144 +128,63 @@
+           <tr>
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Fecha solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar fecha..."
+-                  [ngModel]="filtroFechaE()"
+-                  (ngModelChange)="filtroFechaE.set($event)"
+-                >
++                <span class="th-label">Fecha solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar fecha..."
++                  [ngModel]="filtroFechaE()" (ngModelChange)="filtroFechaE.set($event)" />
+               </div>
+             </th>
+-
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Tipo solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar tipo..."
+-                  [ngModel]="filtroTipoE()"
+-                  (ngModelChange)="filtroTipoE.set($event)"
+-                >
++                <span class="th-label">Tipo solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar tipo..."
++                  [ngModel]="filtroTipoE()" (ngModelChange)="filtroTipoE.set($event)" />
+               </div>
+             </th>
+-
+             <th>
+               <div class="th-content">
+-                <span class="th-label">
+-                  Estado solicitud
+-                </span>
+-
+-                <input
+-                  class="filter-input"
+-                  type="text"
+-                  placeholder="Buscar estado..."
+-                  [ngModel]="filtroEstadoE()"
+-                  (ngModelChange)="filtroEstadoE.set($event)"
+-                >
++                <span class="th-label">Estado solicitud</span>
++                <input class="filter-input" type="text" placeholder="Buscar estado..."
++                  [ngModel]="filtroEstadoE()" (ngModelChange)="filtroEstadoE.set($event)" />
+               </div>
+             </th>
+-
+-            <th>Primera revisión</th>
++            <th>Primer revisión</th>
+             <th>Segunda revisión</th>
+             <th>Motivo rechazo</th>
+             <th>Evidencia</th>
+           </tr>
+         </thead>
+-
+         <tbody>
+-          @if (
+-            solicitudesEmergenciaFiltradas().length === 0
+-          ) {
++          @if (solicitudesEmergenciaFiltradas().length === 0) {
+             <tr>
+-              <td
+-                colspan="7"
+-                class="empty-cell"
+-              >
+-                Sin resultados para los filtros aplicados.
+-              </td>
++              <td colspan="7" class="empty-cell">Sin resultados para los filtros aplicados.</td>
+             </tr>
+           }
+-
+-          @for (
+-            solicitud of
+-              solicitudesEmergenciaFiltradas();
+-            track $index
+-          ) {
++          @for (s of solicitudesEmergenciaFiltradas(); track $index) {
+             <tr>
+-              <td class="td-fecha">
+-                {{
+-                  solicitud.fec_solicitud |
+-                    date:'dd/MM/yyyy'
+-                }}
+-              </td>
+-
+-              <td>
+-                {{ solicitud.nom_tipo_solicitud }}
+-              </td>
+-
+-              <td>
+-                <span [class]="badgeClass">
+-                  {{ solicitud.nom_estado }}
+-                </span>
+-              </td>
+-
+-              <td>
+-                {{ primerRevision(solicitud) }}
+-              </td>
+-
+-              <td>
+-                {{ segundaRevision(solicitud) }}
+-              </td>
+-
+-              <td>
+-                {{
+-                  solicitud.mot_rechazo ??
+-                    'N/A'
+-                }}
+-              </td>
+-
++              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
++              <td>{{ s.nom_tipo_solicitud }}</td>
++              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
++              <td>{{ primerRevision(s) }}</td>
++              <td>{{ segundaRevision(s) }}</td>
++              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
+               <td>—</td>
+             </tr>
+           }
+         </tbody>
+       </table>
+     </div>
+-
+     <div class="table-footer">
+       <p class="results-count">
+-        Mostrando
+-        <strong>
+-          {{
+-            solicitudesEmergenciaFiltradas().length
+-          }}
+-        </strong>
+-        de
+-        <strong>
+-          {{ solicitudesEmergencia().length }}
+-        </strong>
+-
+-        solicitud{{
+-          solicitudesEmergencia().length !== 1
+-            ? 'es'
+-            : ''
+-        }}
+-        de emergencia
++        Mostrando <strong>{{ solicitudesEmergenciaFiltradas().length }}</strong> de
++        <strong>{{ solicitudesEmergencia().length }}</strong>
++        solicitud{{ solicitudesEmergencia().length !== 1 ? 'es' : '' }} de emergencia
+       </p>
+     </div>
+   }
+ 
+ </div>
+ 
+-<!-- Modal nueva solicitud -->
++<!-- ── Modal: Nueva solicitud ── -->
+ @if (modalAbierto()) {
+   <div
+     class="modal-backdrop"
+@@ -388,355 +193,147 @@
+     aria-label="Cerrar modal"
+     (click)="cerrarModal()"
+     (keydown.enter)="cerrarModal()"
+-    (keydown.escape)="cerrarModal()"
+-  ></div>
++    (keydown.escape)="cerrarModal()"></div>
+ 
+-  <div
+-    class="modal"
+-    role="dialog"
+-    aria-modal="true"
+-    aria-labelledby="modal-titulo"
+-  >
++  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+     <div class="modal-header">
+-      <h2
+-        class="modal-titulo"
+-        id="modal-titulo"
+-      >
+-        Nueva solicitud
+-      </h2>
+-
+-      <button
+-        type="button"
+-        class="modal-close"
+-        title="Cerrar"
+-        [disabled]="isEnviando()"
+-        (click)="cerrarModal()"
+-      >
+-        <svg
+-          width="20"
+-          height="20"
+-          fill="none"
+-          stroke="currentColor"
+-          viewBox="0 0 24 24"
+-        >
+-          <path
+-            stroke-linecap="round"
+-            stroke-linejoin="round"
+-            stroke-width="2"
+-            d="M6 18L18 6M6 6l12 12"
+-          />
++      <h2 class="modal-titulo" id="modal-titulo">Nueva solicitud</h2>
++      <button class="modal-close" (click)="cerrarModal()" title="Cerrar">
++        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
++          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+         </svg>
+       </button>
+     </div>
+ 
+     <div class="modal-body">
+ 
+-      @if (modalError()) {
+-        <div class="se-error-alert">
+-          {{ modalError() }}
+-        </div>
+-      }
+-
+-      <!-- Datos del empleado -->
++      <!-- Campos comunes -->
+       <div class="form-group">
+-        <label
+-          class="form-label"
+-          for="nombreEmpleado"
+-        >
+-          Nombre del empleado
+-        </label>
+-
++        <label class="form-label" for="nombreEmpleado">Nombre del empleado</label>
+         <input
+           id="nombreEmpleado"
+           class="form-control form-control--readonly"
+           type="text"
+           readonly
+-          [value]="form().nombreEmpleado"
+-          placeholder="Información no disponible"
+-        >
++          [value]="form().nombreEmpleado" />
+       </div>
+ 
+       <div class="form-row">
+         <div class="form-group">
+-          <label
+-            class="form-label"
+-            for="dependencia"
+-          >
+-            Dependencia
+-          </label>
+-
++          <label class="form-label" for="dependencia">Dependencia</label>
+           <input
+             id="dependencia"
+             class="form-control form-control--readonly"
+             type="text"
+             readonly
+-            [value]="form().dependencia"
+-            placeholder="Información no disponible"
+-          >
++            [value]="form().dependencia" />
+         </div>
+ 
+         <div class="form-group">
+-          <label
+-            class="form-label"
+-            for="cargo"
+-          >
+-            Cargo
+-          </label>
+-
++          <label class="form-label" for="cargo">Cargo</label>
+           <input
+             id="cargo"
+             class="form-control form-control--readonly"
+             type="text"
+             readonly
+-            [value]="form().cargo"
+-            placeholder="Información no disponible"
+-          >
++            [value]="form().cargo" />
+         </div>
+       </div>
+ 
+-      <!-- Tipo de solicitud -->
+       <div class="form-group">
+-        <label
+-          class="form-label"
+-          for="tipoSolicitud"
+-        >
+-          Tipo de solicitud
+-        </label>
+-
++        <label class="form-label" for="tipoSolicitud">Tipo de solicitud</label>
+         <select
+           id="tipoSolicitud"
+           class="form-control form-select"
+           [ngModel]="form().tipoSolicitud"
+-          (ngModelChange)="onTipoChange($event)"
+-        >
+-          <option
+-            value=""
+-            disabled
+-          >
+-            Seleccione un tipo...
+-          </option>
+-
+-          <option value="permiso-personal">
+-            Permiso personal
+-          </option>
+-
+-          <option value="permiso-oficial">
+-            Permiso oficial
+-          </option>
++          (ngModelChange)="onTipoChange($event)">
++          <option value="" disabled>Seleccione un tipo...</option>
++          <option value="permiso-personal">Permiso personal</option>
++          <option value="permiso-oficial">Permiso oficial</option>
+         </select>
+       </div>
+ 
+-      <!-- Permiso personal -->
+-      @if (
+-        form().tipoSolicitud ===
+-        'permiso-personal'
+-      ) {
++      <!-- Sección dinámica según tipo -->
++      @if (form().tipoSolicitud === 'permiso-personal') {
+         <div class="form-section">
+-          <div class="form-section-title">
+-            Datos del permiso personal
+-          </div>
++          <div class="form-section-title">Datos del permiso personal</div>
+ 
++          <!-- Fila: fecha + disponible -->
+           <div class="form-date">
+-
+-            <!-- Fecha -->
+             <div class="form-group">
+-              <label
+-                class="form-label"
+-                for="ppFecha"
+-              >
+-                Fecha de salida
+-              </label>
+-
++              <label class="form-label" for="ppFecha">Fecha de salida</label>
+               <input
+                 id="ppFecha"
+                 class="form-control"
+-                [class.field-invalido]="
+-                  ppErrores().fecha
+-                "
++                [class.field-invalido]="ppErrores().fecha"
+                 type="date"
+                 [min]="ppFechaMin"
+                 [max]="ppFechaMax"
+                 [ngModel]="ppFecha()"
+-                (ngModelChange)="
+-                  cambiarFechaPermisoPersonal(
+-                    $event
+-                  )
+-                "
+-              >
+-
+-              @if (
+-                ppErrores().fecha
+-              ) {
+-                <span class="error-message">
+-                  Seleccione una fecha entre hoy y los próximos siete días.
+-                </span>
++                (ngModelChange)="ppFecha.set($event)" />
++              @if (ppErrores().fecha) {
++                <span class="error-message">Seleccione una fecha entre hoy y 7 días.</span>
+               }
+             </div>
+ 
+-            <!-- Disponibilidad -->
+             <div class="horas-disponibles">
+-              <div class="horas-disponibles-value">
+-                @if (
+-                  ppConsultandoDisponibilidad()
+-                ) {
+-                  <span class="spinner-modal"></span>
+-                } @else {
+-                  {{ ppHorasDisponibles() }}
+-                }
+-              </div>
+-
+-              <div class="horas-disponibles-text">
+-                Disponibles este mes
+-              </div>
+-
+-              <small>
+-                Disponible para esta fecha:
+-                <strong>
+-                  {{ ppDisponibilidadDia() }}
+-                </strong>
+-              </small>
++              <div class="horas-disponibles-value">{{ ppHorasDisponibles() }}</div>
++              <div class="horas-disponibles-text">Horas disponibles</div>
+             </div>
+ 
+-            <!-- Tiempo solicitado -->
+             <div class="form-group tiempo-salida">
+-              <span class="form-label">
+-                Tiempo que desea tomar
+-              </span>
+-
++              <span class="form-label">Tiempo que desea tomar</span>
+               <div class="time-row">
+                 <div class="time-field">
+                   <input
+                     id="ppHoras"
+                     class="form-control time-input"
+-                    [class.field-invalido]="
+-                      ppErrores().horas ||
+-                      ppErrores().tiempoVacio ||
+-                      ppErrores().excedeLimiteDiario ||
+-                      ppErrores().excedeDisponibleDia ||
+-                      ppErrores().excedeDisponibleMes
+-                    "
++                    [class.field-invalido]="ppErrores().horas"
+                     type="number"
+                     min="0"
+-                    max="3"
+-                    step="1"
++                    max="9"
+                     [ngModel]="ppHoras()"
+-                    (ngModelChange)="
+-                      ppHoras.set(+$event)
+-                    "
+-                  >
+-
+-                  <label
+-                    class="form-label"
+-                    for="ppHoras"
+-                  >
+-                    Horas
+-                  </label>
++                    (ngModelChange)="ppHoras.set(+$event)" />
++                  <label class="form-label" for="ppHoras">Horas</label>
+                 </div>
+-
+                 <div class="time-field">
+                   <input
+                     id="ppMinutos"
+                     class="form-control time-input"
+-                    [class.field-invalido]="
+-                      ppErrores().minutos ||
+-                      ppErrores().tiempoVacio ||
+-                      ppErrores().excedeLimiteDiario ||
+-                      ppErrores().excedeDisponibleDia ||
+-                      ppErrores().excedeDisponibleMes
+-                    "
++                    [class.field-invalido]="ppErrores().minutos"
+                     type="number"
+                     min="0"
+                     max="59"
+-                    step="1"
+                     [ngModel]="ppMinutos()"
+-                    (ngModelChange)="
+-                      ppMinutos.set(+$event)
+-                    "
+-                  >
+-
+-                  <label
+-                    class="form-label"
+-                    for="ppMinutos"
+-                  >
+-                    Minutos
+-                  </label>
++                    (ngModelChange)="ppMinutos.set(+$event)" />
++                  <label class="form-label" for="ppMinutos">Minutos</label>
+                 </div>
+               </div>
+-
+-              @if (
+-                ppErrores().horas ||
+-                ppErrores().minutos
+-              ) {
+-                <span class="error-message">
+-                  El tiempo máximo permitido es 3 horas por día.
+-                </span>
+-              }
+-
+-              @if (
+-                ppErrores().tiempoVacio
+-              ) {
+-                <span class="error-message">
+-                  Debe solicitar al menos un minuto.
+-                </span>
+-              }
+-
+-              @if (
+-                ppErrores().excedeDisponibleDia
+-              ) {
+-                <span class="error-message">
+-                  El tiempo solicitado supera lo disponible para esta fecha.
+-                </span>
+-              }
+-
+-              @if (
+-                ppErrores().excedeDisponibleMes
+-              ) {
+-                <span class="error-message">
+-                  El tiempo solicitado supera las horas disponibles del mes.
+-                </span>
++              @if (ppErrores().horas || ppErrores().minutos) {
++                <span class="error-message">Horas: 0–9. Minutos: 0–59.</span>
+               }
+             </div>
+           </div>
+ 
+           <!-- Motivo -->
+           <div class="form-group">
+-            <label
+-              class="form-label"
+-              for="ppMotivo"
+-            >
+-              Motivo de la salida
+-            </label>
+-
++            <label class="form-label" for="ppMotivo">Motivo de la salida</label>
+             <textarea
+               id="ppMotivo"
+               class="form-control"
+-              [class.field-invalido]="
+-                ppErrores().motivo
+-              "
++              [class.field-invalido]="ppErrores().motivo"
+               rows="3"
+-              maxlength="500"
+               placeholder="Describa el motivo de su salida"
+               [ngModel]="ppMotivo()"
+-              (ngModelChange)="
+-                ppMotivo.set($event)
+-              "
+-            ></textarea>
+-
+-            @if (
+-              ppErrores().motivo
+-            ) {
+-              <span class="error-message">
+-                El motivo es obligatorio.
+-              </span>
++              (ngModelChange)="ppMotivo.set($event)"></textarea>
++            @if (ppErrores().motivo) {
++              <span class="error-message">El motivo es obligatorio.</span>
+             }
+           </div>
+ 
+-          <!-- Cita médica / emergencia -->
++          <!-- ¿Cita médica? -->
+           <div class="form-group">
+-            <span class="form-label">
+-              ¿Es cita médica?
+-            </span>
+-
++            <span class="form-label">¿Es cita médica?</span>
+             <div class="radio-group">
+               <label class="radio-option">
+                 <input
+@@ -744,109 +341,61 @@
+                   name="ppCitaMedica"
+                   [value]="1"
+                   [ngModel]="ppCitaMedica()"
+-                  (ngModelChange)="
+-                    ppCitaMedica.set(
+-                      +$event
+-                    )
+-                  "
+-                >
+-
++                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+                 <span>Sí</span>
+               </label>
+-
+               <label class="radio-option">
+                 <input
+                   type="radio"
+                   name="ppCitaMedica"
+                   [value]="0"
+                   [ngModel]="ppCitaMedica()"
+-                  (ngModelChange)="
+-                    ppCitaMedica.set(
+-                      +$event
+-                    )
+-                  "
+-                >
+-
++                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+                 <span>No</span>
+               </label>
+             </div>
+           </div>
++
+         </div>
+       }
+ 
+-      <!-- Permiso oficial -->
+-      @if (
+-        form().tipoSolicitud ===
+-        'permiso-oficial'
+-      ) {
++      @if (form().tipoSolicitud === 'permiso-oficial') {
+         <div class="form-section">
+-          <div class="form-section-title">
+-            Datos del permiso oficial
+-          </div>
++          <div class="form-section-title">Datos del permiso oficial</div>
+ 
++          <!-- Fecha de salida -->
+           <div class="form-group">
+-            <label
+-              class="form-label"
+-              for="poFecha"
+-            >
+-              Fecha de salida
+-            </label>
+-
++            <label class="form-label" for="poFecha">Fecha de salida</label>
+             <input
+               id="poFecha"
+               class="form-control"
+-              [class.field-invalido]="
+-                poErrores().fecha
+-              "
++              [class.field-invalido]="poErrores().fecha"
+               type="date"
+               [min]="poFechaMin"
+               [max]="poFechaMax"
+               [ngModel]="poFecha()"
+-              (ngModelChange)="
+-                poFecha.set($event)
+-              "
+-            >
+-
+-            @if (
+-              poErrores().fecha
+-            ) {
+-              <span class="error-message">
+-                Seleccione una fecha válida, con un máximo de dos semanas.
+-              </span>
++              (ngModelChange)="poFecha.set($event)" />
++            @if (poErrores().fecha) {
++              <span class="error-message">Seleccione una fecha válida (máximo dos semanas a partir de hoy).</span>
+             }
+           </div>
+ 
++          <!-- Motivo -->
+           <div class="form-group">
+-            <label
+-              class="form-label"
+-              for="poMotivo"
+-            >
+-              Motivo de la salida
+-            </label>
+-
++            <label class="form-label" for="poMotivo">Motivo de la salida</label>
+             <textarea
+               id="poMotivo"
+               class="form-control"
+-              [class.field-invalido]="
+-                poErrores().motivo
+-              "
++              [class.field-invalido]="poErrores().motivo"
+               rows="3"
+-              maxlength="500"
+               placeholder="Describa el motivo de su salida"
+               [ngModel]="poMotivo()"
+-              (ngModelChange)="
+-                poMotivo.set($event)
+-              "
+-            ></textarea>
+-
+-            @if (
+-              poErrores().motivo
+-            ) {
+-              <span class="error-message">
+-                Ingrese el motivo.
+-              </span>
++              (ngModelChange)="poMotivo.set($event)"></textarea>
++            @if (poErrores().motivo) {
++              <span class="error-message">Ingrese el motivo.</span>
+             }
+           </div>
++
+         </div>
+       }
+ 
+@@ -854,91 +403,39 @@
+ 
+     <div class="modal-footer">
+       <div class="modal-footer-info">
+-        @if (
+-          form().tipoSolicitud
+-        ) {
++        @if (form().tipoSolicitud) {
+           <span class="modal-tipo-badge">
+-            <svg
+-              width="13"
+-              height="13"
+-              fill="none"
+-              stroke="currentColor"
+-              viewBox="0 0 24 24"
+-              aria-hidden="true"
+-            >
+-              <path
+-                stroke-linecap="round"
+-                stroke-linejoin="round"
+-                stroke-width="2"
+-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"
+-              />
++            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
++              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
+             </svg>
+-
+-            {{
+-              form().tipoSolicitud ===
+-                'permiso-personal'
+-                ? 'Permiso personal'
+-                : 'Permiso oficial'
+-            }}
++            {{ form().tipoSolicitud === 'permiso-personal' ? 'Permiso personal' : 'Permiso oficial' }}
+           </span>
+         }
+       </div>
+-
+       <div class="modal-footer-actions">
++        <button class="btn-cancelar" type="button" (click)="cerrarModal()">Cancelar</button>
+         <button
+-          type="button"
+-          class="btn-cancelar"
+-          [disabled]="isEnviando()"
+-          (click)="cerrarModal()"
+-        >
+-          Cancelar
+-        </button>
+-
+-        <button
+-          type="button"
+           class="btn-enviar"
+-          [disabled]="
+-            cargandoModal() ||
+-            isEnviando() ||
++          type="button"
++          [disabled]="cargandoModal() || isEnviando() ||
+             !form().tipoSolicitud ||
+-            (
+-              form().tipoSolicitud ===
+-                'permiso-personal' &&
+-              ppFormInvalido()
+-            ) ||
+-            (
+-              form().tipoSolicitud ===
+-                'permiso-oficial' &&
+-              poFormInvalido()
+-            )
+-          "
+-          (click)="enviarSolicitud()"
+-        >
++            (form().tipoSolicitud === 'permiso-personal' && ppFormInvalido()) ||
++            (form().tipoSolicitud === 'permiso-oficial'  && poFormInvalido())"
++          (click)="enviarSolicitud()">
+           @if (isEnviando()) {
+-            <span
+-              class="spinner-modal"
+-              aria-hidden="true"
+-            ></span>
+-
++            <span class="spinner-modal" aria-hidden="true"></span>
+             Enviando…
+           } @else {
+-            <svg
+-              width="15"
+-              height="15"
+-              fill="none"
+-              stroke="currentColor"
+-              viewBox="0 0 24 24"
+-              aria-hidden="true"
+-            >
+-              <path
+-                stroke-linecap="round"
+-                stroke-linejoin="round"
+-                stroke-width="2"
+-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+-              />
++            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
++              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
++                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+             </svg>
+-
+-            Enviar a jefe inmediato
++            @if (form().tipoSolicitud === 'permiso-personal' || form().tipoSolicitud === 'permiso-oficial') {
++              Enviar a jefe inmediato
++            } @else {
++              Enviar solicitud
++            }
+           }
+         </button>
+       </div>
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
+index 725ce1a..9c8d544 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
+@@ -1,34 +1,13 @@
+-import {
+-  ChangeDetectionStrategy,
+-  Component,
+-  OnInit,
+-  PLATFORM_ID,
+-  computed,
+-  inject,
+-  signal,
+-} from '@angular/core';
+-import {
+-  DatePipe,
+-  isPlatformBrowser,
+-} from '@angular/common';
++import { Component, ChangeDetectionStrategy, OnInit, signal, computed, inject, PLATFORM_ID } from '@angular/core';
++import { DatePipe, isPlatformBrowser } from '@angular/common';
+ import { FormsModule } from '@angular/forms';
+ import { forkJoin, of } from 'rxjs';
+ import { catchError } from 'rxjs/operators';
++import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
++import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
++import { DatosPermiso, InsertarPermisoPersonalBody, InsertarPermisoOficialBody } from './solicitudesEmpleado.service';
+ 
+-import {
+-  EncabezadosPaginaComponent,
+-} from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
+-
+-import {
+-  DatosPermiso,
+-  InsertarPermisoOficialBody,
+-  InsertarPermisoPersonalBody,
+-  SolicitudesEmpleadoService,
+-} from './solicitudesEmpleado.service';
+-
+-export type TipoSolicitud =
+-  | 'permiso-personal'
+-  | 'permiso-oficial';
++export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
+ 
+ export interface NuevaSolicitudForm {
+   nombreEmpleado: string;
+@@ -40,468 +19,147 @@ export interface NuevaSolicitudForm {
+ export interface Solicitud {
+   fec_solicitud: string;
+   nom_tipo_solicitud: string;
+-
+-  nom_estado:
+-    | 'EN PROCESO'
+-    | 'APROBADO'
+-    | 'RECHAZADO';
+-
++  nom_estado: 'EN PROCESO' | 'APROBADO' | 'RECHAZADO';
+   pri_aporbacion: string | null;
+   seg_aprobacion: string | null;
+   mot_rechazo: string | null;
+ }
+ 
+-/**
+- * Devuelve la fecha local en formato YYYY-MM-DD.
+- */
++// Helpers de fecha (zona horaria Honduras UTC-6)
+ function hoyStr(): string {
+   return new Date().toLocaleDateString('en-CA');
+ }
+-
+-/**
+- * Permisos personales:
+- * máximo siete días desde la fecha actual.
+- */
+ function maxFechaStr(): string {
+-  const fecha = new Date();
+-
+-  fecha.setDate(
+-    fecha.getDate() + 7,
+-  );
+-
+-  return fecha.toLocaleDateString('en-CA');
++  const d = new Date();
++  d.setDate(d.getDate() + 7);
++  return d.toLocaleDateString('en-CA');
+ }
+-
+-/**
+- * Permisos oficiales:
+- * máximo catorce días desde la fecha actual.
+- */
+ function maxFechaOficialStr(): string {
+-  const fecha = new Date();
+-
+-  fecha.setDate(
+-    fecha.getDate() + 14,
+-  );
+-
+-  return fecha.toLocaleDateString('en-CA');
++  const d = new Date();
++  d.setDate(d.getDate() + 14);
++  return d.toLocaleDateString('en-CA');
+ }
+ 
+ @Component({
+   selector: 'app-solicitudes-empleado',
+   standalone: true,
+-
+-  imports: [
+-    DatePipe,
+-    FormsModule,
+-    EncabezadosPaginaComponent,
+-  ],
+-
+-  templateUrl:
+-    './solicitudesEmpleado.component.html',
+-
+-  styleUrls: [
+-    './solicitudesEmpleado.component.css',
+-  ],
+-
+-  changeDetection:
+-    ChangeDetectionStrategy.OnPush,
++  imports: [DatePipe, FormsModule, EncabezadosPaginaComponent],
++  templateUrl: './solicitudesEmpleado.component.html',
++  styleUrls: ['./solicitudesEmpleado.component.css'],
++  changeDetection: ChangeDetectionStrategy.OnPush
+ })
+-export class SolicitudesEmpleadoComponent
+-  implements OnInit
+-{
+-  private readonly solicitudesService =
+-    inject(SolicitudesEmpleadoService);
+-
+-  private readonly platformId =
+-    inject(PLATFORM_ID);
+-
+-  /* =========================================================
+-     LISTADOS
+-     ========================================================= */
+-
+-  readonly solicitudes =
+-    signal<Solicitud[]>([]);
+-
+-  readonly solicitudesEmergencia =
+-    signal<Solicitud[]>([]);
+-
+-  readonly isActualizando =
+-    signal(true);
+-
+-  readonly errorMessage =
+-    signal('');
+-
+-  /* =========================================================
+-     FILTROS: SOLICITUDES NORMALES
+-     ========================================================= */
+-
+-  readonly filtroFecha =
+-    signal('');
+-
+-  readonly filtroTipo =
+-    signal('');
+-
+-  readonly filtroEstado =
+-    signal('');
+-
+-  /* =========================================================
+-     FILTROS: EMERGENCIAS
+-     ========================================================= */
+-
+-  readonly filtroFechaE =
+-    signal('');
+-
+-  readonly filtroTipoE =
+-    signal('');
+-
+-  readonly filtroEstadoE =
+-    signal('');
+-
+-  readonly solicitudesFiltradas =
+-    computed(() => {
+-      const filtroFecha =
+-        this.filtroFecha()
+-          .trim()
+-          .toLowerCase();
+-
+-      const filtroTipo =
+-        this.filtroTipo()
+-          .trim()
+-          .toLowerCase();
+-
+-      const filtroEstado =
+-        this.filtroEstado()
+-          .trim()
+-          .toLowerCase();
+-
+-      return this.solicitudes().filter(
+-        (solicitud) =>
+-          (
+-            filtroFecha
+-              ? solicitud.fec_solicitud
+-                  .toLowerCase()
+-                  .includes(filtroFecha)
+-              : true
+-          ) &&
+-          (
+-            filtroTipo
+-              ? solicitud.nom_tipo_solicitud
+-                  .toLowerCase()
+-                  .includes(filtroTipo)
+-              : true
+-          ) &&
+-          (
+-            filtroEstado
+-              ? solicitud.nom_estado
+-                  .toLowerCase()
+-                  .includes(filtroEstado)
+-              : true
+-          ),
+-      );
+-    });
+-
+-  readonly solicitudesEmergenciaFiltradas =
+-    computed(() => {
+-      const filtroFecha =
+-        this.filtroFechaE()
+-          .trim()
+-          .toLowerCase();
+-
+-      const filtroTipo =
+-        this.filtroTipoE()
+-          .trim()
+-          .toLowerCase();
+-
+-      const filtroEstado =
+-        this.filtroEstadoE()
+-          .trim()
+-          .toLowerCase();
+-
+-      return this.solicitudesEmergencia()
+-        .filter(
+-          (solicitud) =>
+-            (
+-              filtroFecha
+-                ? solicitud.fec_solicitud
+-                    .toLowerCase()
+-                    .includes(filtroFecha)
+-                : true
+-            ) &&
+-            (
+-              filtroTipo
+-                ? solicitud.nom_tipo_solicitud
+-                    .toLowerCase()
+-                    .includes(filtroTipo)
+-                : true
+-            ) &&
+-            (
+-              filtroEstado
+-                ? solicitud.nom_estado
+-                    .toLowerCase()
+-                    .includes(filtroEstado)
+-                : true
+-            ),
+-        );
+-    });
++export class SolicitudesEmpleadoComponent implements OnInit {
++  private readonly solicitudesService = inject(SolicitudesEmpleadoService);
++  private readonly platformId          = inject(PLATFORM_ID);
++
++  solicitudes          = signal<Solicitud[]>([]);
++  solicitudesEmergencia = signal<Solicitud[]>([]);
++
++  isActualizando = signal(true);
++  errorMessage   = signal('');
++
++  // — Filtros tabla normal —
++  filtroFecha  = signal('');
++  filtroTipo   = signal('');
++  filtroEstado = signal('');
++
++  // — Filtros tabla emergencia —
++  filtroFechaE  = signal('');
++  filtroTipoE   = signal('');
++  filtroEstadoE = signal('');
++
++  solicitudesFiltradas = computed(() => {
++    const f = this.filtroFecha().toLowerCase();
++    const t = this.filtroTipo().toLowerCase();
++    const e = this.filtroEstado().toLowerCase();
++    return this.solicitudes().filter(s =>
++      (f ? s.fec_solicitud.includes(f) : true) &&
++      (t ? s.nom_tipo_solicitud.toLowerCase().includes(t) : true) &&
++      (e ? s.nom_estado.toLowerCase().includes(e) : true)
++    );
++  });
++
++  solicitudesEmergenciaFiltradas = computed(() => {
++    const f = this.filtroFechaE().toLowerCase();
++    const t = this.filtroTipoE().toLowerCase();
++    const e = this.filtroEstadoE().toLowerCase();
++    return this.solicitudesEmergencia().filter(s =>
++      (f ? s.fec_solicitud.includes(f) : true) &&
++      (t ? s.nom_tipo_solicitud.toLowerCase().includes(t) : true) &&
++      (e ? s.nom_estado.toLowerCase().includes(e) : true)
++    );
++  });
+ 
+   readonly badgeClass = 'badge';
+ 
+-  /* =========================================================
+-     MODAL
+-     ========================================================= */
+-
+-  readonly modalAbierto =
+-    signal(false);
+-
+-  readonly cargandoModal =
+-    signal(false);
+-
+-  readonly isEnviando =
+-    signal(false);
+-
+-  readonly modalError =
+-    signal('');
+-
+-  readonly form =
+-    signal<NuevaSolicitudForm>({
+-      nombreEmpleado: '',
+-      dependencia: '',
+-      cargo: '',
+-      tipoSolicitud: '',
+-    });
+-
+-  /* =========================================================
+-     PERMISO PERSONAL
+-     ========================================================= */
+-
+-  readonly ppFechaMin =
+-    hoyStr();
+-
+-  readonly ppFechaMax =
+-    maxFechaStr();
+-
+-  readonly ppFecha =
+-    signal(hoyStr());
+-
+-  readonly ppHoras =
+-    signal(0);
+-
+-  readonly ppMinutos =
+-    signal(0);
+-
+-  readonly ppMotivo =
+-    signal('Asunto Personal.');
+-
+-  readonly ppCitaMedica =
+-    signal(0);
+-
+-  /**
+-   * Texto que se muestra en la tarjeta.
+-   */
+-  readonly ppHorasDisponibles =
+-    signal('--:--');
+-
+-  readonly ppDisponibilidadDia =
+-    signal('--:--');
+-
+-  readonly ppConsultandoDisponibilidad =
+-    signal(false);
+-
+-  /**
+-   * Valores en minutos para validar el formulario.
+-   */
+-  readonly ppDisponibleMesMinutos =
+-    signal(0);
+-
+-  readonly ppDisponibleDiaMinutos =
+-    signal(0);
+-
+-  readonly ppDisponibilidadCargada =
+-    signal(false);
+-
+-  readonly ppMinutosSolicitados =
+-    computed(() => {
+-      const horas =
+-        Number(this.ppHoras()) || 0;
+-
+-      const minutos =
+-        Number(this.ppMinutos()) || 0;
+-
+-      return (
+-        horas * 60 +
+-        minutos
+-      );
+-    });
+-
+-  readonly ppErrores =
+-    computed(() => {
+-      const horas =
+-        Number(this.ppHoras());
+-
+-      const minutos =
+-        Number(this.ppMinutos());
+-
+-      const minutosSolicitados =
+-        this.ppMinutosSolicitados();
+-
+-      const fechaInvalida =
+-        !this.ppFecha() ||
+-        this.ppFecha() <
+-          this.ppFechaMin ||
+-        this.ppFecha() >
+-          this.ppFechaMax;
+-
+-      const horasInvalidas =
+-        !Number.isInteger(horas) ||
+-        horas < 0 ||
+-        horas > 3 ||
+-        (
+-          horas === 3 &&
+-          minutos > 0
+-        );
+-
+-      const minutosInvalidos =
+-        !Number.isInteger(minutos) ||
+-        minutos < 0 ||
+-        minutos > 59;
+-
+-      const tiempoVacio =
+-        minutosSolicitados <= 0;
+-
+-      const excedeLimiteDiario =
+-        minutosSolicitados > 180;
+-
+-      const excedeDisponibleDia =
+-        this.ppDisponibilidadCargada() &&
+-        minutosSolicitados >
+-          this.ppDisponibleDiaMinutos();
+-
+-      const excedeDisponibleMes =
+-        this.ppDisponibilidadCargada() &&
+-        minutosSolicitados >
+-          this.ppDisponibleMesMinutos();
+-
+-      return {
+-        fecha:
+-          fechaInvalida,
+-
+-        horas:
+-          horasInvalidas,
+-
+-        minutos:
+-          minutosInvalidos,
+-
+-        tiempoVacio,
+-
+-        excedeLimiteDiario,
+-
+-        excedeDisponibleDia,
+-
+-        excedeDisponibleMes,
+-
+-        motivo:
+-          !this.ppMotivo().trim(),
+-      };
+-    });
+-
+-  readonly ppFormInvalido =
+-    computed(() => {
+-      const errores =
+-        this.ppErrores();
+-
+-      return (
+-        errores.fecha ||
+-        errores.horas ||
+-        errores.minutos ||
+-        errores.tiempoVacio ||
+-        errores.excedeLimiteDiario ||
+-        errores.excedeDisponibleDia ||
+-        errores.excedeDisponibleMes ||
+-        errores.motivo ||
+-        !this.ppDisponibilidadCargada() ||
+-        this.ppConsultandoDisponibilidad() ||
+-        (
+-          this.ppCitaMedica() !== 0 &&
+-          this.ppCitaMedica() !== 1
+-        )
+-      );
+-    });
+-
+-  readonly ppFormatHM =
+-    computed(() => {
+-      const horas =
+-        String(
+-          Math.max(
+-            0,
+-            Number(this.ppHoras()) || 0,
+-          ),
+-        ).padStart(2, '0');
+-
+-      const minutos =
+-        String(
+-          Math.max(
+-            0,
+-            Number(this.ppMinutos()) || 0,
+-          ),
+-        ).padStart(2, '0');
+-
+-      return `${horas}:${minutos}`;
+-    });
+-
+-  /* =========================================================
+-     PERMISO OFICIAL
+-     ========================================================= */
+-
+-  readonly poFechaMin =
+-    hoyStr();
+-
+-  readonly poFechaMax =
+-    maxFechaOficialStr();
+-
+-  readonly poFecha =
+-    signal(hoyStr());
++  // ── Modal ──
++  modalAbierto   = signal(false);
++  cargandoModal  = signal(false);
++  isEnviando     = signal(false);
++  form = signal<NuevaSolicitudForm>({
++    nombreEmpleado: '',
++    dependencia: '',
++    cargo: '',
++    tipoSolicitud: ''
++  });
++
++  // ── Estado permiso personal ──
++  readonly ppFechaMin = hoyStr();
++  readonly ppFechaMax = maxFechaStr();
++
++  ppFecha      = signal(hoyStr());
++  ppHoras      = signal(3);
++  ppMinutos    = signal(0);
++  ppMotivo     = signal('Asunto Personal.');
++  ppCitaMedica = signal(0);
++  ppHorasDisponibles = signal<string>('--:--');
++
++  ppErrores = computed(() => ({
++    fecha:   !this.ppFecha() ||
++             this.ppFecha() < this.ppFechaMin ||
++             this.ppFecha() > this.ppFechaMax,
++    horas:   this.ppHoras() < 0 || this.ppHoras() > 9,
++    minutos: this.ppMinutos() < 0 || this.ppMinutos() > 59,
++    motivo:  !this.ppMotivo().trim()
++  }));
++
++  ppFormInvalido = computed(() =>
++    Object.values(this.ppErrores()).some(Boolean) ||
++    (this.ppCitaMedica() !== 0 && this.ppCitaMedica() !== 1)
++  );
+ 
+-  readonly poMotivo =
+-    signal('');
++  ppFormatHM = computed(() => {
++    const h = String(this.ppHoras()).padStart(2, '0');
++    const m = String(this.ppMinutos()).padStart(2, '0');
++    return `${h}:${m}`;
++  });
+ 
+-  readonly poErrores =
+-    computed(() => ({
+-      fecha:
+-        !this.poFecha() ||
+-        this.poFecha() <
+-          this.poFechaMin ||
+-        this.poFecha() >
+-          this.poFechaMax,
++  // ── Estado permiso oficial ──
++  readonly poFechaMin = hoyStr();
++  readonly poFechaMax = maxFechaOficialStr();
+ 
+-      motivo:
+-        !this.poMotivo().trim(),
+-    }));
++  poFecha  = signal(hoyStr());
++  poMotivo = signal('');
+ 
+-  readonly poFormInvalido =
+-    computed(() =>
+-      Object.values(
+-        this.poErrores(),
+-      ).some(Boolean),
+-    );
++  poErrores = computed(() => ({
++    fecha:  !this.poFecha() ||
++            this.poFecha() < this.poFechaMin ||
++            this.poFecha() > this.poFechaMax,
++    motivo: !this.poMotivo().trim()
++  }));
+ 
+-  /* =========================================================
+-     CICLO DE VIDA
+-     ========================================================= */
++  poFormInvalido = computed(() =>
++    Object.values(this.poErrores()).some(Boolean)
++  );
+ 
++  // ── Carga de datos ──
+   ngOnInit(): void {
+-    if (
+-      isPlatformBrowser(
+-        this.platformId,
+-      )
+-    ) {
++    // Solo carga en el browser: evita mismatch de hidratación SSR
++    if (isPlatformBrowser(this.platformId)) {
+       this.cargarDatos();
+     }
+   }
+ 
+-  /* =========================================================
+-     CARGA DE SOLICITUDES
+-     ========================================================= */
+-
+   actualizarDatos(): void {
+     this.cargarDatos();
+   }
+@@ -509,596 +167,117 @@ export class SolicitudesEmpleadoComponent
+   private cargarDatos(): void {
+     this.isActualizando.set(true);
+     this.errorMessage.set('');
+-
+     forkJoin({
+-      solicitudes:
+-        this.solicitudesService
+-          .getMisSolicitudes()
+-          .pipe(
+-            catchError(() => of(null)),
+-          ),
+-
+-      emergencias:
+-        this.solicitudesService
+-          .getMisSolicitudesEmergencia()
+-          .pipe(
+-            catchError(() => of(null)),
+-          ),
+-    }).subscribe({
+-      next: ({
+-        solicitudes,
+-        emergencias,
+-      }) => {
+-        if (
+-          solicitudes === null &&
+-          emergencias === null
+-        ) {
+-          this.errorMessage.set(
+-            'No fue posible cargar las solicitudes. Intente nuevamente.',
+-          );
+-        }
+-
+-        this.solicitudes.set(
+-          solicitudes ?? [],
+-        );
+-
+-        this.solicitudesEmergencia.set(
+-          emergencias ?? [],
+-        );
+-
+-        this.isActualizando.set(false);
+-      },
+-
+-      error: () => {
+-        this.errorMessage.set(
+-          'No fue posible cargar las solicitudes.',
+-        );
+-
+-        this.isActualizando.set(false);
+-      },
++      solicitudes: this.solicitudesService.getMisSolicitudes().pipe(
++        catchError(() => of(null))
++      ),
++      emergencias: this.solicitudesService.getMisSolicitudesEmergencia().pipe(
++        catchError(() => of(null))
++      )
++    }).subscribe(({ solicitudes, emergencias }) => {
++      if (solicitudes === null && emergencias === null) {
++        this.errorMessage.set('No fue posible cargar las solicitudes. Intente de nuevo más tarde.');
++      }
++      this.solicitudes.set(solicitudes ?? []);
++      this.solicitudesEmergencia.set(emergencias ?? []);
++      this.isActualizando.set(false);
+     });
+   }
+ 
+-  /* =========================================================
+-     MODAL
+-     ========================================================= */
+-
+-  private resetModal(
+-    datos?: DatosPermiso,
+-  ): void {
++  // ── Acciones modal ──
++  private resetModal(datos?: DatosPermiso): void {
+     this.form.set({
+-      nombreEmpleado:
+-        datos?.nombre ?? '',
+-
+-      dependencia:
+-        datos?.dependencia ?? '',
+-
+-      cargo:
+-        datos?.cargo ?? '',
+-
+-      tipoSolicitud:
+-        'permiso-personal',
++      nombreEmpleado: datos?.nombre      ?? '',
++      dependencia:    datos?.dependencia ?? '',
++      cargo:          datos?.cargo       ?? '',
++      tipoSolicitud:  ''
+     });
+-
+-    this.modalError.set('');
+-
+-    this.ppFecha.set(
+-      hoyStr(),
+-    );
+-
+-    this.ppHoras.set(0);
++    this.ppFecha.set(hoyStr());
++    this.ppHoras.set(3);
+     this.ppMinutos.set(0);
+-
+-    this.ppMotivo.set(
+-      'Asunto Personal.',
+-    );
+-
++    this.ppMotivo.set('Asunto Personal.');
+     this.ppCitaMedica.set(0);
+-
+-    this.ppHorasDisponibles.set(
+-      datos?.horasDisponibles ??
+-        '--:--',
+-    );
+-
+-    this.ppDisponibilidadDia.set(
+-      '--:--',
+-    );
+-
+-    this.ppDisponibleMesMinutos.set(
+-      0,
+-    );
+-
+-    this.ppDisponibleDiaMinutos.set(
+-      0,
+-    );
+-
+-    this.ppDisponibilidadCargada.set(
+-      false,
+-    );
+-
+-    this.ppConsultandoDisponibilidad.set(
+-      false,
+-    );
+-
+-    this.poFecha.set(
+-      hoyStr(),
+-    );
+-
++    this.ppHorasDisponibles.set(datos?.horasDisponibles ?? '--:--');
++    this.poFecha.set(hoyStr());
+     this.poMotivo.set('');
+   }
+ 
+   abrirModal(): void {
+     this.cargandoModal.set(true);
+-    this.modalError.set('');
+-
+-    this.solicitudesService
+-      .getDatosPermiso()
+-      .subscribe({
+-        next: (
+-          datos: DatosPermiso,
+-        ) => {
+-          this.resetModal(datos);
+-
+-          this.cargandoModal.set(
+-            false,
+-          );
+-
+-          this.modalAbierto.set(
+-            true,
+-          );
+-
+-          this.cargarDisponibilidadPermisoPersonal(
+-            this.ppFecha(),
+-          );
+-        },
+-
+-        error: (error: unknown) => {
+-          console.error(
+-            'Error cargando datos del permiso:',
+-            error,
+-          );
+-
+-          this.resetModal();
+ 
+-          this.modalError.set(
+-            'No fue posible cargar la información del empleado.',
+-          );
+-
+-          this.cargandoModal.set(
+-            false,
+-          );
+-
+-          this.modalAbierto.set(
+-            true,
+-          );
+-
+-          this.cargarDisponibilidadPermisoPersonal(
+-            this.ppFecha(),
+-          );
+-        },
+-      });
++    this.solicitudesService.getDatosPermiso().subscribe({
++      next: (datos: DatosPermiso) => {
++        this.resetModal(datos);
++        this.cargandoModal.set(false);
++        this.modalAbierto.set(true);
++      },
++      error: () => {
++        this.resetModal();
++        this.cargandoModal.set(false);
++        this.modalAbierto.set(true);
++      }
++    });
+   }
+ 
+   cerrarModal(): void {
+-    if (this.isEnviando()) {
+-      return;
+-    }
+-
+     this.modalAbierto.set(false);
+-    this.modalError.set('');
+   }
+ 
+-  onTipoChange(
+-    tipo: string,
+-  ): void {
+-    this.form.update(
+-      (formulario) => ({
+-        ...formulario,
+-
+-        tipoSolicitud:
+-          tipo as
+-            | TipoSolicitud
+-            | '',
+-      }),
+-    );
+-
+-    this.modalError.set('');
+-
+-    if (
+-      tipo ===
+-      'permiso-personal'
+-    ) {
+-      this.cargarDisponibilidadPermisoPersonal(
+-        this.ppFecha(),
+-      );
+-    }
+-  }
+-
+-  /* =========================================================
+-     DISPONIBILIDAD DEL PERMISO PERSONAL
+-     ========================================================= */
+-
+-  cambiarFechaPermisoPersonal(
+-    fecha: string,
+-  ): void {
+-    this.ppFecha.set(fecha);
+-    this.modalError.set('');
+-
+-    if (
+-      !fecha ||
+-      fecha <
+-        this.ppFechaMin ||
+-      fecha >
+-        this.ppFechaMax
+-    ) {
+-      this.ppHorasDisponibles.set(
+-        '--:--',
+-      );
+-
+-      this.ppDisponibilidadDia.set(
+-        '--:--',
+-      );
+-
+-      this.ppDisponibleMesMinutos.set(
+-        0,
+-      );
+-
+-      this.ppDisponibleDiaMinutos.set(
+-        0,
+-      );
+-
+-      this.ppDisponibilidadCargada.set(
+-        false,
+-      );
+-
+-      return;
+-    }
+-
+-    this.cargarDisponibilidadPermisoPersonal(
+-      fecha,
+-    );
+-  }
+-
+-  private cargarDisponibilidadPermisoPersonal(
+-    fecha: string,
+-  ): void {
+-    if (!fecha) {
+-      return;
+-    }
+-
+-    this.ppConsultandoDisponibilidad.set(
+-      true,
+-    );
+-
+-    this.ppDisponibilidadCargada.set(
+-      false,
+-    );
+-
+-    this.solicitudesService
+-      .consultarDisponibilidadPermisoPersonal(
+-        fecha,
+-      )
+-      .subscribe({
+-        next: (
+-          disponibilidad,
+-        ) => {
+-          const disponibleMes =
+-            Math.max(
+-              0,
+-              Number(
+-                disponibilidad
+-                  .disponibleMesMinutos,
+-              ) || 0,
+-            );
+-
+-          const disponibleDia =
+-            Math.max(
+-              0,
+-              Number(
+-                disponibilidad
+-                  .disponibleDiaMinutos,
+-              ) || 0,
+-            );
+-
+-          this.ppDisponibleMesMinutos.set(
+-            disponibleMes,
+-          );
+-
+-          this.ppDisponibleDiaMinutos.set(
+-            disponibleDia,
+-          );
+-
+-          this.ppHorasDisponibles.set(
+-            this.formatearMinutos(
+-              disponibleMes,
+-            ),
+-          );
+-
+-          this.ppDisponibilidadDia.set(
+-            this.formatearMinutos(
+-              disponibleDia,
+-            ),
+-          );
+-
+-          this.ppDisponibilidadCargada.set(
+-            true,
+-          );
+-
+-          this.ppConsultandoDisponibilidad.set(
+-            false,
+-          );
+-        },
+-
+-        error: (error: unknown) => {
+-          console.error(
+-            'Error al consultar disponibilidad:',
+-            error,
+-          );
+-
+-          this.ppHorasDisponibles.set(
+-            '--:--',
+-          );
+-
+-          this.ppDisponibilidadDia.set(
+-            '--:--',
+-          );
+-
+-          this.ppDisponibleMesMinutos.set(
+-            0,
+-          );
+-
+-          this.ppDisponibleDiaMinutos.set(
+-            0,
+-          );
+-
+-          this.ppDisponibilidadCargada.set(
+-            false,
+-          );
+-
+-          this.ppConsultandoDisponibilidad.set(
+-            false,
+-          );
+-
+-          this.modalError.set(
+-            this.obtenerMensajeError(
+-              error,
+-              'No fue posible consultar las horas disponibles.',
+-            ),
+-          );
+-        },
+-      });
++  onTipoChange(tipo: string): void {
++    this.form.update(f => ({ ...f, tipoSolicitud: tipo as TipoSolicitud | '' }));
+   }
+ 
+-  private formatearMinutos(
+-    minutosTotales: number,
+-  ): string {
+-    const valor =
+-      Math.max(
+-        0,
+-        Math.round(
+-          Number(minutosTotales) ||
+-            0,
+-        ),
+-      );
+-
+-    const horas =
+-      Math.floor(
+-        valor / 60,
+-      );
+-
+-    const minutos =
+-      valor % 60;
+-
+-    return (
+-      `${String(horas).padStart(2, '0')}:` +
+-      `${String(minutos).padStart(2, '0')}`
+-    );
++  onCampoChange(campo: keyof NuevaSolicitudForm, valor: string): void {
++    this.form.update(f => ({ ...f, [campo]: valor }));
+   }
+ 
+-  /* =========================================================
+-     ENVÍO
+-     ========================================================= */
+-
+   enviarSolicitud(): void {
+-    this.modalError.set('');
+-
+-    if (
+-      this.form().tipoSolicitud ===
+-      'permiso-personal'
+-    ) {
+-      if (
+-        this.ppFormInvalido()
+-      ) {
+-        this.modalError.set(
+-          'Revise los datos del permiso personal.',
+-        );
+-
+-        return;
+-      }
+-
+-      const body:
+-        InsertarPermisoPersonalBody = {
+-          fecha:
+-            this.ppFecha(),
+-
+-          horas:
+-            this.ppFormatHM(),
+-
+-          motivo:
+-            this.ppMotivo().trim(),
+-
+-          emergencia:
+-            this.ppCitaMedica() ===
+-            1,
+-        };
+-
++    if (this.form().tipoSolicitud === 'permiso-personal') {
++      const body: InsertarPermisoPersonalBody = {
++        fecha:      this.ppFecha(),
++        horas:      this.ppFormatHM(),
++        motivo:     this.ppMotivo(),
++        emergencia: this.ppCitaMedica() === 1
++      };
+       this.isEnviando.set(true);
+-
+-      this.solicitudesService
+-        .insertarPermisoPersonal(
+-          body,
+-        )
+-        .subscribe({
+-          next: () => {
+-            this.isEnviando.set(
+-              false,
+-            );
+-
+-            this.cerrarModal();
+-            this.cargarDatos();
+-          },
+-
+-          error: (
+-            error: unknown,
+-          ) => {
+-            this.isEnviando.set(
+-              false,
+-            );
+-
+-            this.modalError.set(
+-              this.obtenerMensajeError(
+-                error,
+-                'No fue posible registrar el permiso personal.',
+-              ),
+-            );
+-
+-            this.cargarDisponibilidadPermisoPersonal(
+-              this.ppFecha(),
+-            );
+-          },
+-        });
+-
++      this.solicitudesService.insertarPermisoPersonal(body).subscribe({
++        next: () => {
++          this.isEnviando.set(false);
++          this.cerrarModal();
++          this.cargarDatos();
++        },
++        error: () => {
++          this.isEnviando.set(false);
++        }
++      });
+       return;
+     }
+-
+-    if (
+-      this.form().tipoSolicitud ===
+-      'permiso-oficial'
+-    ) {
+-      if (
+-        this.poFormInvalido()
+-      ) {
+-        this.modalError.set(
+-          'Revise los datos del permiso oficial.',
+-        );
+-
+-        return;
+-      }
+-
+-      const body:
+-        InsertarPermisoOficialBody = {
+-          fecha:
+-            this.poFecha(),
+-
+-          motivo:
+-            this.poMotivo().trim(),
+-        };
+-
+-      this.isEnviando.set(true);
+-
+-      this.solicitudesService
+-        .insertarPermisoOficial(
+-          body,
+-        )
+-        .subscribe({
+-          next: () => {
+-            this.isEnviando.set(
+-              false,
+-            );
+-
+-            this.cerrarModal();
+-            this.cargarDatos();
+-          },
+-
+-          error: (
+-            error: unknown,
+-          ) => {
+-            this.isEnviando.set(
+-              false,
+-            );
+-
+-            this.modalError.set(
+-              this.obtenerMensajeError(
+-                error,
+-                'No fue posible registrar el permiso oficial.',
+-              ),
+-            );
+-          },
+-        });
+-    }
+-  }
+-
+-  private obtenerMensajeError(
+-    error: unknown,
+-    mensajePredeterminado: string,
+-  ): string {
+-    const respuesta =
+-      error as {
+-        error?: {
+-          message?: string;
+-
+-          error?: {
+-            message?: string;
+-            details?: string[];
+-          };
+-
+-          data?: {
+-            message?: string;
+-          };
+-        };
+-
+-        message?: string;
++    if (this.form().tipoSolicitud === 'permiso-oficial') {
++      const body: InsertarPermisoOficialBody = {
++        fecha:  this.poFecha(),
++        motivo: this.poMotivo()
+       };
+-
+-    const detalles =
+-      respuesta.error?.error
+-        ?.details;
+-
+-    if (
+-      Array.isArray(detalles) &&
+-      detalles.length > 0
+-    ) {
+-      return detalles.join(', ');
++      this.isEnviando.set(true);
++      this.solicitudesService.insertarPermisoOficial(body).subscribe({
++        next: () => {
++          this.isEnviando.set(false);
++          this.cerrarModal();
++          this.cargarDatos();
++        },
++        error: () => {
++          this.isEnviando.set(false);
++        }
++      });
++      return;
+     }
+-
+-    return (
+-      respuesta.error?.error
+-        ?.message ??
+-      respuesta.error?.data
+-        ?.message ??
+-      respuesta.error?.message ??
+-      respuesta.message ??
+-      mensajePredeterminado
+-    );
+   }
+ 
+-  /* =========================================================
+-     DATOS DE LAS TABLAS
+-     ========================================================= */
+-
+-  primerRevision(
+-    solicitud: Solicitud,
+-  ): string {
+-    return (
+-      solicitud.pri_aporbacion ??
+-      (
+-        solicitud.mot_rechazo
+-          ? '----------------'
+-          : 'PENDIENTE'
+-      )
+-    );
++  primerRevision(s: Solicitud): string {
++    return s.pri_aporbacion ?? (s.mot_rechazo ? '----------------' : 'PENDIENTE');
+   }
+ 
+-  segundaRevision(
+-    solicitud: Solicitud,
+-  ): string {
+-    return (
+-      solicitud.seg_aprobacion ??
+-      (
+-        solicitud.mot_rechazo
+-          ? '----------------'
+-          : 'PENDIENTE'
+-      )
+-    );
++  segundaRevision(s: Solicitud): string {
++    return s.seg_aprobacion ?? (s.mot_rechazo ? '----------------' : 'PENDIENTE');
+   }
+ }
++
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
+index 7cdf305..698c408 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
+@@ -1,5 +1,5 @@
+ import { Injectable, inject } from '@angular/core';
+-import { HttpClient, HttpParams } from '@angular/common/http';
++import { HttpClient } from '@angular/common/http';
+ import { Observable } from 'rxjs';
+ import { map } from 'rxjs/operators';
+ import { environment } from '../../../../../../environments/environment';
+@@ -9,57 +9,20 @@ import {
+   EP_RRHH_MIS_SOLICITUDES_EMERGENCIA,
+   EP_RRHH_DATOS_PERMISO,
+   EP_RRHH_PERMISOS_PERSONALES_INSERTAR,
+-  EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD,
+-  EP_RRHH_PERMISOS_OFICIALES_INSERTAR,
++  EP_RRHH_PERMISOS_OFICIALES_INSERTAR
+ } from '../../../../../config/api.endpoints';
+-
+ import { Solicitud } from './solicitudesEmpleado.component';
+ 
+-/* ─────────────────────────────────────────────────────────────
+-   Modelos públicos
+-   ───────────────────────────────────────────────────────────── */
++// ── Modelo público del modal ────────────────────────────────────────────────
+ 
+ export interface DatosPermiso {
+-  nombre: string;
+-  dependencia: string;
+-  cargo: string;
+-  horasDisponibles: string;
++  nombre:           string;
++  dependencia:      string;
++  cargo:            string;
++  horasDisponibles: string; // formato HH:MM
+ }
+ 
+-export interface DisponibilidadPermisoPersonal {
+-  fecha: string;
+-  limiteDiarioMinutos: number;
+-  consumidoDiaMinutos: number;
+-  disponibleDiaMinutos: number;
+-  limiteMensualMinutos: number;
+-  consumidoMesMinutos: number;
+-  disponibleMesMinutos: number;
+-  horasDisponibles: string;
+-}
+-
+-export interface InsertarPermisoPersonalBody {
+-  fecha: string;
+-  horas: string;
+-  motivo: string;
+-  emergencia: boolean;
+-}
+-
+-export interface InsertarPermisoOficialBody {
+-  fecha: string;
+-  motivo: string;
+-}
+-
+-/* ─────────────────────────────────────────────────────────────
+-   Respuestas del backend
+-   ───────────────────────────────────────────────────────────── */
+-
+-interface ApiResponse<T> {
+-  success: boolean;
+-  data: T;
+-  message?: string;
+-  timestamp?: string;
+-  path?: string;
+-}
++// ── Tipos de respuesta de la API ────────────────────────────────────────────
+ 
+ interface SolicitudApi {
+   tipo: string;
+@@ -71,269 +34,148 @@ interface SolicitudApi {
+   segAprobacion: string | null;
+ }
+ 
+-interface MisSolicitudesData {
+-  email: string;
+-  solicitudes: SolicitudApi[];
++interface MisSolicitudesResponse {
++  success: boolean;
++  data: {
++    email: string;
++    solicitudes: SolicitudApi[];
++  };
++  message: string;
+ }
+ 
+-interface MisSolicitudesEmergenciaData {
+-  email: string;
+-  emergencias: SolicitudApi[];
++interface MisSolicitudesEmergenciaResponse {
++  success: boolean;
++  data: {
++    email: string;
++    emergencias: SolicitudApi[];
++  };
++  message: string;
+ }
+ 
+ interface DatosPermisoApi {
+-  prinombre?: string | null;
+-  segnombre?: string | null;
+-  priapellido?: string | null;
+-  segapellido?: string | null;
++  prinombre:         string;
++  segnombre:         string | null;
++  priapellido:       string;
++  segapellido:       string | null;
++  dependencia:       string;
++  cargo:             string;
++  horas_disponibles: string;
++}
+ 
+-  dependencia?: string | null;
+-  cargo?: string | null;
++export interface InsertarPermisoPersonalBody {
++  fecha:      string;  // YYYY-MM-DD
++  horas:      string;  // HH:MM
++  motivo:     string;
++  emergencia: boolean;
++}
+ 
+-  horas_disponibles?: string | null;
++export interface InsertarPermisoPersonalResponse {
++  status:          string;  // 'OK'
++  message:         string;
++  idpermiso:       string;
++  horas_solicitadas: number;
++  emergencia:      boolean;
++}
+ 
+-  /*
+-   * Se incluyen variantes por si la función SQL
+-   * devuelve estos nombres.
+-   */
+-  nombre?: string | null;
+-  nombreEmpleado?: string | null;
+-  nombreempleado?: string | null;
+-  nomdependencia?: string | null;
+-  nomcargo?: string | null;
+-  horasDisponibles?: string | null;
+-  hordisponibles?: string | null;
++export interface InsertarPermisoOficialBody {
++  fecha:  string;  // YYYY-MM-DD
++  motivo: string;
+ }
+ 
+-export interface InsertarPermisoPersonalResultado {
+-  status: string;
+-  message: string;
+-  idpermiso?: string;
+-  fecha?: string;
+-  horas_solicitadas?: string;
+-  minutos_solicitados?: number;
+-  consumido_dia_antes_minutos?: number;
+-  disponible_dia_despues_minutos?: number;
+-  consumido_mes_antes_minutos?: number;
+-  disponible_mes_despues_minutos?: number;
+-  emergencia?: boolean;
++export interface InsertarPermisoOficialResponse {
++  status:    string;  // 'OK'
++  message:   string;
++  idpermiso: string;
+ }
+ 
+-export interface InsertarPermisoOficialResultado {
+-  status: string;
+-  message: string;
+-  idpermiso?: string;
++interface DatosPermisoResponse {
++  success:   boolean;
++  data:      DatosPermisoApi;
++  message:   string;
++  timestamp: string;
+ }
+ 
+-/* ─────────────────────────────────────────────────────────────
+-   Mapper
+-   ───────────────────────────────────────────────────────────── */
++// ── Mapper API → modelo interno ─────────────────────────────────────────────
+ 
+-function mapSolicitud(solicitud: SolicitudApi): Solicitud {
++function mapSolicitud(s: SolicitudApi): Solicitud {
+   return {
+-    fec_solicitud: solicitud.fecha,
+-    nom_tipo_solicitud: solicitud.tipo,
+-    nom_estado: solicitud.estado,
+-    pri_aporbacion: solicitud.priAprobacion,
+-    seg_aprobacion: solicitud.segAprobacion,
+-    mot_rechazo: solicitud.motRechazo,
++    fec_solicitud:      s.fecha,
++    nom_tipo_solicitud: s.tipo,
++    nom_estado:         s.estado,
++    pri_aporbacion:     s.priAprobacion,
++    seg_aprobacion:     s.segAprobacion,
++    mot_rechazo:        s.motRechazo,
+   };
+ }
+ 
+-function normalizarHora(valor: string | null | undefined): string {
+-  if (!valor) {
+-    return '00:00';
+-  }
+-  const texto = String(valor).trim();
+-
+-  /*
+-   * Convierte:
+-   * 09:00:00 -> 09:00
+-   * 07:30:00 -> 07:30
+-   */
+-  const coincidencia = texto.match(/^(\d{1,2}):(\d{2})/);
+-  if (!coincidencia) {
+-    return '00:00';
+-  }
+-  return `${coincidencia[1].padStart(2, '0')}:${coincidencia[2]}`;
+-}
+-
+-/* ─────────────────────────────────────────────────────────────
+-   Servicio
+-   ───────────────────────────────────────────────────────────── */
++// ── Servicio ─────────────────────────────────────────────────────────────────
+ 
+-@Injectable({
+-  providedIn: 'root',
+-})
++@Injectable({ providedIn: 'root' })
+ export class SolicitudesEmpleadoService {
+-  private readonly http = inject(HttpClient);
++  private readonly http        = inject(HttpClient);
+   private readonly authService = inject(AuthService);
+-  private readonly base = environment.apiBaseUrl;
++  private readonly base        = environment.apiBaseUrl;
+ 
+-  /*
+-   * Estos endpoints todavía reciben el correo en el body.
+-   * Cuando se cambien para tomarlo del JWT, también podremos
+-   * eliminar esta propiedad.
+-   */
+   private get emailBody(): { email: string } {
+-    return {
+-      email:
+-        this.authService.currentUser()?.email?.trim() ?? '',
+-    };
++    return { email: this.authService.currentUser()?.email ?? '' };
+   }
++
+   getMisSolicitudes(): Observable<Solicitud[]> {
+     return this.http
+-      .post<ApiResponse<MisSolicitudesData>>(
++      .post<MisSolicitudesResponse>(
+         `${this.base}${EP_RRHH_MIS_SOLICITUDES}`,
+-        this.emailBody,
++        this.emailBody
+       )
+-      .pipe(
+-        map((respuesta) => {
+-          const solicitudes =
+-            respuesta.data?.solicitudes ?? [];
+-
+-          return solicitudes
+-            .map(mapSolicitud)
+-            .sort((a, b) =>
+-              b.fec_solicitud.localeCompare(
+-                a.fec_solicitud,
+-              ),
+-            );
+-        }),
+-      );
++      .pipe(map(r => r.data.solicitudes
++        .map(mapSolicitud)
++        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
++      ));
+   }
++
+   getMisSolicitudesEmergencia(): Observable<Solicitud[]> {
+     return this.http
+-      .post<ApiResponse<MisSolicitudesEmergenciaData>>(
++      .post<MisSolicitudesEmergenciaResponse>(
+         `${this.base}${EP_RRHH_MIS_SOLICITUDES_EMERGENCIA}`,
+-        this.emailBody,
++        this.emailBody
+       )
+-      .pipe(
+-        map((respuesta) => {
+-          const emergencias =
+-            respuesta.data?.emergencias ?? [];
+-
+-          return emergencias
+-            .map(mapSolicitud)
+-            .sort((a, b) =>
+-              b.fec_solicitud.localeCompare(
+-                a.fec_solicitud,
+-              ),
+-            );
+-        }),
+-      );
++      .pipe(map(r => r.data.emergencias
++        .map(mapSolicitud)
++        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
++      ));
+   }
+ 
+-  getDatosPermiso(): Observable<DatosPermiso> {
+-  return this.http
+-    .post<any>(
+-      `${this.base}${EP_RRHH_DATOS_PERMISO}`,
+-      this.emailBody,
+-    )
+-    .pipe(
+-      map((respuesta) => {
+-        const resultado =
+-          respuesta?.data ?? respuesta ?? {};
+-
+-        const datos =
+-          resultado?.data ?? resultado;
+-
+-        const nombre = [
+-          datos?.prinombre,
+-          datos?.segnombre,
+-          datos?.priapellido,
+-          datos?.segapellido,
+-        ]
+-          .map((valor: unknown) =>
+-            typeof valor === 'string'
+-              ? valor.trim()
+-              : '',
+-          )
+-          .filter(Boolean)
+-          .join(' ');
+-
+-        const horasDisponibles =
+-          normalizarHora(
+-            datos?.horas_disponibles ??
+-            datos?.horasDisponibles ??
+-            datos?.hordisponibles ??
+-            '00:00',
+-          );
+-
+-        return {
+-          nombre,
+-          dependencia:
+-            String(
+-              datos?.dependencia ?? '',
+-            ).trim(),
+-
+-          cargo:
+-            String(
+-              datos?.cargo ?? '',
+-            ).trim(),
+-
+-          horasDisponibles,
+-        };
+-      }),
+-    );
+-}
+-
+-  consultarDisponibilidadPermisoPersonal(
+-    fecha: string,
+-  ): Observable<DisponibilidadPermisoPersonal> {
+-    const params = new HttpParams().set(
+-      'fecha',
+-      fecha,
++  insertarPermisoOficial(body: InsertarPermisoOficialBody): Observable<InsertarPermisoOficialResponse> {
++    return this.http.post<InsertarPermisoOficialResponse>(
++      `${this.base}${EP_RRHH_PERMISOS_OFICIALES_INSERTAR}`,
++      { ...this.emailBody, ...body }
+     );
+-    return this.http
+-      .get<
+-        ApiResponse<DisponibilidadPermisoPersonal>
+-      >(
+-        `${this.base}${EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD}`,
+-        {
+-          params,
+-        },
+-      )
+-      .pipe(
+-        map((respuesta) => respuesta.data),
+-      );
+   }
+ 
+-  insertarPermisoPersonal(
+-    body: InsertarPermisoPersonalBody,
+-  ): Observable<InsertarPermisoPersonalResultado> {
+-    /*
+-     * No enviamos email.
+-     * El controlador NestJS lo obtiene del token JWT.
+-     */
+-    return this.http
+-      .post<
+-        ApiResponse<InsertarPermisoPersonalResultado>
+-      >(
+-        `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
+-        body,
+-      )
+-      .pipe(
+-        map((respuesta) => respuesta.data),
+-      );
++  insertarPermisoPersonal(body: InsertarPermisoPersonalBody): Observable<InsertarPermisoPersonalResponse> {
++    return this.http.post<InsertarPermisoPersonalResponse>(
++      `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
++      { ...this.emailBody, ...body }
++    );
+   }
+ 
+-  insertarPermisoOficial(
+-    body: InsertarPermisoOficialBody,
+-  ): Observable<InsertarPermisoOficialResultado> {
+-    /*
+-     * El permiso oficial también obtenía el correo del JWT
+-     * según el controlador que corregimos anteriormente.
+-     */
++  getDatosPermiso(): Observable<DatosPermiso> {
+     return this.http
+-      .post<
+-        ApiResponse<InsertarPermisoOficialResultado>
+-      >(
+-        `${this.base}${EP_RRHH_PERMISOS_OFICIALES_INSERTAR}`,
+-        body,
++      .post<DatosPermisoResponse>(
++        `${this.base}${EP_RRHH_DATOS_PERMISO}`,
++        this.emailBody
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map(r => ({
++          nombre: [
++            r.data.prinombre,
++            r.data.segnombre  ?? '',
++            r.data.priapellido,
++            r.data.segapellido ?? ''
++          ].filter(Boolean).join(' '),
++          dependencia:      r.data.dependencia,
++          cargo:            r.data.cargo,
++          horasDisponibles: r.data.horas_disponibles.substring(0, 5),
++        }))
+       );
+   }
+ }

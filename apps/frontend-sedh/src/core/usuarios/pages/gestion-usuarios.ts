@@ -26,7 +26,6 @@ export interface Usuario {
   actualizadoPor?: string | null;
   roles?: Rol[];
 }
-
 @Component({
   selector: 'app-gestion-usuarios',
   templateUrl: './gestion-usuarios.html',

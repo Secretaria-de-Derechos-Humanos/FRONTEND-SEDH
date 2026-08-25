@@ -829,3 +829,94 @@ textarea.form-control {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCIONES DE SOLICITUD
+═══════════════════════════════════════════════════════════════════════════ */
+
+.td-acciones {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Botón anular */
+.btn-anular {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-inline-size: 72px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--sedh-radius);
+  background: var(--sedh-danger);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--sedh-shadow-sm);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn-anular:hover:not(:disabled) {
+  background: #b02a37;
+  box-shadow: var(--sedh-shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-anular:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-anular:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner del botón Anular */
+.spinner-anular {
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-block-start-color: white;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite;
+}
+
+/* Cuando no hay acción */
+.sin-accion {
+  color: var(--sedh-text-muted);
+  font-size: 0.9rem;
+}
+
+/* Mensaje de éxito */
+.se-success-alert {
+  background: var(--sedh-success-light);
+  color: var(--sedh-success);
+  border: 1px solid var(--sedh-success);
+  border-radius: var(--sedh-radius);
+  padding:
+    var(--sedh-space-sm)
+    var(--sedh-space-md);
+  font-size: 0.9rem;
+  margin-block-end: var(--sedh-space-md);
+}
+
+/* Responsive para las acciones */
+@media (max-width: 768px) {
+  .td-acciones {
+    text-align: start;
+  }
+
+  .btn-anular {
+    min-inline-size: 64px;
+    padding: 5px 9px;
+    font-size: 0.75rem;
+  }
+}

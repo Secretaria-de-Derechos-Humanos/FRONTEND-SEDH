@@ -9,7 +9,6 @@
   box-sizing: border-box;
 }
 
-
 /* =========================================================
    ENCABEZADO
    ========================================================= */
@@ -19,39 +18,27 @@
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-
   background: #ffffff;
-
   padding: 24px 28px;
-
   border-radius: 12px;
   border: 1px solid #e5e7eb;
-
   margin-bottom: 20px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .titulo-reporte h1 {
   margin: 0;
-
   font-size: 26px;
   font-weight: 700;
-
   color: #1f2937;
 }
 
 .titulo-reporte p {
   margin: 7px 0 0;
-
   font-size: 14px;
-
   color: #6b7280;
-
   line-height: 1.5;
 }
-
 
 /* =========================================================
    CONTROLES
@@ -59,114 +46,98 @@
 
 .controles-reporte {
   display: flex;
-
   align-items: flex-end;
-
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .control-anio {
   display: flex;
-
   flex-direction: column;
-
   gap: 6px;
 }
 
-.control-anio label {
+.control-anio label,
+.campo-busqueda label,
+.campo-administracion label {
   font-size: 12px;
-
   font-weight: 700;
-
   color: #475569;
 }
 
 .control-anio input {
   width: 110px;
-
   height: 42px;
-
   padding: 0 12px;
-
   box-sizing: border-box;
-
   border: 1px solid #cbd5e1;
-
   border-radius: 8px;
-
   background: #ffffff;
-
   color: #1f2937;
-
   font-size: 14px;
-
   outline: none;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
-.control-anio input:focus {
+.control-anio input:focus,
+.campo-busqueda input:focus,
+.campo-administracion input:focus,
+.campo-administracion select:focus,
+.campo-administracion textarea:focus {
   border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
-
 
 /* =========================================================
-   BOTÓN ACTUALIZAR
+   BOTONES SUPERIORES
    ========================================================= */
 
-.boton-actualizar {
+.boton-actualizar,
+.boton-exportar {
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
-  min-width: 120px;
-
   height: 42px;
-
-  padding: 0 18px;
-
+  padding: 0 16px;
   border: none;
-
   border-radius: 8px;
-
-  background: #2563eb;
-
   color: #ffffff;
-
-  font-size: 14px;
-
+  font-size: 13px;
   font-weight: 600;
-
   cursor: pointer;
+}
 
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+.boton-actualizar {
+  min-width: 120px;
+  background: #2563eb;
 }
 
 .boton-actualizar:hover:not(:disabled) {
   background: #1d4ed8;
-
-  transform: translateY(-1px);
-
-  box-shadow:
-    0 4px 10px rgba(37, 99, 235, 0.25);
 }
 
-.boton-actualizar:disabled {
-  opacity: 0.6;
+.acciones-reporte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
+.boton-exportar {
+  min-width: 130px;
+}
+
+.boton-excel {
+  background: #15803d;
+}
+
+.boton-pdf {
+  background: #b91c1c;
+}
+
+.boton-actualizar:disabled,
+.boton-exportar:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
-
 
 /* =========================================================
    MENSAJES
@@ -174,30 +145,22 @@
 
 .mensaje {
   padding: 14px 18px;
-
   margin-bottom: 18px;
-
   border-radius: 8px;
-
   font-size: 14px;
 }
 
 .mensaje.error {
   background: #fef2f2;
-
   border: 1px solid #fecaca;
-
   color: #b91c1c;
 }
 
 .mensaje.exito {
   background: #f0fdf4;
-
   border: 1px solid #bbf7d0;
-
   color: #15803d;
 }
-
 
 /* =========================================================
    RESUMEN
@@ -205,276 +168,352 @@
 
 .resumen-reporte {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-
   margin-bottom: 20px;
 }
 
 .tarjeta-resumen {
   background: #ffffff;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 12px;
-
   padding: 20px 22px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
-
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   display: flex;
-
   flex-direction: column;
-
   gap: 6px;
 }
 
 .resumen-titulo {
   font-size: 13px;
-
   color: #64748b;
-
   font-weight: 600;
 }
 
 .resumen-valor {
   font-size: 25px;
-
   color: #1f2937;
-
   font-weight: 700;
 }
-
 
 /* =========================================================
-   BARRA DE BÚSQUEDA
+   ADMINISTRACIÓN DE SALDOS
    ========================================================= */
 
-.barra-busqueda {
+.panel-administracion {
   background: #ffffff;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 12px;
-
-  padding: 18px 20px;
-
   margin-bottom: 20px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
-.campo-busqueda {
+.panel-administracion summary {
+  position: relative;
+  cursor: pointer;
+  list-style: none;
+  padding: 20px 22px;
   display: flex;
-
   flex-direction: column;
-
-  gap: 7px;
+  gap: 5px;
 }
 
-.campo-busqueda label {
-  font-size: 12px;
+.panel-administracion summary::-webkit-details-marker {
+  display: none;
+}
 
+.panel-administracion summary::after {
+  content: '＋';
+  position: absolute;
+  right: 22px;
+  top: 18px;
+  font-size: 23px;
+  color: #2563eb;
+}
+
+.panel-administracion[open] summary::after {
+  content: '−';
+}
+
+.titulo-panel {
+  font-size: 16px;
   font-weight: 700;
-
-  color: #475569;
-}
-
-.campo-busqueda input {
-  width: 100%;
-
-  height: 42px;
-
-  padding: 0 14px;
-
-  box-sizing: border-box;
-
-  border: 1px solid #cbd5e1;
-
-  border-radius: 8px;
-
-  background: #ffffff;
-
   color: #1f2937;
-
-  font-size: 14px;
-
-  outline: none;
-
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
 }
 
+.subtitulo-panel {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.contenido-administracion {
+  border-top: 1px solid #e5e7eb;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bloque-administracion {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 20px;
+  background: #f8fafc;
+}
+
+.titulo-bloque {
+  margin-bottom: 18px;
+}
+
+.titulo-bloque h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.titulo-bloque p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.formulario-administracion {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.campo-administracion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-administracion input,
+.campo-administracion select,
+.campo-administracion textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 13px;
+  outline: none;
+}
+
+.campo-administracion input,
+.campo-administracion select {
+  height: 42px;
+  padding: 0 12px;
+}
+
+.campo-administracion textarea {
+  min-height: 82px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.campo-administracion input::placeholder,
+.campo-administracion textarea::placeholder,
 .campo-busqueda input::placeholder {
   color: #94a3b8;
 }
 
-.campo-busqueda input:focus {
-  border-color: #2563eb;
-
-  box-shadow:
-    0 0 0 3px rgba(37, 99, 235, 0.12);
+.campo-ancho {
+  grid-column: 1 / -1;
 }
 
+.empleado-seleccionado {
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.acciones-administracion {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.boton-principal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 190px;
+  height: 42px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-principal:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.boton-principal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 /* =========================================================
-   CARGANDO
+   MASIVO
+   ========================================================= */
+
+.acciones-masivo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.boton-secundario {
+  height: 36px;
+  padding: 0 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-secundario:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.boton-secundario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.resumen-seleccion {
+  padding: 9px 13px;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 13px;
+}
+
+/* =========================================================
+   BÚSQUEDA
+   ========================================================= */
+
+.barra-busqueda {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.campo-busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-busqueda input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 14px;
+  outline: none;
+}
+
+/* =========================================================
+   CARGA / SIN RESULTADOS
    ========================================================= */
 
 .mensaje-carga {
   min-height: 250px;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
-
   gap: 12px;
-
   background: #ffffff;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 12px;
-
   color: #64748b;
-
   font-size: 15px;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .cargando-icono {
   font-size: 28px;
-
   color: #2563eb;
-
-  animation:
-    girar 1s linear infinite;
+  animation: girar 1s linear infinite;
 }
 
 @keyframes girar {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
-
-
-/* =========================================================
-   SIN RESULTADOS
-   ========================================================= */
 
 .sin-resultados {
   min-height: 300px;
-
   display: flex;
-
   flex-direction: column;
-
   align-items: center;
-
   justify-content: center;
-
   text-align: center;
-
   background: #ffffff;
-
   border: 1px solid #e5e7eb;
-
   border-radius: 12px;
-
   padding: 40px;
-
   color: #64748b;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .icono-sin-resultados {
   width: 64px;
-
   height: 64px;
-
   display: flex;
-
   align-items: center;
-
   justify-content: center;
-
   margin-bottom: 16px;
-
   border-radius: 50%;
-
   background: #eff6ff;
-
   font-size: 28px;
 }
-
-.sin-resultados h2 {
-  margin: 0 0 8px;
-
-  font-size: 18px;
-
-  color: #374151;
-}
-
-.sin-resultados p {
-  margin: 0;
-
-  max-width: 500px;
-
-  color: #94a3b8;
-
-  font-size: 14px;
-
-  line-height: 1.6;
-}
-
-
-/* =========================================================
-   CONTENEDOR DE TABLA
-   ========================================================= */
-
-.contenedor-tabla {
-  width: 100%;
-
-  background: #ffffff;
-
-  border: 1px solid #e5e7eb;
-
-  border-radius: 12px;
-
-  overflow-x: auto;
-
-  box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
 
 /* =========================================================
    TABLA
    ========================================================= */
 
+.contenedor-tabla {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
 .tabla-reporte {
   width: 100%;
-
-  min-width: 1100px;
-
+  min-width: 1350px;
   border-collapse: collapse;
 }
 
@@ -484,60 +523,45 @@
 
 .tabla-reporte th {
   padding: 15px 14px;
-
   text-align: left;
-
   font-size: 11px;
-
   font-weight: 700;
-
   color: #475569;
-
   text-transform: uppercase;
-
   letter-spacing: 0.03em;
-
   border-bottom: 1px solid #e5e7eb;
-
   white-space: nowrap;
 }
 
 .tabla-reporte td {
   padding: 15px 14px;
-
   font-size: 13px;
-
   color: #374151;
-
   border-bottom: 1px solid #f1f5f9;
-
   vertical-align: middle;
-}
-
-.tabla-reporte tbody tr {
-  transition:
-    background 0.15s ease;
 }
 
 .tabla-reporte tbody tr:hover {
   background: #f8fafc;
 }
 
-.tabla-reporte tbody tr:last-child td {
-  border-bottom: none;
-}
-
-
-/* =========================================================
-   COLUMNAS
-   ========================================================= */
-
 .numero-fila {
   width: 40px;
-
   color: #94a3b8 !important;
-
   text-align: center;
+}
+
+.columna-checkbox {
+  width: 42px;
+  text-align: center !important;
+}
+
+.columna-checkbox input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: #2563eb;
 }
 
 .empleado {
@@ -546,133 +570,181 @@
 
 .empleado strong {
   color: #1f2937;
-
   font-weight: 600;
 }
 
 .numero {
   text-align: center;
-
   font-weight: 600;
 }
 
 .tipo-contratacion {
   display: inline-block;
-
   padding: 5px 9px;
-
   border-radius: 6px;
-
   background: #f1f5f9;
-
   color: #475569;
-
   font-size: 12px;
-
   font-weight: 600;
 }
 
-
-/* =========================================================
-   DÍAS UTILIZADOS
-   ========================================================= */
-
-.dias-utilizados {
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  min-width: 32px;
-
+.estado-pendiente,
+.estado-cargado {
+  display: inline-block;
   padding: 5px 8px;
-
   border-radius: 6px;
-
-  background: #fef3c7;
-
-  color: #92400e;
-
+  font-size: 10px;
   font-weight: 700;
+  white-space: nowrap;
 }
 
-
-/* =========================================================
-   DÍAS RESERVADOS
-   ========================================================= */
-
-.dias-reservados {
-  display: inline-flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  min-width: 32px;
-
-  padding: 5px 8px;
-
-  border-radius: 6px;
-
-  background: #e0e7ff;
-
-  color: #3730a3;
-
-  font-weight: 700;
+.estado-pendiente {
+  background: #fff7ed;
+  color: #c2410c;
 }
 
+.estado-cargado {
+  background: #dcfce7;
+  color: #166534;
+}
 
-/* =========================================================
-   DÍAS DISPONIBLES
-   ========================================================= */
-
+.dias-utilizados,
+.dias-reservados,
 .dias-disponibles {
   display: inline-flex;
-
   align-items: center;
-
   justify-content: center;
-
-  min-width: 38px;
-
-  padding: 5px 9px;
-
+  min-width: 32px;
+  padding: 5px 8px;
   border-radius: 6px;
-
   font-weight: 700;
+}
+
+.dias-utilizados {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.dias-reservados {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+.dias-disponibles {
+  min-width: 38px;
 }
 
 .dias-disponibles.con-dias {
   background: #dcfce7;
-
   color: #166534;
 }
 
 .dias-disponibles.sin-dias {
   background: #fee2e2;
-
   color: #b91c1c;
 }
 
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
+
+.boton-historial {
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-historial:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.boton-historial:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.panel-historial {
+  margin-top: 20px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.encabezado-historial {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.encabezado-historial h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #1f2937;
+}
+
+.encabezado-historial p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.boton-cerrar {
+  height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 7px;
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.historial-vacio {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #64748b;
+}
+
+.historial-tabla .tabla-reporte {
+  min-width: 900px;
+}
+
+.tipo-movimiento {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+}
 
 /* =========================================================
-   INFORMACIÓN DE LA TABLA
+   INFORMACIÓN
    ========================================================= */
 
 .informacion-tabla {
   display: flex;
-
   align-items: center;
-
   justify-content: space-between;
-
   gap: 20px;
-
   padding: 14px 4px;
-
   color: #64748b;
-
   font-size: 13px;
 }
 
@@ -680,20 +752,23 @@
   color: #374151;
 }
 
-
 /* =========================================================
    RESPONSIVE
    ========================================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+  .formulario-administracion {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
+@media (max-width: 900px) {
   .pagina-reporte-vacaciones {
     padding: 20px;
   }
 
   .encabezado-reporte {
     flex-direction: column;
-
     align-items: flex-start;
   }
 
@@ -701,64 +776,73 @@
     width: 100%;
   }
 
-  .control-anio {
+  .resumen-reporte {
+    grid-template-columns: 1fr;
+  }
+
+  .formulario-administracion {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-ancho,
+  .acciones-administracion {
+    grid-column: auto;
+  }
+
+  .acciones-reporte {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .boton-exportar {
     flex: 1;
   }
-
-  .control-anio input {
-    width: 100%;
-  }
-
-  .boton-actualizar {
-    min-width: 140px;
-  }
-
-  .resumen-reporte {
-    grid-template-columns:
-      1fr;
-  }
-
 }
 
-
 @media (max-width: 600px) {
-
   .pagina-reporte-vacaciones {
     padding: 16px;
   }
 
-  .encabezado-reporte {
-    padding: 20px;
-  }
-
-  .titulo-reporte h1 {
-    font-size: 22px;
-  }
-
-  .titulo-reporte p {
-    font-size: 13px;
-  }
-
   .controles-reporte {
     flex-direction: column;
-
     align-items: stretch;
   }
 
-  .boton-actualizar {
+  .boton-actualizar,
+  .boton-exportar {
     width: 100%;
   }
 
-  .barra-busqueda {
-    padding: 16px;
+  .acciones-reporte {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .acciones-masivo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .boton-secundario,
+  .resumen-seleccion {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
   }
 
   .informacion-tabla {
     flex-direction: column;
-
     align-items: flex-start;
-
     gap: 6px;
   }
 
+  .encabezado-historial {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .boton-cerrar {
+    width: 100%;
+  }
 }

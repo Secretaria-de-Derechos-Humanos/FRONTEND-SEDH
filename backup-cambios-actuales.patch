@@ -1,0 +1,7768 @@
+diff --git a/apps/frontend-sedh/src/app/config/api.endpoints.ts b/apps/frontend-sedh/src/app/config/api.endpoints.ts
+index 2a70238..4d8f4d0 100644
+--- a/apps/frontend-sedh/src/app/config/api.endpoints.ts
++++ b/apps/frontend-sedh/src/app/config/api.endpoints.ts
+@@ -26,6 +26,8 @@ export const EP_RRHH_MIS_SOLICITUDES_EMERGENCIA        = '/rrhh/solicitudes-empl
+ export const EP_RRHH_DATOS_PERMISO                     = '/rrhh/solicitudes-empleados/datos-permiso';
+ export const EP_RRHH_PERMISOS_PERSONALES_INSERTAR      = '/rrhh/permisos-personales/insertar';
+ export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficiales/insertar';
++export const EP_RRHH_PERMISOS_PERSONALES_ANULAR = '/rrhh/permisos-personales/anular';
++export const EP_RRHH_PERMISOS_OFICIALES_ANULAR =  '/rrhh/permisos-oficiales/anular';
+ export const EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD = '/rrhh/permisos-personales/disponibilidad';
+ 
+ 
+diff --git a/apps/frontend-sedh/src/app/core/services/vacaciones-api.ts b/apps/frontend-sedh/src/app/core/services/vacaciones-api.ts
+index 9b61253..b0ae7fa 100644
+--- a/apps/frontend-sedh/src/app/core/services/vacaciones-api.ts
++++ b/apps/frontend-sedh/src/app/core/services/vacaciones-api.ts
+@@ -4,33 +4,68 @@ import { map, Observable } from 'rxjs';
+ 
+ import { environment } from '../../../environments/environment';
+ 
++// =========================================================
++// SALDO DE VACACIONES
++// =========================================================
++
+ export interface SaldoVacaciones {
+   idSaldoVacacion?: string;
++
+   anio: number;
++
+   diasAsignados: number;
+   diasUtilizados: number;
+   diasReservados: number;
+   diasDisponibles: number;
++
++  tipoContratacion?: string;
++  fechaIngreso?: string;
++  antiguedadAnios?: number;
++  mesesGenerados?: number | null;
++
++  periodoAnterior?: string | null;
++  diasPeriodoAnterior?: number;
++
++  periodoActual?: string | null;
++  diasPeriodoActual?: number;
++
++  saldoInicialPendiente?: boolean;
+ }
+ 
++// =========================================================
++// CREAR SOLICITUD
++// =========================================================
++
+ export interface CrearSolicitudVacaciones {
+   fechaInicio: string;
+   fechaFin: string;
+   observaciones?: string;
+ }
+ 
++// =========================================================
++// ESTADO DE SOLICITUD
++// =========================================================
++
+ export interface EstadoSolicitudVacaciones {
+   idEstadoSolicitud?: string;
+   nomEstado?: string;
+   nomestado?: string;
+ }
+ 
++// =========================================================
++// TIPO DE SOLICITUD
++// =========================================================
++
+ export interface TipoSolicitudVacaciones {
+   idTipoSolicitud?: string;
+   nomTipo?: string;
+   nomtipo?: string;
+ }
+ 
++// =========================================================
++// SOLICITUD DE VACACIONES
++// =========================================================
++
+ export interface SolicitudVacaciones {
+   idVacaciones?: string;
+   idVacacion?: string;
+@@ -41,40 +76,64 @@ export interface SolicitudVacaciones {
+   fecRetorno?: string | null;
+ 
+   cantVacaciones: number;
++
+   observaciones?: string | null;
+ 
+   idEstadoSolicitud: string;
++
+   estadoSolicitud?: EstadoSolicitudVacaciones;
+ 
+   idTipoSolicitud?: string;
++
+   tipoSolicitud?: TipoSolicitudVacaciones;
+ 
+   priAprobacion?: boolean | null;
+   segAprobacion?: boolean | null;
++
+   motRechazo?: string | null;
+ 
+-  // Datos del empleado
++  // =======================================================
++  // DATOS DEL EMPLEADO
++  // =======================================================
++
+   idUsuario?: string;
+   emailInstitucional?: string;
+   numIdentidad?: string;
++
+   primerNombre?: string;
+   segundoNombre?: string;
+   primerApellido?: string;
+   segundoApellido?: string;
+ }
+ 
++// =========================================================
++// SOLICITUD CREADA
++// =========================================================
++
+ export interface SolicitudVacacionesCreada {
+   message: string;
++
+   diasSolicitados: number;
++
+   diasDisponiblesAntes: number;
++
+   diasDisponiblesDespues: number;
++
+   solicitud: unknown;
+ }
+ 
++// =========================================================
++// APROBACIÓN
++// =========================================================
++
+ export interface AprobarVacaciones {
+   observacion?: string;
+ }
+ 
++// =========================================================
++// RECHAZO
++// =========================================================
++
+ export interface RechazarVacaciones {
+   motivoRechazo: string;
+ }
+@@ -85,73 +144,287 @@ export interface RechazarVacaciones {
+ 
+ export interface ReporteVacacionesEmpleado {
+   idUsuario: string;
++
+   identidad: string;
++
+   nombreCompleto: string;
++
+   tipoContratacion: string;
++
+   anio: number;
++
+   diasAsignados: number;
++
+   diasUtilizados: number;
++
+   diasReservados: number;
++
+   diasDisponibles: number;
++
++  saldoInicialPendiente?: boolean;
+ }
+ 
+ export interface ReporteVacacionesResponse {
+   anio: number;
++
+   totalEmpleados: number;
++
+   empleados: ReporteVacacionesEmpleado[];
+ }
+ 
++// =========================================================
++// CARGA INICIAL DE SALDO
++// =========================================================
++
++export interface CargaInicialSaldo {
++  idUsuario: string;
++
++  anio: number;
++
++  diasAsignados: number;
++
++  diasUtilizados: number;
++
++  diasReservados: number;
++
++  observacion: string;
++}
++
++// =========================================================
++// AJUSTE INDIVIDUAL DE SALDO
++// =========================================================
++
++export interface AjusteSaldoVacaciones {
++  idUsuario: string;
++
++  tipo: 'AGREGAR' | 'DESCONTAR';
++
++  dias: number;
++
++  justificacion: string;
++}
++
++// =========================================================
++// DESCUENTO MASIVO
++// =========================================================
++
++export interface DescuentoMasivoVacaciones {
++  idUsuarios: string[];
++
++  dias: number;
++
++  justificacion: string;
++}
++
++// =========================================================
++// RESULTADO DE AJUSTE
++// =========================================================
++
++export interface ResultadoAjusteSaldo {
++  message: string;
++
++  tipo: 'AGREGAR' | 'DESCONTAR';
++
++  dias: number;
++
++  justificacion: string;
++
++  saldo?: SaldoVacaciones;
++
++  movimientos?: Array<{
++    anio: number;
++    dias: number;
++  }>;
++}
++
++// =========================================================
++// HISTORIAL DE VACACIONES
++// =========================================================
++
++export interface HistorialVacaciones {
++  idHistorial: string;
++
++  idPermisoVaca?: string | null;
++
++  idSaldoVacacion?: string | null;
++
++  idUsuarioAccion: string;
++
++  accion: string;
++
++  estadoAnterior?: string | null;
++
++  estadoNuevo?: string | null;
++
++  observacion?: string | null;
++
++  fechaAccion: string;
++}
++
++// =========================================================
++// RESPUESTA GENERAL DEL BACKEND
++// =========================================================
++
+ interface ApiResponse<T> {
+   success: boolean;
++
+   data: T;
++
+   message?: string;
+ }
+ 
++// =========================================================
++// SERVICIO
++// =========================================================
++
+ @Injectable({
+   providedIn: 'root',
+ })
+ export class VacacionesApiService {
++
+   private readonly http = inject(HttpClient);
+ 
+   private readonly apiUrl =
+     `${environment.apiBaseUrl}/rrhh/vacaciones`;
+ 
++
+   // =========================================================
+-  // SALDO
++  // SALDO DEL USUARIO AUTENTICADO
+   // =========================================================
+ 
+-  obtenerMiSaldo(): Observable<SaldoVacaciones> {
++  obtenerMiSaldo():
++    Observable<SaldoVacaciones> {
++
+     return this.http
+       .get<ApiResponse<SaldoVacaciones>>(
+         `${this.apiUrl}/mi-saldo`,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
++      );
++  }
++
++
++  // =========================================================
++  // CARGA INICIAL DE SALDO
++  // =========================================================
++
++  cargarSaldoInicial(
++    saldo: CargaInicialSaldo,
++  ): Observable<unknown> {
++
++    return this.http
++      .post<ApiResponse<unknown>>(
++        `${this.apiUrl}/saldo/carga-inicial`,
++        saldo,
++      )
++      .pipe(
++        map((respuesta) =>
++          respuesta.data,
++        ),
++      );
++  }
++
++
++  // =========================================================
++  // AJUSTE INDIVIDUAL DE SALDO
++  // =========================================================
++
++  ajustarSaldo(
++    ajuste: AjusteSaldoVacaciones,
++  ): Observable<ResultadoAjusteSaldo> {
++
++    return this.http
++      .post<ApiResponse<ResultadoAjusteSaldo>>(
++        `${this.apiUrl}/saldo/ajuste`,
++        ajuste,
++      )
++      .pipe(
++        map((respuesta) =>
++          respuesta.data,
++        ),
++      );
++  }
++
++
++  // =========================================================
++  // DESCUENTO MASIVO
++  // =========================================================
++
++  aplicarDescuentoMasivo(
++    descuento: DescuentoMasivoVacaciones,
++  ): Observable<unknown> {
++
++    return this.http
++      .post<ApiResponse<unknown>>(
++        `${this.apiUrl}/saldo/descuento-masivo`,
++        descuento,
++      )
++      .pipe(
++        map((respuesta) =>
++          respuesta.data,
++        ),
++      );
++  }
++
++
++  // =========================================================
++  // HISTORIAL DE VACACIONES
++  // =========================================================
++
++  obtenerHistorialVacaciones(
++    idUsuario: string,
++  ): Observable<HistorialVacaciones[]> {
++
++    return this.http
++      .get<ApiResponse<HistorialVacaciones[]>>(
++        `${this.apiUrl}/saldo/historial/${idUsuario}`,
++      )
++      .pipe(
++        map((respuesta) =>
++          respuesta.data ?? [],
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+-  // CALCULAR DÍAS
++  // CALCULAR DÍAS LABORABLES
+   // =========================================================
+ 
+   calcularDias(
+     fechaInicio: string,
+     fechaFin: string,
+   ): Observable<number> {
+-    const params = new HttpParams()
+-      .set('fechaInicio', fechaInicio)
+-      .set('fechaFin', fechaFin);
++
++    const params =
++      new HttpParams()
++        .set(
++          'fechaInicio',
++          fechaInicio,
++        )
++        .set(
++          'fechaFin',
++          fechaFin,
++        );
+ 
+     return this.http
+       .get<ApiResponse<number>>(
+         `${this.apiUrl}/calcular-dias`,
+-        { params },
++        {
++          params,
++        },
+       )
+       .pipe(
+-        map((respuesta) => Number(respuesta.data)),
++        map((respuesta) =>
++          Number(respuesta.data),
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // CREAR SOLICITUD
+   // =========================================================
+@@ -159,44 +432,79 @@ export class VacacionesApiService {
+   crearSolicitud(
+     solicitud: CrearSolicitudVacaciones,
+   ): Observable<SolicitudVacacionesCreada> {
++
+     return this.http
+       .post<ApiResponse<SolicitudVacacionesCreada>>(
+         `${this.apiUrl}/solicitudes`,
+         solicitud,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // MIS SOLICITUDES
+   // =========================================================
+ 
+-  obtenerMisSolicitudes(): Observable<SolicitudVacaciones[]> {
++  obtenerMisSolicitudes():
++    Observable<SolicitudVacaciones[]> {
++
+     return this.http
+       .get<ApiResponse<SolicitudVacaciones[]>>(
+         `${this.apiUrl}/mis-solicitudes`,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data ?? []),
++        map((respuesta) =>
++          respuesta.data ?? [],
++        ),
+       );
+   }
+ 
++
++  // =========================================================
++  // ANULAR MI SOLICITUD
++  // =========================================================
++
++  anularVacaciones(
++    idVacaciones: string,
++  ): Observable<unknown> {
++
++    return this.http
++      .post<ApiResponse<unknown>>(
++        `${this.apiUrl}/${idVacaciones}/anular`,
++        {},
++      )
++      .pipe(
++        map((respuesta) =>
++          respuesta.data,
++        ),
++      );
++  }
++
++
+   // =========================================================
+   // SOLICITUDES PENDIENTES DEL JEFE
+   // =========================================================
+ 
+-  obtenerPendientesJefe(): Observable<SolicitudVacaciones[]> {
++  obtenerPendientesJefe():
++    Observable<SolicitudVacaciones[]> {
++
+     return this.http
+       .get<ApiResponse<SolicitudVacaciones[]>>(
+         `${this.apiUrl}/pendientes-jefe`,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data ?? []),
++        map((respuesta) =>
++          respuesta.data ?? [],
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // APROBAR COMO JEFE
+   // =========================================================
+@@ -205,32 +513,44 @@ export class VacacionesApiService {
+     idVacaciones: string,
+     observacion?: string,
+   ): Observable<unknown> {
++
++    const body: AprobarVacaciones = {
++      observacion:
++        observacion?.trim() || undefined,
++    };
++
+     return this.http
+       .post<ApiResponse<unknown>>(
+         `${this.apiUrl}/${idVacaciones}/aprobar-jefe`,
+-        {
+-          observacion: observacion?.trim() || undefined,
+-        },
++        body,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+-  // PENDIENTES DE SUBGERENCIA
++  // SOLICITUDES PENDIENTES DE SUBGERENCIA
+   // =========================================================
+ 
+-  obtenerPendientesSubgerente(): Observable<SolicitudVacaciones[]> {
++  obtenerPendientesSubgerente():
++    Observable<SolicitudVacaciones[]> {
++
+     return this.http
+       .get<ApiResponse<SolicitudVacaciones[]>>(
+         `${this.apiUrl}/pendientes-subgerente`,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data ?? []),
++        map((respuesta) =>
++          respuesta.data ?? [],
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // APROBAR COMO SUBGERENCIA
+   // =========================================================
+@@ -239,18 +559,25 @@ export class VacacionesApiService {
+     idVacaciones: string,
+     observacion?: string,
+   ): Observable<unknown> {
++
++    const body: AprobarVacaciones = {
++      observacion:
++        observacion?.trim() || undefined,
++    };
++
+     return this.http
+       .post<ApiResponse<unknown>>(
+         `${this.apiUrl}/${idVacaciones}/aprobar-subgerente`,
+-        {
+-          observacion: observacion?.trim() || undefined,
+-        },
++        body,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // RECHAZAR
+   // =========================================================
+@@ -259,40 +586,54 @@ export class VacacionesApiService {
+     idVacaciones: string,
+     motivoRechazo: string,
+   ): Observable<unknown> {
++
++    const body: RechazarVacaciones = {
++      motivoRechazo:
++        motivoRechazo.trim(),
++    };
++
+     return this.http
+       .post<ApiResponse<unknown>>(
+         `${this.apiUrl}/${idVacaciones}/rechazar`,
+-        {
+-          motivoRechazo: motivoRechazo.trim(),
+-        },
++        body,
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
+       );
+   }
+ 
++
+   // =========================================================
+   // REPORTE DE VACACIONES
+-  // ROLES: 2, 3, 5
+   // =========================================================
+ 
+   obtenerReporteVacaciones(
+     anio?: number,
+   ): Observable<ReporteVacacionesResponse> {
+-    let params = new HttpParams();
++
++    let params =
++      new HttpParams();
++
+     if (anio !== undefined) {
+       params = params.set(
+         'anio',
+         anio.toString(),
+       );
+     }
++
+     return this.http
+       .get<ApiResponse<ReporteVacacionesResponse>>(
+         `${this.apiUrl}/reporte`,
+-        { params },
++        {
++          params,
++        },
+       )
+       .pipe(
+-        map((respuesta) => respuesta.data),
++        map((respuesta) =>
++          respuesta.data,
++        ),
+       );
+   }
+ }
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.css b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.css
+index 8e39c24..5409d11 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.css
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.css
+@@ -829,3 +829,94 @@ textarea.form-control {
+   }
+ }
+ 
++/* ═══════════════════════════════════════════════════════════════════════════
++   ACCIONES DE SOLICITUD
++═══════════════════════════════════════════════════════════════════════════ */
++
++.td-acciones {
++  text-align: center;
++  white-space: nowrap;
++}
++
++/* Botón anular */
++.btn-anular {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  gap: 6px;
++  min-inline-size: 72px;
++  padding: 6px 12px;
++  border: none;
++  border-radius: var(--sedh-radius);
++  background: var(--sedh-danger);
++  color: white;
++  font-size: 0.8rem;
++  font-weight: 600;
++  cursor: pointer;
++  box-shadow: var(--sedh-shadow-sm);
++  transition:
++    background 0.2s ease,
++    box-shadow 0.2s ease,
++    transform 0.15s ease,
++    opacity 0.15s ease;
++}
++
++.btn-anular:hover:not(:disabled) {
++  background: #b02a37;
++  box-shadow: var(--sedh-shadow-md);
++  transform: translateY(-1px);
++}
++
++.btn-anular:active:not(:disabled) {
++  transform: translateY(0);
++}
++
++.btn-anular:disabled {
++  opacity: 0.55;
++  cursor: not-allowed;
++  transform: none;
++  box-shadow: none;
++}
++
++/* Spinner del botón Anular */
++.spinner-anular {
++  display: inline-block;
++  inline-size: 12px;
++  block-size: 12px;
++  border: 2px solid rgba(255, 255, 255, 0.4);
++  border-block-start-color: white;
++  border-radius: 50%;
++  animation: spin 0.65s linear infinite;
++}
++
++/* Cuando no hay acción */
++.sin-accion {
++  color: var(--sedh-text-muted);
++  font-size: 0.9rem;
++}
++
++/* Mensaje de éxito */
++.se-success-alert {
++  background: var(--sedh-success-light);
++  color: var(--sedh-success);
++  border: 1px solid var(--sedh-success);
++  border-radius: var(--sedh-radius);
++  padding:
++    var(--sedh-space-sm)
++    var(--sedh-space-md);
++  font-size: 0.9rem;
++  margin-block-end: var(--sedh-space-md);
++}
++
++/* Responsive para las acciones */
++@media (max-width: 768px) {
++  .td-acciones {
++    text-align: start;
++  }
++
++  .btn-anular {
++    min-inline-size: 64px;
++    padding: 5px 9px;
++    font-size: 0.75rem;
++  }
++}
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
+index 26be60b..c01968a 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.html
+@@ -1,191 +1,672 @@
+ <div class="se-container">
+ 
+   <div class="se-page-header">
++
+     <app-encabezados-pagina
+       titulo="Mis solicitudes"
+       subtitulo="Consulte el estado de sus solicitudes de permisos y ausencias"
+     />
++
+     <div class="header-actions">
++
+       <button
+         class="btn-nueva-solicitud"
+         title="Solicitar un nuevo permiso"
+         [disabled]="cargandoModal()"
+         (click)="abrirModal()">
++
+         @if (cargandoModal()) {
++
+           <span class="spinner"></span>
++
+           <span>Cargando...</span>
++
+         } @else {
++
+           + Nueva solicitud
++
+         }
++
+       </button>
++
++
+       <button
+         class="btn-actualizar"
+         title="Actualizar solicitudes"
+         [disabled]="isActualizando()"
+         (click)="actualizarDatos()">
++
+         @if (!isActualizando()) {
++
+           <span>&#x21BB; Actualizar</span>
++
+         } @else {
++
+           <span class="spinner"></span>
++
+           <span>Cargando...</span>
++
+         }
++
+       </button>
++
+     </div>
++
+   </div>
+ 
++
+   @if (errorMessage()) {
+-    <div class="se-error-alert">{{ errorMessage() }}</div>
++
++    <div class="se-error-alert">
++
++      {{ errorMessage() }}
++
++    </div>
++
+   }
+ 
+-  <!-- ── Tabla: Solicitudes normales ── -->
++
++  @if (mensajeAnulacion()) {
++
++    <div class="se-success-alert">
++
++      {{ mensajeAnulacion() }}
++
++    </div>
++
++  }
++
++
++  @if (errorAnulacion()) {
++
++    <div class="se-error-alert">
++
++      {{ errorAnulacion() }}
++
++    </div>
++
++  }
++
++
++  <!-- ═══════════════════════════════════════════════════════════════════════
++       TABLA: SOLICITUDES NORMALES
++  ═══════════════════════════════════════════════════════════════════════ -->
++
+   @if (!isActualizando() && solicitudes().length === 0) {
++
+     <div class="empty-state">
+-      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
++
++      <svg
++        class="empty-icon"
++        fill="none"
++        stroke="currentColor"
++        viewBox="0 0 24 24">
++
++        <path
++          stroke-linecap="round"
++          stroke-linejoin="round"
++          stroke-width="2"
++          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
++        />
++
+       </svg>
+-      <p class="empty-message">No hay solicitudes registradas en este momento.</p>
++
++      <p class="empty-message">
++        No hay solicitudes registradas en este momento.
++      </p>
++
+     </div>
++
+   } @else {
++
+     <div class="table-container">
++
+       <table class="table">
++
+         <thead>
++
+           <tr>
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Fecha solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar fecha..."
+-                  [ngModel]="filtroFecha()" (ngModelChange)="filtroFecha.set($event)" />
++
++                <span class="th-label">
++                  Fecha solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar fecha..."
++                  [ngModel]="filtroFecha()"
++                  (ngModelChange)="filtroFecha.set($event)"
++                />
++
+               </div>
++
+             </th>
++
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Tipo solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar tipo..."
+-                  [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)" />
++
++                <span class="th-label">
++                  Tipo solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar tipo..."
++                  [ngModel]="filtroTipo()"
++                  (ngModelChange)="filtroTipo.set($event)"
++                />
++
+               </div>
++
+             </th>
++
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Estado solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar estado..."
+-                  [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)" />
++
++                <span class="th-label">
++                  Estado solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar estado..."
++                  [ngModel]="filtroEstado()"
++                  (ngModelChange)="filtroEstado.set($event)"
++                />
++
+               </div>
++
+             </th>
+-            <th>Primer revisión</th>
+-            <th>Segunda revisión</th>
+-            <th>Motivo rechazo</th>
++
++
++            <th>
++              Primer revisión
++            </th>
++
++            <th>
++              Segunda revisión
++            </th>
++
++            <th>
++              Motivo rechazo
++            </th>
++
++            <th>
++              Acciones
++            </th>
++
+           </tr>
++
+         </thead>
++
++
+         <tbody>
++
+           @if (solicitudesFiltradas().length === 0) {
++
+             <tr>
+-              <td colspan="6" class="empty-cell">Sin resultados para los filtros aplicados.</td>
++
++              <td
++                colspan="7"
++                class="empty-cell">
++
++                Sin resultados para los filtros aplicados.
++
++              </td>
++
+             </tr>
++
+           }
+-          @for (s of solicitudesFiltradas(); track $index) {
++
++
++          @for (
++            s of solicitudesFiltradas();
++            track s.idPermiso || $index
++          ) {
++
+             <tr>
+-              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
+-              <td>{{ s.nom_tipo_solicitud }}</td>
+-              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
+-              <td>{{ primerRevision(s) }}</td>
+-              <td>{{ segundaRevision(s) }}</td>
+-              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
++
++              <td class="td-fecha">
++
++                {{ s.fec_solicitud | date:'dd/MM/yyyy' }}
++
++              </td>
++
++
++              <td>
++
++                {{ s.nom_tipo_solicitud }}
++
++              </td>
++
++
++              <td>
++
++                <span [class]="badgeClass">
++
++                  {{ s.nom_estado }}
++
++                </span>
++
++              </td>
++
++
++              <td>
++
++                {{ primerRevision(s) }}
++
++              </td>
++
++
++              <td>
++
++                {{ segundaRevision(s) }}
++
++              </td>
++
++
++              <td>
++
++                {{ s.mot_rechazo ?? 'N/A' }}
++
++              </td>
++
++
++              <td class="td-acciones">
++
++                @if (puedeAnular(s)) {
++
++                  <button
++                    type="button"
++                    class="btn-anular"
++                    [disabled]="isAnulando()"
++                    [title]="
++                      estaAnulando(s)
++                        ? 'Anulando permiso...'
++                        : 'Anular permiso'
++                    "
++                    (click)="anularSolicitud(s)"
++                  >
++
++                    @if (estaAnulando(s)) {
++
++                      <span class="spinner-anular"></span>
++
++                      Anulando...
++
++                    } @else {
++
++                      Anular
++
++                    }
++
++                  </button>
++
++                } @else {
++
++                  <span class="sin-accion">
++                    —
++                  </span>
++
++                }
++
++              </td>
++
+             </tr>
++
+           }
++
+         </tbody>
++
+       </table>
++
+     </div>
++
++
+     <div class="table-footer">
++
+       <p class="results-count">
+-        Mostrando <strong>{{ solicitudesFiltradas().length }}</strong> de
+-        <strong>{{ solicitudes().length }}</strong>
++
++        Mostrando
++
++        <strong>
++          {{ solicitudesFiltradas().length }}
++        </strong>
++
++        de
++
++        <strong>
++          {{ solicitudes().length }}
++        </strong>
++
+         solicitud{{ solicitudes().length !== 1 ? 'es' : '' }}
++
+       </p>
++
+     </div>
++
+   }
+ 
+-  <!-- ── Sección: Solicitudes de emergencia ── -->
++
++  <!-- ═══════════════════════════════════════════════════════════════════════
++       SOLICITUDES DE EMERGENCIA
++  ═══════════════════════════════════════════════════════════════════════ -->
++
+   <div class="se-section">
++
+     <app-encabezados-pagina
+       titulo="Mis solicitudes de emergencia"
+       subtitulo="Solicitudes enviadas con carácter urgente"
+     />
++
+   </div>
+ 
+-  @if (!isActualizando() && solicitudesEmergencia().length === 0) {
++
++  @if (
++    !isActualizando()
++    &&
++    solicitudesEmergencia().length === 0
++  ) {
++
+     <div class="empty-state">
+-      <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+-          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
++
++      <svg
++        class="empty-icon"
++        fill="none"
++        stroke="currentColor"
++        viewBox="0 0 24 24">
++
++        <path
++          stroke-linecap="round"
++          stroke-linejoin="round"
++          stroke-width="2"
++          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
++        />
++
+       </svg>
+-      <p class="empty-message">No hay solicitudes de emergencia registradas en este momento.</p>
++
++      <p class="empty-message">
++
++        No hay solicitudes de emergencia registradas en este momento.
++
++      </p>
++
+     </div>
++
+   } @else {
++
+     <div class="table-container">
++
+       <table class="table">
++
+         <thead>
++
+           <tr>
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Fecha solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar fecha..."
+-                  [ngModel]="filtroFechaE()" (ngModelChange)="filtroFechaE.set($event)" />
++
++                <span class="th-label">
++                  Fecha solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar fecha..."
++                  [ngModel]="filtroFechaE()"
++                  (ngModelChange)="filtroFechaE.set($event)"
++                />
++
+               </div>
++
+             </th>
++
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Tipo solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar tipo..."
+-                  [ngModel]="filtroTipoE()" (ngModelChange)="filtroTipoE.set($event)" />
++
++                <span class="th-label">
++                  Tipo solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar tipo..."
++                  [ngModel]="filtroTipoE()"
++                  (ngModelChange)="filtroTipoE.set($event)"
++                />
++
+               </div>
++
+             </th>
++
++
+             <th>
++
+               <div class="th-content">
+-                <span class="th-label">Estado solicitud</span>
+-                <input class="filter-input" type="text" placeholder="Buscar estado..."
+-                  [ngModel]="filtroEstadoE()" (ngModelChange)="filtroEstadoE.set($event)" />
++
++                <span class="th-label">
++                  Estado solicitud
++                </span>
++
++                <input
++                  class="filter-input"
++                  type="text"
++                  placeholder="Buscar estado..."
++                  [ngModel]="filtroEstadoE()"
++                  (ngModelChange)="filtroEstadoE.set($event)"
++                />
++
+               </div>
++
++            </th>
++
++
++            <th>
++              Primer revisión
++            </th>
++
++            <th>
++              Segunda revisión
+             </th>
+-            <th>Primer revisión</th>
+-            <th>Segunda revisión</th>
+-            <th>Motivo rechazo</th>
+-            <th>Evidencia</th>
++
++            <th>
++              Motivo rechazo
++            </th>
++
++            <th>
++              Evidencia
++            </th>
++
++            <th>
++              Acciones
++            </th>
++
+           </tr>
++
+         </thead>
++
++
+         <tbody>
+-          @if (solicitudesEmergenciaFiltradas().length === 0) {
++
++          @if (
++            solicitudesEmergenciaFiltradas().length === 0
++          ) {
++
+             <tr>
+-              <td colspan="7" class="empty-cell">Sin resultados para los filtros aplicados.</td>
++
++              <td
++                colspan="8"
++                class="empty-cell">
++
++                Sin resultados para los filtros aplicados.
++
++              </td>
++
+             </tr>
++
+           }
+-          @for (s of solicitudesEmergenciaFiltradas(); track $index) {
++
++
++          @for (
++            s of solicitudesEmergenciaFiltradas();
++            track s.idPermiso || $index
++          ) {
++
+             <tr>
+-              <td class="td-fecha">{{ s.fec_solicitud | date:'dd/MM/yyyy' }}</td>
+-              <td>{{ s.nom_tipo_solicitud }}</td>
+-              <td><span [class]="badgeClass">{{ s.nom_estado }}</span></td>
+-              <td>{{ primerRevision(s) }}</td>
+-              <td>{{ segundaRevision(s) }}</td>
+-              <td>{{ s.mot_rechazo ?? 'N/A' }}</td>
+-              <td>—</td>
++
++              <td class="td-fecha">
++
++                {{ s.fec_solicitud | date:'dd/MM/yyyy' }}
++
++              </td>
++
++
++              <td>
++
++                {{ s.nom_tipo_solicitud }}
++
++              </td>
++
++
++              <td>
++
++                <span [class]="badgeClass">
++
++                  {{ s.nom_estado }}
++
++                </span>
++
++              </td>
++
++
++              <td>
++
++                {{ primerRevision(s) }}
++
++              </td>
++
++
++              <td>
++
++                {{ segundaRevision(s) }}
++
++              </td>
++
++
++              <td>
++
++                {{ s.mot_rechazo ?? 'N/A' }}
++
++              </td>
++
++
++              <td>
++                —
++              </td>
++
++
++              <td class="td-acciones">
++
++                @if (puedeAnular(s)) {
++
++                  <button
++                    type="button"
++                    class="btn-anular"
++                    [disabled]="isAnulando()"
++                    [title]="
++                      estaAnulando(s)
++                        ? 'Anulando permiso...'
++                        : 'Anular permiso'
++                    "
++                    (click)="anularSolicitud(s)"
++                  >
++
++                    @if (estaAnulando(s)) {
++
++                      <span class="spinner-anular"></span>
++
++                      Anulando...
++
++                    } @else {
++
++                      Anular
++
++                    }
++
++                  </button>
++
++                } @else {
++
++                  <span class="sin-accion">
++                    —
++                  </span>
++
++                }
++
++              </td>
++
+             </tr>
++
+           }
++
+         </tbody>
++
+       </table>
++
+     </div>
++
++
+     <div class="table-footer">
++
+       <p class="results-count">
+-        Mostrando <strong>{{ solicitudesEmergenciaFiltradas().length }}</strong> de
+-        <strong>{{ solicitudesEmergencia().length }}</strong>
+-        solicitud{{ solicitudesEmergencia().length !== 1 ? 'es' : '' }} de emergencia
++
++        Mostrando
++
++        <strong>
++          {{ solicitudesEmergenciaFiltradas().length }}
++        </strong>
++
++        de
++
++        <strong>
++          {{ solicitudesEmergencia().length }}
++        </strong>
++
++        solicitud{{ solicitudesEmergencia().length !== 1 ? 'es' : '' }}
++        de emergencia
++
+       </p>
++
+     </div>
++
+   }
+ 
++
+ </div>
+ 
+-<!-- ── Modal: Nueva solicitud ── -->
++
++<!-- ═══════════════════════════════════════════════════════════════════════════
++     MODAL NUEVA SOLICITUD
++═══════════════════════════════════════════════════════════════════════════ -->
++
+ @if (modalAbierto()) {
++
+   <div
+     class="modal-backdrop"
+     role="button"
+@@ -193,75 +674,194 @@
+     aria-label="Cerrar modal"
+     (click)="cerrarModal()"
+     (keydown.enter)="cerrarModal()"
+-    (keydown.escape)="cerrarModal()"></div>
++    (keydown.escape)="cerrarModal()">
++  </div>
++
++
++  <div
++    class="modal"
++    role="dialog"
++    aria-modal="true"
++    aria-labelledby="modal-titulo">
++
+ 
+-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+     <div class="modal-header">
+-      <h2 class="modal-titulo" id="modal-titulo">Nueva solicitud</h2>
+-      <button class="modal-close" (click)="cerrarModal()" title="Cerrar">
+-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
++
++      <h2
++        class="modal-titulo"
++        id="modal-titulo">
++
++        Nueva solicitud
++
++      </h2>
++
++
++      <button
++        class="modal-close"
++        (click)="cerrarModal()"
++        title="Cerrar">
++
++        <svg
++          width="20"
++          height="20"
++          fill="none"
++          stroke="currentColor"
++          viewBox="0 0 24 24">
++
++          <path
++            stroke-linecap="round"
++            stroke-linejoin="round"
++            stroke-width="2"
++            d="M6 18L18 6M6 6l12 12"
++          />
++
+         </svg>
++
+       </button>
++
+     </div>
+ 
++
+     <div class="modal-body">
+ 
+-      <!-- Campos comunes -->
++
++      <!-- CAMPOS COMUNES -->
++
+       <div class="form-group">
+-        <label class="form-label" for="nombreEmpleado">Nombre del empleado</label>
++
++        <label
++          class="form-label"
++          for="nombreEmpleado">
++
++          Nombre del empleado
++
++        </label>
++
+         <input
+           id="nombreEmpleado"
+           class="form-control form-control--readonly"
+           type="text"
+           readonly
+-          [value]="form().nombreEmpleado" />
++          [value]="form().nombreEmpleado"
++        />
++
+       </div>
+ 
++
+       <div class="form-row">
++
+         <div class="form-group">
+-          <label class="form-label" for="dependencia">Dependencia</label>
++
++          <label
++            class="form-label"
++            for="dependencia">
++
++            Dependencia
++
++          </label>
++
+           <input
+             id="dependencia"
+             class="form-control form-control--readonly"
+             type="text"
+             readonly
+-            [value]="form().dependencia" />
++            [value]="form().dependencia"
++          />
++
+         </div>
+ 
++
+         <div class="form-group">
+-          <label class="form-label" for="cargo">Cargo</label>
++
++          <label
++            class="form-label"
++            for="cargo">
++
++            Cargo
++
++          </label>
++
+           <input
+             id="cargo"
+             class="form-control form-control--readonly"
+             type="text"
+             readonly
+-            [value]="form().cargo" />
++            [value]="form().cargo"
++          />
++
+         </div>
++
+       </div>
+ 
++
+       <div class="form-group">
+-        <label class="form-label" for="tipoSolicitud">Tipo de solicitud</label>
++
++        <label
++          class="form-label"
++          for="tipoSolicitud">
++
++          Tipo de solicitud
++
++        </label>
++
++
+         <select
+           id="tipoSolicitud"
+           class="form-control form-select"
+           [ngModel]="form().tipoSolicitud"
+           (ngModelChange)="onTipoChange($event)">
+-          <option value="" disabled>Seleccione un tipo...</option>
+-          <option value="permiso-personal">Permiso personal</option>
+-          <option value="permiso-oficial">Permiso oficial</option>
++
++          <option
++            value=""
++            disabled>
++
++            Seleccione un tipo...
++
++          </option>
++
++          <option value="permiso-personal">
++            Permiso personal
++          </option>
++
++          <option value="permiso-oficial">
++            Permiso oficial
++          </option>
++
+         </select>
++
+       </div>
+ 
+-      <!-- Sección dinámica según tipo -->
+-      @if (form().tipoSolicitud === 'permiso-personal') {
++
++      <!-- PERMISO PERSONAL -->
++
++      @if (
++        form().tipoSolicitud
++        ===
++        'permiso-personal'
++      ) {
++
+         <div class="form-section">
+-          <div class="form-section-title">Datos del permiso personal</div>
+ 
+-          <!-- Fila: fecha + disponible -->
++          <div class="form-section-title">
++
++            Datos del permiso personal
++
++          </div>
++
++
+           <div class="form-date">
++
+             <div class="form-group">
+-              <label class="form-label" for="ppFecha">Fecha de salida</label>
++
++              <label
++                class="form-label"
++                for="ppFecha">
++
++                Fecha de salida
++
++              </label>
++
++
+               <input
+                 id="ppFecha"
+                 class="form-control"
+@@ -270,21 +870,53 @@
+                 [min]="ppFechaMin"
+                 [max]="ppFechaMax"
+                 [ngModel]="ppFecha()"
+-                (ngModelChange)="ppFecha.set($event)" />
++                (ngModelChange)="ppFecha.set($event)"
++              />
++
++
+               @if (ppErrores().fecha) {
+-                <span class="error-message">Seleccione una fecha entre hoy y 7 días.</span>
++
++                <span class="error-message">
++
++                  Seleccione una fecha entre hoy y 7 días.
++
++                </span>
++
+               }
++
+             </div>
+ 
++
+             <div class="horas-disponibles">
+-              <div class="horas-disponibles-value">{{ ppHorasDisponibles() }}</div>
+-              <div class="horas-disponibles-text">Horas disponibles</div>
++
++              <div class="horas-disponibles-value">
++
++                {{ ppHorasDisponibles() }}
++
++              </div>
++
++              <div class="horas-disponibles-text">
++
++                Horas disponibles
++
++              </div>
++
+             </div>
+ 
++
+             <div class="form-group tiempo-salida">
+-              <span class="form-label">Tiempo que desea tomar</span>
++
++              <span class="form-label">
++
++                Tiempo que desea tomar
++
++              </span>
++
++
+               <div class="time-row">
++
+                 <div class="time-field">
++
+                   <input
+                     id="ppHoras"
+                     class="form-control time-input"
+@@ -293,10 +925,22 @@
+                     min="0"
+                     max="9"
+                     [ngModel]="ppHoras()"
+-                    (ngModelChange)="ppHoras.set(+$event)" />
+-                  <label class="form-label" for="ppHoras">Horas</label>
++                    (ngModelChange)="ppHoras.set(+$event)"
++                  />
++
++                  <label
++                    class="form-label"
++                    for="ppHoras">
++
++                    Horas
++
++                  </label>
++
+                 </div>
++
++
+                 <div class="time-field">
++
+                   <input
+                     id="ppMinutos"
+                     class="form-control time-input"
+@@ -305,19 +949,52 @@
+                     min="0"
+                     max="59"
+                     [ngModel]="ppMinutos()"
+-                    (ngModelChange)="ppMinutos.set(+$event)" />
+-                  <label class="form-label" for="ppMinutos">Minutos</label>
++                    (ngModelChange)="ppMinutos.set(+$event)"
++                  />
++
++                  <label
++                    class="form-label"
++                    for="ppMinutos">
++
++                    Minutos
++
++                  </label>
++
+                 </div>
++
+               </div>
+-              @if (ppErrores().horas || ppErrores().minutos) {
+-                <span class="error-message">Horas: 0–9. Minutos: 0–59.</span>
++
++
++              @if (
++                ppErrores().horas
++                ||
++                ppErrores().minutos
++              ) {
++
++                <span class="error-message">
++
++                  Horas: 0–9. Minutos: 0–59.
++
++                </span>
++
+               }
++
+             </div>
++
+           </div>
+ 
+-          <!-- Motivo -->
++
+           <div class="form-group">
+-            <label class="form-label" for="ppMotivo">Motivo de la salida</label>
++
++            <label
++              class="form-label"
++              for="ppMotivo">
++
++              Motivo de la salida
++
++            </label>
++
++
+             <textarea
+               id="ppMotivo"
+               class="form-control"
+@@ -325,47 +1002,104 @@
+               rows="3"
+               placeholder="Describa el motivo de su salida"
+               [ngModel]="ppMotivo()"
+-              (ngModelChange)="ppMotivo.set($event)"></textarea>
++              (ngModelChange)="ppMotivo.set($event)"
++            ></textarea>
++
++
+             @if (ppErrores().motivo) {
+-              <span class="error-message">El motivo es obligatorio.</span>
++
++              <span class="error-message">
++
++                El motivo es obligatorio.
++
++              </span>
++
+             }
++
+           </div>
+ 
+-          <!-- ¿Cita médica? -->
++
+           <div class="form-group">
+-            <span class="form-label">¿Es cita médica?</span>
++
++            <span class="form-label">
++
++              ¿Es cita médica?
++
++            </span>
++
++
+             <div class="radio-group">
++
+               <label class="radio-option">
++
+                 <input
+                   type="radio"
+                   name="ppCitaMedica"
+                   [value]="1"
+                   [ngModel]="ppCitaMedica()"
+-                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+-                <span>Sí</span>
++                  (ngModelChange)="ppCitaMedica.set(+$event)"
++                />
++
++                <span>
++                  Sí
++                </span>
++
+               </label>
++
++
+               <label class="radio-option">
++
+                 <input
+                   type="radio"
+                   name="ppCitaMedica"
+                   [value]="0"
+                   [ngModel]="ppCitaMedica()"
+-                  (ngModelChange)="ppCitaMedica.set(+$event)" />
+-                <span>No</span>
++                  (ngModelChange)="ppCitaMedica.set(+$event)"
++                />
++
++                <span>
++                  No
++                </span>
++
+               </label>
++
+             </div>
++
+           </div>
+ 
+         </div>
++
+       }
+ 
+-      @if (form().tipoSolicitud === 'permiso-oficial') {
++
++      <!-- PERMISO OFICIAL -->
++
++      @if (
++        form().tipoSolicitud
++        ===
++        'permiso-oficial'
++      ) {
++
+         <div class="form-section">
+-          <div class="form-section-title">Datos del permiso oficial</div>
+ 
+-          <!-- Fecha de salida -->
++          <div class="form-section-title">
++
++            Datos del permiso oficial
++
++          </div>
++
++
+           <div class="form-group">
+-            <label class="form-label" for="poFecha">Fecha de salida</label>
++
++            <label
++              class="form-label"
++              for="poFecha">
++
++              Fecha de salida
++
++            </label>
++
++
+             <input
+               id="poFecha"
+               class="form-control"
+@@ -374,15 +1108,35 @@
+               [min]="poFechaMin"
+               [max]="poFechaMax"
+               [ngModel]="poFecha()"
+-              (ngModelChange)="poFecha.set($event)" />
++              (ngModelChange)="poFecha.set($event)"
++            />
++
++
+             @if (poErrores().fecha) {
+-              <span class="error-message">Seleccione una fecha válida (máximo dos semanas a partir de hoy).</span>
++
++              <span class="error-message">
++
++                Seleccione una fecha válida
++                (máximo dos semanas a partir de hoy).
++
++              </span>
++
+             }
++
+           </div>
+ 
+-          <!-- Motivo -->
++
+           <div class="form-group">
+-            <label class="form-label" for="poMotivo">Motivo de la salida</label>
++
++            <label
++              class="form-label"
++              for="poMotivo">
++
++              Motivo de la salida
++
++            </label>
++
++
+             <textarea
+               id="poMotivo"
+               class="form-control"
+@@ -390,55 +1144,160 @@
+               rows="3"
+               placeholder="Describa el motivo de su salida"
+               [ngModel]="poMotivo()"
+-              (ngModelChange)="poMotivo.set($event)"></textarea>
++              (ngModelChange)="poMotivo.set($event)"
++            ></textarea>
++
++
+             @if (poErrores().motivo) {
+-              <span class="error-message">Ingrese el motivo.</span>
++
++              <span class="error-message">
++
++                Ingrese el motivo.
++
++              </span>
++
+             }
++
+           </div>
+ 
+         </div>
++
+       }
+ 
+     </div>
+ 
++
+     <div class="modal-footer">
++
+       <div class="modal-footer-info">
++
+         @if (form().tipoSolicitud) {
++
+           <span class="modal-tipo-badge">
+-            <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"/>
++
++            <svg
++              width="13"
++              height="13"
++              fill="none"
++              stroke="currentColor"
++              viewBox="0 0 24 24"
++              aria-hidden="true">
++
++              <path
++                stroke-linecap="round"
++                stroke-linejoin="round"
++                stroke-width="2"
++                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z"
++              />
++
+             </svg>
+-            {{ form().tipoSolicitud === 'permiso-personal' ? 'Permiso personal' : 'Permiso oficial' }}
++
++
++            {{
++              form().tipoSolicitud
++              ===
++              'permiso-personal'
++                ? 'Permiso personal'
++                : 'Permiso oficial'
++            }}
++
+           </span>
++
+         }
++
+       </div>
++
++
+       <div class="modal-footer-actions">
+-        <button class="btn-cancelar" type="button" (click)="cerrarModal()">Cancelar</button>
++
++        <button
++          class="btn-cancelar"
++          type="button"
++          (click)="cerrarModal()">
++
++          Cancelar
++
++        </button>
++
++
+         <button
+           class="btn-enviar"
+           type="button"
+-          [disabled]="cargandoModal() || isEnviando() ||
+-            !form().tipoSolicitud ||
+-            (form().tipoSolicitud === 'permiso-personal' && ppFormInvalido()) ||
+-            (form().tipoSolicitud === 'permiso-oficial'  && poFormInvalido())"
+-          (click)="enviarSolicitud()">
++
++          [disabled]="
++            cargandoModal()
++            ||
++            isEnviando()
++            ||
++            !form().tipoSolicitud
++            ||
++            (
++              form().tipoSolicitud === 'permiso-personal'
++              &&
++              ppFormInvalido()
++            )
++            ||
++            (
++              form().tipoSolicitud === 'permiso-oficial'
++              &&
++              poFormInvalido()
++            )
++          "
++
++          (click)="enviarSolicitud()"
++        >
++
+           @if (isEnviando()) {
+-            <span class="spinner-modal" aria-hidden="true"></span>
++
++            <span
++              class="spinner-modal"
++              aria-hidden="true">
++            </span>
++
+             Enviando…
++
+           } @else {
+-            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+-                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
++
++            <svg
++              width="15"
++              height="15"
++              fill="none"
++              stroke="currentColor"
++              viewBox="0 0 24 24"
++              aria-hidden="true">
++
++              <path
++                stroke-linecap="round"
++                stroke-linejoin="round"
++                stroke-width="2"
++                d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
++              />
++
+             </svg>
+-            @if (form().tipoSolicitud === 'permiso-personal' || form().tipoSolicitud === 'permiso-oficial') {
++
++
++            @if (
++              form().tipoSolicitud === 'permiso-personal'
++              ||
++              form().tipoSolicitud === 'permiso-oficial'
++            ) {
++
+               Enviar a jefe inmediato
++
+             } @else {
++
+               Enviar solicitud
++
+             }
++
+           }
++
+         </button>
++
+       </div>
++
+     </div>
++
+   </div>
++
+ }
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
+index 9c8d544..70773f0 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.component.ts
+@@ -1,283 +1,1364 @@
+-import { Component, ChangeDetectionStrategy, OnInit, signal, computed, inject, PLATFORM_ID } from '@angular/core';
+-import { DatePipe, isPlatformBrowser } from '@angular/common';
++import {
++  Component,
++  ChangeDetectionStrategy,
++  OnInit,
++  signal,
++  computed,
++  inject,
++  PLATFORM_ID
++} from '@angular/core';
++
++import {
++  DatePipe,
++  isPlatformBrowser
++} from '@angular/common';
++
+ import { FormsModule } from '@angular/forms';
+-import { forkJoin, of } from 'rxjs';
+-import { catchError } from 'rxjs/operators';
+-import { EncabezadosPaginaComponent } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
+-import { SolicitudesEmpleadoService } from './solicitudesEmpleado.service';
+-import { DatosPermiso, InsertarPermisoPersonalBody, InsertarPermisoOficialBody } from './solicitudesEmpleado.service';
+ 
+-export type TipoSolicitud = 'permiso-personal' | 'permiso-oficial';
++import {
++  forkJoin,
++  of
++} from 'rxjs';
++
++import {
++  catchError
++} from 'rxjs/operators';
++
++import {
++  EncabezadosPaginaComponent
++} from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
++
++import {
++  SolicitudesEmpleadoService,
++  DatosPermiso,
++  InsertarPermisoPersonalBody,
++  InsertarPermisoOficialBody
++} from './solicitudesEmpleado.service';
++
++import {
++  VacacionesApiService,
++  SolicitudVacaciones
++} from '../../../../../core/services/vacaciones-api';
++
++
++export type TipoSolicitud =
++  | 'permiso-personal'
++  | 'permiso-oficial';
++
+ 
+ export interface NuevaSolicitudForm {
++
+   nombreEmpleado: string;
++
+   dependencia: string;
++
+   cargo: string;
++
+   tipoSolicitud: TipoSolicitud | '';
++
+ }
+ 
++
+ export interface Solicitud {
++
++  idPermiso: string;
++
+   fec_solicitud: string;
++
+   nom_tipo_solicitud: string;
+-  nom_estado: 'EN PROCESO' | 'APROBADO' | 'RECHAZADO';
++
++  nom_estado:
++    | 'EN PROCESO'
++    | 'APROBADO'
++    | 'RECHAZADO'
++    | 'ANULADO';
++
+   pri_aporbacion: string | null;
++
+   seg_aprobacion: string | null;
++
+   mot_rechazo: string | null;
++
+ }
+ 
+-// Helpers de fecha (zona horaria Honduras UTC-6)
++
++// ─────────────────────────────────────────────────────────────────────────────
++// FECHAS
++// ─────────────────────────────────────────────────────────────────────────────
++
+ function hoyStr(): string {
++
+   return new Date().toLocaleDateString('en-CA');
++
+ }
++
++
+ function maxFechaStr(): string {
++
+   const d = new Date();
++
+   d.setDate(d.getDate() + 7);
++
+   return d.toLocaleDateString('en-CA');
++
+ }
++
++
+ function maxFechaOficialStr(): string {
++
+   const d = new Date();
++
+   d.setDate(d.getDate() + 14);
++
+   return d.toLocaleDateString('en-CA');
++
+ }
+ 
++
++// ─────────────────────────────────────────────────────────────────────────────
++// COMPONENTE
++// ─────────────────────────────────────────────────────────────────────────────
++
+ @Component({
++
+   selector: 'app-solicitudes-empleado',
++
+   standalone: true,
+-  imports: [DatePipe, FormsModule, EncabezadosPaginaComponent],
+-  templateUrl: './solicitudesEmpleado.component.html',
+-  styleUrls: ['./solicitudesEmpleado.component.css'],
+-  changeDetection: ChangeDetectionStrategy.OnPush
++
++  imports: [
++    DatePipe,
++    FormsModule,
++    EncabezadosPaginaComponent
++  ],
++
++  templateUrl:
++    './solicitudesEmpleado.component.html',
++
++  styleUrls: [
++    './solicitudesEmpleado.component.css'
++  ],
++
++  changeDetection:
++    ChangeDetectionStrategy.OnPush
++
+ })
+-export class SolicitudesEmpleadoComponent implements OnInit {
+-  private readonly solicitudesService = inject(SolicitudesEmpleadoService);
+-  private readonly platformId          = inject(PLATFORM_ID);
+-
+-  solicitudes          = signal<Solicitud[]>([]);
+-  solicitudesEmergencia = signal<Solicitud[]>([]);
+-
+-  isActualizando = signal(true);
+-  errorMessage   = signal('');
+-
+-  // — Filtros tabla normal —
+-  filtroFecha  = signal('');
+-  filtroTipo   = signal('');
+-  filtroEstado = signal('');
+-
+-  // — Filtros tabla emergencia —
+-  filtroFechaE  = signal('');
+-  filtroTipoE   = signal('');
+-  filtroEstadoE = signal('');
+-
+-  solicitudesFiltradas = computed(() => {
+-    const f = this.filtroFecha().toLowerCase();
+-    const t = this.filtroTipo().toLowerCase();
+-    const e = this.filtroEstado().toLowerCase();
+-    return this.solicitudes().filter(s =>
+-      (f ? s.fec_solicitud.includes(f) : true) &&
+-      (t ? s.nom_tipo_solicitud.toLowerCase().includes(t) : true) &&
+-      (e ? s.nom_estado.toLowerCase().includes(e) : true)
++export class SolicitudesEmpleadoComponent
++  implements OnInit {
++
++
++  private readonly solicitudesService =
++    inject(SolicitudesEmpleadoService);
++
++  private readonly vacacionesApi =
++    inject(VacacionesApiService);
++
++
++  private readonly platformId =
++    inject(PLATFORM_ID);
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // SOLICITUDES
++  // ───────────────────────────────────────────────────────────────────────────
++
++  solicitudes =
++    signal<Solicitud[]>([]);
++
++
++  solicitudesEmergencia =
++    signal<Solicitud[]>([]);
++
++  solicitudesVacaciones =
++    signal<SolicitudVacaciones[]>([]);
++
++  isAnulandoVacaciones =
++    signal(false);
++
++  idVacacionAnulando =
++    signal<string | null>(null);
++
++
++  isActualizando =
++    signal(true);
++
++
++  errorMessage =
++    signal('');
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ANULACIÓN
++  // ───────────────────────────────────────────────────────────────────────────
++
++  isAnulando =
++    signal(false);
++
++
++  idPermisoAnulando =
++    signal<string | null>(null);
++
++
++  mensajeAnulacion =
++    signal('');
++
++
++  errorAnulacion =
++    signal('');
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // FILTROS
++  // ───────────────────────────────────────────────────────────────────────────
++
++  filtroFecha =
++    signal('');
++
++  filtroTipo =
++    signal('');
++
++  filtroEstado =
++    signal('');
++
++
++  filtroFechaE =
++    signal('');
++
++  filtroTipoE =
++    signal('');
++
++  filtroEstadoE =
++    signal('');
++
++
++  solicitudesFiltradas =
++    computed(() => {
++
++      const f =
++        this.filtroFecha()
++          .toLowerCase();
++
++      const t =
++        this.filtroTipo()
++          .toLowerCase();
++
++      const e =
++        this.filtroEstado()
++          .toLowerCase();
++
++
++      return this.solicitudes()
++        .filter(s =>
++
++          (f
++            ? s.fec_solicitud
++                .includes(f)
++            : true
++          )
++
++          &&
++
++          (t
++            ? s.nom_tipo_solicitud
++                .toLowerCase()
++                .includes(t)
++            : true
++          )
++
++          &&
++
++          (e
++            ? s.nom_estado
++                .toLowerCase()
++                .includes(e)
++            : true
++          )
++
++        );
++
++    });
++
++
++  solicitudesEmergenciaFiltradas =
++    computed(() => {
++
++      const f =
++        this.filtroFechaE()
++          .toLowerCase();
++
++      const t =
++        this.filtroTipoE()
++          .toLowerCase();
++
++      const e =
++        this.filtroEstadoE()
++          .toLowerCase();
++
++
++      return this.solicitudesEmergencia()
++        .filter(s =>
++
++          (f
++            ? s.fec_solicitud
++                .includes(f)
++            : true
++          )
++
++          &&
++
++          (t
++            ? s.nom_tipo_solicitud
++                .toLowerCase()
++                .includes(t)
++            : true
++          )
++
++          &&
++
++          (e
++            ? s.nom_estado
++                .toLowerCase()
++                .includes(e)
++            : true
++          )
++
++        );
++
++    });
++
++
++  readonly badgeClass =
++    'badge';
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // MODAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  modalAbierto =
++    signal(false);
++
++
++  cargandoModal =
++    signal(false);
++
++
++  isEnviando =
++    signal(false);
++
++
++  form =
++    signal<NuevaSolicitudForm>({
++
++      nombreEmpleado: '',
++
++      dependencia: '',
++
++      cargo: '',
++
++      tipoSolicitud: ''
++
++    });
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // PERMISO PERSONAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  readonly ppFechaMin =
++    hoyStr();
++
++
++  readonly ppFechaMax =
++    maxFechaStr();
++
++
++  ppFecha =
++    signal(hoyStr());
++
++
++  ppHoras =
++    signal(3);
++
++
++  ppMinutos =
++    signal(0);
++
++
++  ppMotivo =
++    signal('Asunto Personal.');
++
++
++  ppCitaMedica =
++    signal(0);
++
++
++  ppHorasDisponibles =
++    signal<string>('--:--');
++
++
++  ppErrores =
++    computed(() => ({
++
++      fecha:
++        !this.ppFecha()
++
++        ||
++
++        this.ppFecha()
++          < this.ppFechaMin
++
++        ||
++
++        this.ppFecha()
++          > this.ppFechaMax,
++
++
++      horas:
++        this.ppHoras() < 0
++        ||
++        this.ppHoras() > 9,
++
++
++      minutos:
++        this.ppMinutos() < 0
++        ||
++        this.ppMinutos() > 59,
++
++
++      motivo:
++        !this.ppMotivo().trim()
++
++    }));
++
++
++  ppFormInvalido =
++    computed(() =>
++
++      Object
++        .values(this.ppErrores())
++        .some(Boolean)
++
++      ||
++
++      (
++        this.ppCitaMedica() !== 0
++        &&
++        this.ppCitaMedica() !== 1
++      )
++
+     );
+-  });
+-
+-  solicitudesEmergenciaFiltradas = computed(() => {
+-    const f = this.filtroFechaE().toLowerCase();
+-    const t = this.filtroTipoE().toLowerCase();
+-    const e = this.filtroEstadoE().toLowerCase();
+-    return this.solicitudesEmergencia().filter(s =>
+-      (f ? s.fec_solicitud.includes(f) : true) &&
+-      (t ? s.nom_tipo_solicitud.toLowerCase().includes(t) : true) &&
+-      (e ? s.nom_estado.toLowerCase().includes(e) : true)
++
++
++  ppFormatHM =
++    computed(() => {
++
++      const h =
++        String(this.ppHoras())
++          .padStart(2, '0');
++
++
++      const m =
++        String(this.ppMinutos())
++          .padStart(2, '0');
++
++
++      return `${h}:${m}`;
++
++    });
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // PERMISO OFICIAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  readonly poFechaMin =
++    hoyStr();
++
++
++  readonly poFechaMax =
++    maxFechaOficialStr();
++
++
++  poFecha =
++    signal(hoyStr());
++
++
++  poMotivo =
++    signal('');
++
++
++  poErrores =
++    computed(() => ({
++
++      fecha:
++        !this.poFecha()
++
++        ||
++
++        this.poFecha()
++          < this.poFechaMin
++
++        ||
++
++        this.poFecha()
++          > this.poFechaMax,
++
++
++      motivo:
++        !this.poMotivo().trim()
++
++    }));
++
++
++  poFormInvalido =
++    computed(() =>
++
++      Object
++        .values(this.poErrores())
++        .some(Boolean)
++
+     );
+-  });
+-
+-  readonly badgeClass = 'badge';
+-
+-  // ── Modal ──
+-  modalAbierto   = signal(false);
+-  cargandoModal  = signal(false);
+-  isEnviando     = signal(false);
+-  form = signal<NuevaSolicitudForm>({
+-    nombreEmpleado: '',
+-    dependencia: '',
+-    cargo: '',
+-    tipoSolicitud: ''
+-  });
+-
+-  // ── Estado permiso personal ──
+-  readonly ppFechaMin = hoyStr();
+-  readonly ppFechaMax = maxFechaStr();
+-
+-  ppFecha      = signal(hoyStr());
+-  ppHoras      = signal(3);
+-  ppMinutos    = signal(0);
+-  ppMotivo     = signal('Asunto Personal.');
+-  ppCitaMedica = signal(0);
+-  ppHorasDisponibles = signal<string>('--:--');
+-
+-  ppErrores = computed(() => ({
+-    fecha:   !this.ppFecha() ||
+-             this.ppFecha() < this.ppFechaMin ||
+-             this.ppFecha() > this.ppFechaMax,
+-    horas:   this.ppHoras() < 0 || this.ppHoras() > 9,
+-    minutos: this.ppMinutos() < 0 || this.ppMinutos() > 59,
+-    motivo:  !this.ppMotivo().trim()
+-  }));
+-
+-  ppFormInvalido = computed(() =>
+-    Object.values(this.ppErrores()).some(Boolean) ||
+-    (this.ppCitaMedica() !== 0 && this.ppCitaMedica() !== 1)
+-  );
+-
+-  ppFormatHM = computed(() => {
+-    const h = String(this.ppHoras()).padStart(2, '0');
+-    const m = String(this.ppMinutos()).padStart(2, '0');
+-    return `${h}:${m}`;
+-  });
+-
+-  // ── Estado permiso oficial ──
+-  readonly poFechaMin = hoyStr();
+-  readonly poFechaMax = maxFechaOficialStr();
+-
+-  poFecha  = signal(hoyStr());
+-  poMotivo = signal('');
+-
+-  poErrores = computed(() => ({
+-    fecha:  !this.poFecha() ||
+-            this.poFecha() < this.poFechaMin ||
+-            this.poFecha() > this.poFechaMax,
+-    motivo: !this.poMotivo().trim()
+-  }));
+-
+-  poFormInvalido = computed(() =>
+-    Object.values(this.poErrores()).some(Boolean)
+-  );
+-
+-  // ── Carga de datos ──
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // INICIO
++  // ───────────────────────────────────────────────────────────────────────────
++
+   ngOnInit(): void {
+-    // Solo carga en el browser: evita mismatch de hidratación SSR
+-    if (isPlatformBrowser(this.platformId)) {
++
++    if (
++      isPlatformBrowser(
++        this.platformId
++      )
++    ) {
++
+       this.cargarDatos();
++
+     }
++
+   }
+ 
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ACTUALIZAR
++  // ───────────────────────────────────────────────────────────────────────────
++
+   actualizarDatos(): void {
++
+     this.cargarDatos();
++
+   }
+ 
++
+   private cargarDatos(): void {
++
+     this.isActualizando.set(true);
++
+     this.errorMessage.set('');
++
++
+     forkJoin({
+-      solicitudes: this.solicitudesService.getMisSolicitudes().pipe(
+-        catchError(() => of(null))
+-      ),
+-      emergencias: this.solicitudesService.getMisSolicitudesEmergencia().pipe(
+-        catchError(() => of(null))
+-      )
+-    }).subscribe(({ solicitudes, emergencias }) => {
+-      if (solicitudes === null && emergencias === null) {
+-        this.errorMessage.set('No fue posible cargar las solicitudes. Intente de nuevo más tarde.');
+-      }
+-      this.solicitudes.set(solicitudes ?? []);
+-      this.solicitudesEmergencia.set(emergencias ?? []);
+-      this.isActualizando.set(false);
+-    });
+-  }
+ 
+-  // ── Acciones modal ──
+-  private resetModal(datos?: DatosPermiso): void {
+-    this.form.set({
+-      nombreEmpleado: datos?.nombre      ?? '',
+-      dependencia:    datos?.dependencia ?? '',
+-      cargo:          datos?.cargo       ?? '',
+-      tipoSolicitud:  ''
+-    });
+-    this.ppFecha.set(hoyStr());
+-    this.ppHoras.set(3);
+-    this.ppMinutos.set(0);
+-    this.ppMotivo.set('Asunto Personal.');
+-    this.ppCitaMedica.set(0);
+-    this.ppHorasDisponibles.set(datos?.horasDisponibles ?? '--:--');
+-    this.poFecha.set(hoyStr());
+-    this.poMotivo.set('');
+-  }
++      solicitudes:
++        this.solicitudesService
++          .getMisSolicitudes()
++          .pipe(
++            catchError(() => of(null))
++          ),
+ 
+-  abrirModal(): void {
+-    this.cargandoModal.set(true);
+ 
+-    this.solicitudesService.getDatosPermiso().subscribe({
+-      next: (datos: DatosPermiso) => {
+-        this.resetModal(datos);
+-        this.cargandoModal.set(false);
+-        this.modalAbierto.set(true);
+-      },
+-      error: () => {
+-        this.resetModal();
+-        this.cargandoModal.set(false);
+-        this.modalAbierto.set(true);
+-      }
+-    });
+-  }
++      emergencias:
++        this.solicitudesService
++          .getMisSolicitudesEmergencia()
++          .pipe(
++            catchError(() => of(null))
++          ),
+ 
+-  cerrarModal(): void {
+-    this.modalAbierto.set(false);
+-  }
++      vacaciones:
++        this.vacacionesApi
++          .obtenerMisSolicitudes()
++          .pipe(
++            catchError(() => of(null))
++          )
+ 
+-  onTipoChange(tipo: string): void {
+-    this.form.update(f => ({ ...f, tipoSolicitud: tipo as TipoSolicitud | '' }));
+-  }
++    })
+ 
+-  onCampoChange(campo: keyof NuevaSolicitudForm, valor: string): void {
+-    this.form.update(f => ({ ...f, [campo]: valor }));
+-  }
++      .subscribe(
++        ({
++          solicitudes,
++          emergencias,
++          vacaciones
++        }) => {
+ 
+-  enviarSolicitud(): void {
+-    if (this.form().tipoSolicitud === 'permiso-personal') {
+-      const body: InsertarPermisoPersonalBody = {
+-        fecha:      this.ppFecha(),
+-        horas:      this.ppFormatHM(),
+-        motivo:     this.ppMotivo(),
+-        emergencia: this.ppCitaMedica() === 1
+-      };
+-      this.isEnviando.set(true);
+-      this.solicitudesService.insertarPermisoPersonal(body).subscribe({
+-        next: () => {
+-          this.isEnviando.set(false);
+-          this.cerrarModal();
+-          this.cargarDatos();
+-        },
+-        error: () => {
+-          this.isEnviando.set(false);
+-        }
+-      });
+-      return;
+-    }
+-    if (this.form().tipoSolicitud === 'permiso-oficial') {
+-      const body: InsertarPermisoOficialBody = {
+-        fecha:  this.poFecha(),
+-        motivo: this.poMotivo()
+-      };
+-      this.isEnviando.set(true);
+-      this.solicitudesService.insertarPermisoOficial(body).subscribe({
+-        next: () => {
+-          this.isEnviando.set(false);
+-          this.cerrarModal();
+-          this.cargarDatos();
+-        },
+-        error: () => {
+-          this.isEnviando.set(false);
+-        }
+-      });
+-      return;
+-    }
+-  }
++          if (
++            solicitudes === null
++            &&
++            emergencias === null
++            &&
++            vacaciones === null
++          ) {
++
++            this.errorMessage.set(
++              'No fue posible cargar las solicitudes. Intente de nuevo más tarde.'
++            );
++
++          }
++
++
++          this.solicitudes.set(
++            solicitudes ?? []
++          );
++
++
++          this.solicitudesEmergencia.set(
++            emergencias ?? []
++          );
++
++          this.solicitudesVacaciones.set(
++            vacaciones ?? []
++          );
++
++
++          this.isActualizando.set(false);
++
++        }
++      );
+ 
+-  primerRevision(s: Solicitud): string {
+-    return s.pri_aporbacion ?? (s.mot_rechazo ? '----------------' : 'PENDIENTE');
+   }
+ 
+-  segundaRevision(s: Solicitud): string {
+-    return s.seg_aprobacion ?? (s.mot_rechazo ? '----------------' : 'PENDIENTE');
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // MODAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  private resetModal(
++    datos?: DatosPermiso
++  ): void {
++
++    this.form.set({
++
++      nombreEmpleado:
++        datos?.nombre ?? '',
++
++      dependencia:
++        datos?.dependencia ?? '',
++
++      cargo:
++        datos?.cargo ?? '',
++
++      tipoSolicitud:
++        ''
++
++    });
++
++
++    this.ppFecha.set(
++      hoyStr()
++    );
++
++
++    this.ppHoras.set(3);
++
++    this.ppMinutos.set(0);
++
++    this.ppMotivo.set(
++      'Asunto Personal.'
++    );
++
++    this.ppCitaMedica.set(0);
++
++    this.ppHorasDisponibles.set(
++      datos?.horasDisponibles
++      ?? '--:--'
++    );
++
++
++    this.poFecha.set(
++      hoyStr()
++    );
++
++    this.poMotivo.set('');
++
+   }
+-}
+ 
++
++  abrirModal(): void {
++
++    this.cargandoModal.set(true);
++
++
++    this.solicitudesService
++      .getDatosPermiso()
++      .subscribe({
++
++        next: (datos) => {
++
++          this.resetModal(datos);
++
++          this.cargandoModal.set(false);
++
++          this.modalAbierto.set(true);
++
++        },
++
++
++        error: () => {
++
++          this.resetModal();
++
++          this.cargandoModal.set(false);
++
++          this.modalAbierto.set(true);
++
++        }
++
++      });
++
++  }
++
++
++  cerrarModal(): void {
++
++    this.modalAbierto.set(false);
++
++  }
++
++
++  onTipoChange(
++    tipo: string
++  ): void {
++
++    this.form.update(
++      f => ({
++
++        ...f,
++
++        tipoSolicitud:
++          tipo as TipoSolicitud | ''
++
++      })
++    );
++
++  }
++
++
++  onCampoChange(
++    campo: keyof NuevaSolicitudForm,
++    valor: string
++  ): void {
++
++    this.form.update(
++      f => ({
++
++        ...f,
++
++        [campo]: valor
++
++      })
++    );
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ENVIAR
++  // ───────────────────────────────────────────────────────────────────────────
++
++  enviarSolicitud(): void {
++
++
++    // PERSONAL
++
++    if (
++      this.form().tipoSolicitud
++      ===
++      'permiso-personal'
++    ) {
++
++      const body:
++        InsertarPermisoPersonalBody = {
++
++        fecha:
++          this.ppFecha(),
++
++        horas:
++          this.ppFormatHM(),
++
++        motivo:
++          this.ppMotivo(),
++
++        emergencia:
++          this.ppCitaMedica() === 1
++
++      };
++
++
++      this.isEnviando.set(true);
++
++
++      this.solicitudesService
++        .insertarPermisoPersonal(body)
++        .subscribe({
++
++          next: () => {
++
++            this.isEnviando.set(false);
++
++            this.cerrarModal();
++
++            this.cargarDatos();
++
++          },
++
++
++          error: (error) => {
++
++            console.error(
++              'Error al registrar permiso personal:',
++              error
++            );
++
++            this.isEnviando.set(false);
++
++          }
++
++        });
++
++
++      return;
++
++    }
++
++
++    // OFICIAL
++
++    if (
++      this.form().tipoSolicitud
++      ===
++      'permiso-oficial'
++    ) {
++
++      const body:
++        InsertarPermisoOficialBody = {
++
++        fecha:
++          this.poFecha(),
++
++        motivo:
++          this.poMotivo()
++
++      };
++
++
++      this.isEnviando.set(true);
++
++
++      this.solicitudesService
++        .insertarPermisoOficial(body)
++        .subscribe({
++
++          next: () => {
++
++            this.isEnviando.set(false);
++
++            this.cerrarModal();
++
++            this.cargarDatos();
++
++          },
++
++
++          error: (error) => {
++
++            console.error(
++              'Error al registrar permiso oficial:',
++              error
++            );
++
++            this.isEnviando.set(false);
++
++          }
++
++        });
++
++
++      return;
++
++    }
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ¿PUEDE ANULAR?
++  // ───────────────────────────────────────────────────────────────────────────
++
++  puedeAnular(
++    solicitud: Solicitud
++  ): boolean {
++
++    return (
++
++      !!solicitud.idPermiso
++
++      &&
++
++      (
++        solicitud.nom_estado
++        === 'EN PROCESO'
++
++        ||
++
++        solicitud.nom_estado
++        === 'APROBADO'
++      )
++
++    );
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ¿SE ESTÁ ANULANDO?
++  // ───────────────────────────────────────────────────────────────────────────
++
++  estaAnulando(
++    solicitud: Solicitud
++  ): boolean {
++
++    return (
++
++      this.isAnulando()
++
++      &&
++
++      this.idPermisoAnulando()
++      ===
++      solicitud.idPermiso
++
++    );
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ANULAR SOLICITUD
++  // ───────────────────────────────────────────────────────────────────────────
++
++  anularSolicitud(
++    solicitud: Solicitud
++  ): void {
++
++    if (
++      !this.puedeAnular(solicitud)
++    ) {
++
++      return;
++
++    }
++
++
++    if (
++      this.isAnulando()
++    ) {
++
++      return;
++
++    }
++
++
++    const confirmado =
++      window.confirm(
++        `¿Está seguro de que desea anular este ${this.obtenerTipoPermiso(solicitud)}?`
++      );
++
++
++    if (!confirmado) {
++
++      return;
++
++    }
++
++
++    this.errorAnulacion.set('');
++
++    this.mensajeAnulacion.set('');
++
++    this.isAnulando.set(true);
++
++    this.idPermisoAnulando.set(
++      solicitud.idPermiso
++    );
++
++
++    const tipo =
++      solicitud.nom_tipo_solicitud
++        .trim()
++        .toLowerCase();
++
++
++    // PERSONAL
++
++    if (
++      tipo.includes('permiso personal')
++    ) {
++
++      this.solicitudesService
++        .anularPermisoPersonal(
++          solicitud.idPermiso
++        )
++        .subscribe({
++
++          next: (respuesta) => {
++
++            this.isAnulando.set(false);
++
++            this.idPermisoAnulando.set(null);
++
++
++            this.mensajeAnulacion.set(
++
++              respuesta.message
++              ??
++              respuesta.mensaje
++              ??
++              'Permiso personal anulado correctamente.'
++
++            );
++
++
++            this.cargarDatos();
++
++          },
++
++
++          error: (error) => {
++
++            console.error(
++              'Error al anular permiso personal:',
++              error
++            );
++
++
++            this.isAnulando.set(false);
++
++            this.idPermisoAnulando.set(null);
++
++
++            this.errorAnulacion.set(
++
++              error?.error?.message
++              ??
++              error?.error?.mensaje
++              ??
++              'No fue posible anular el permiso personal.'
++
++            );
++
++          }
++
++        });
++
++
++      return;
++
++    }
++
++
++    // OFICIAL
++
++    if (
++      tipo.includes('permiso oficial')
++    ) {
++
++      this.solicitudesService
++        .anularPermisoOficial(
++          solicitud.idPermiso
++        )
++        .subscribe({
++
++          next: (respuesta) => {
++
++            this.isAnulando.set(false);
++
++            this.idPermisoAnulando.set(null);
++
++
++            this.mensajeAnulacion.set(
++
++              respuesta.message
++              ??
++              respuesta.mensaje
++              ??
++              'Permiso oficial anulado correctamente.'
++
++            );
++
++
++            this.cargarDatos();
++
++          },
++
++
++          error: (error) => {
++
++            console.error(
++              'Error al anular permiso oficial:',
++              error
++            );
++
++
++            this.isAnulando.set(false);
++
++            this.idPermisoAnulando.set(null);
++
++
++            this.errorAnulacion.set(
++
++              error?.error?.message
++              ??
++              error?.error?.mensaje
++              ??
++              'No fue posible anular el permiso oficial.'
++
++            );
++
++          }
++
++        });
++
++
++      return;
++
++    }
++
++
++    this.isAnulando.set(false);
++
++    this.idPermisoAnulando.set(null);
++
++
++    this.errorAnulacion.set(
++      'No se reconoce el tipo de permiso.'
++    );
++
++  }
++
++
++  private obtenerTipoPermiso(
++    solicitud: Solicitud
++  ): string {
++
++    const tipo =
++      solicitud.nom_tipo_solicitud
++        .toLowerCase();
++
++
++    if (
++      tipo.includes('permiso personal')
++    ) {
++
++      return 'permiso personal';
++
++    }
++
++
++    if (
++      tipo.includes('permiso oficial')
++    ) {
++
++      return 'permiso oficial';
++
++    }
++
++
++    return 'permiso';
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // VACACIONES
++  // ───────────────────────────────────────────────────────────────────────────
++
++  puedeAnularVacaciones(
++    solicitud: SolicitudVacaciones
++  ): boolean {
++
++    const id =
++      solicitud.idVacaciones ??
++      solicitud.idVacacion;
++
++    if (!id) {
++      return false;
++    }
++
++    const estado =
++      solicitud.estadoSolicitud?.nomEstado ??
++      solicitud.estadoSolicitud?.nomestado ??
++      '';
++
++    if (
++      estado !== 'EN PROCESO' &&
++      estado !== 'APROBADO'
++    ) {
++      return false;
++    }
++
++    // La solicitud solo puede anularse antes de que inicie el período.
++    const fechaInicio =
++      new Date(`${solicitud.fecInicial}T00:00:00`);
++
++    const hoy = new Date();
++    hoy.setHours(0, 0, 0, 0);
++
++    return fechaInicio > hoy;
++  }
++
++
++  estaAnulandoVacaciones(
++    solicitud: SolicitudVacaciones
++  ): boolean {
++
++    const id =
++      solicitud.idVacaciones ??
++      solicitud.idVacacion;
++
++    return (
++      this.isAnulandoVacaciones() &&
++      !!id &&
++      this.idVacacionAnulando() === id
++    );
++  }
++
++
++  anularVacaciones(
++    solicitud: SolicitudVacaciones
++  ): void {
++
++    if (!this.puedeAnularVacaciones(solicitud)) {
++      return;
++    }
++
++    if (this.isAnulandoVacaciones()) {
++      return;
++    }
++
++    const id =
++      solicitud.idVacaciones ??
++      solicitud.idVacacion;
++
++    if (!id) {
++      return;
++    }
++
++    if (
++      !window.confirm(
++        '¿Está seguro de que desea anular esta solicitud de vacaciones?'
++      )
++    ) {
++      return;
++    }
++
++    this.errorAnulacion.set('');
++    this.mensajeAnulacion.set('');
++    this.isAnulandoVacaciones.set(true);
++    this.idVacacionAnulando.set(id);
++
++    this.vacacionesApi
++      .anularVacaciones(id)
++      .subscribe({
++
++        next: (respuesta: any) => {
++
++          this.isAnulandoVacaciones.set(false);
++          this.idVacacionAnulando.set(null);
++
++          this.mensajeAnulacion.set(
++            respuesta?.message ??
++            respuesta?.mensaje ??
++            'Solicitud de vacaciones anulada correctamente.'
++          );
++
++          this.cargarDatos();
++        },
++
++        error: (error) => {
++
++          console.error(
++            'Error al anular vacaciones:',
++            error
++          );
++
++          this.isAnulandoVacaciones.set(false);
++          this.idVacacionAnulando.set(null);
++
++          this.errorAnulacion.set(
++            error?.error?.message ??
++            error?.error?.mensaje ??
++            'No fue posible anular la solicitud de vacaciones.'
++          );
++        }
++
++      });
++  }
++
++
++  nombreEstadoVacaciones(
++    solicitud: SolicitudVacaciones
++  ): string {
++
++    return (
++      solicitud.estadoSolicitud?.nomEstado ??
++      solicitud.estadoSolicitud?.nomestado ??
++      'SIN ESTADO'
++    );
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // REVISIONES
++  // ───────────────────────────────────────────────────────────────────────────
++
++  primerRevision(
++    s: Solicitud
++  ): string {
++
++    return (
++
++      s.pri_aporbacion
++
++      ??
++
++      (
++        s.mot_rechazo
++          ? '----------------'
++          : 'PENDIENTE'
++      )
++
++    );
++
++  }
++
++
++  segundaRevision(
++    s: Solicitud
++  ): string {
++
++    return (
++
++      s.seg_aprobacion
++
++      ??
++
++      (
++        s.mot_rechazo
++          ? '----------------'
++          : 'PENDIENTE'
++      )
++
++    );
++
++  }
++
++}
+diff --git a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
+index 698c408..0d78ec0 100644
+--- a/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
++++ b/apps/frontend-sedh/src/app/pages/recursosHumanos/pages/permisosEmpleados/solicitudesEmpleado/solicitudesEmpleado.service.ts
+@@ -2,180 +2,411 @@ import { Injectable, inject } from '@angular/core';
+ import { HttpClient } from '@angular/common/http';
+ import { Observable } from 'rxjs';
+ import { map } from 'rxjs/operators';
++
+ import { environment } from '../../../../../../environments/environment';
+ import { AuthService } from '../../../../../services/auth.service';
++
+ import {
+   EP_RRHH_MIS_SOLICITUDES,
+   EP_RRHH_MIS_SOLICITUDES_EMERGENCIA,
+   EP_RRHH_DATOS_PERMISO,
+   EP_RRHH_PERMISOS_PERSONALES_INSERTAR,
+-  EP_RRHH_PERMISOS_OFICIALES_INSERTAR
++  EP_RRHH_PERMISOS_OFICIALES_INSERTAR,
++  EP_RRHH_PERMISOS_PERSONALES_ANULAR,
++  EP_RRHH_PERMISOS_OFICIALES_ANULAR
+ } from '../../../../../config/api.endpoints';
++
+ import { Solicitud } from './solicitudesEmpleado.component';
+ 
+-// ── Modelo público del modal ────────────────────────────────────────────────
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Datos del empleado
++// ─────────────────────────────────────────────────────────────────────────────
+ 
+ export interface DatosPermiso {
+-  nombre:           string;
+-  dependencia:      string;
+-  cargo:            string;
+-  horasDisponibles: string; // formato HH:MM
++  nombre: string;
++  dependencia: string;
++  cargo: string;
++  horasDisponibles: string;
+ }
+ 
+-// ── Tipos de respuesta de la API ────────────────────────────────────────────
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Respuesta de solicitudes
++// ─────────────────────────────────────────────────────────────────────────────
+ 
+ interface SolicitudApi {
++  idPermiso: string;
++
+   tipo: string;
++
+   fecha: string;
+-  estado: 'EN PROCESO' | 'APROBADO' | 'RECHAZADO';
++
++  estado:
++    | 'EN PROCESO'
++    | 'APROBADO'
++    | 'RECHAZADO'
++    | 'ANULADO';
++
+   emergencia: boolean;
++
+   motRechazo: string | null;
++
+   priAprobacion: string | null;
++
+   segAprobacion: string | null;
+ }
+ 
++
+ interface MisSolicitudesResponse {
+   success: boolean;
++
+   data: {
+     email: string;
+     solicitudes: SolicitudApi[];
+   };
++
+   message: string;
+ }
+ 
++
+ interface MisSolicitudesEmergenciaResponse {
+   success: boolean;
++
+   data: {
+     email: string;
+     emergencias: SolicitudApi[];
+   };
++
+   message: string;
+ }
+ 
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Datos permiso
++// ─────────────────────────────────────────────────────────────────────────────
++
+ interface DatosPermisoApi {
+-  prinombre:         string;
+-  segnombre:         string | null;
+-  priapellido:       string;
+-  segapellido:       string | null;
+-  dependencia:       string;
+-  cargo:             string;
++  prinombre: string;
++  segnombre: string | null;
++  priapellido: string;
++  segapellido: string | null;
++  dependencia: string;
++  cargo: string;
+   horas_disponibles: string;
+ }
+ 
++
++interface DatosPermisoResponse {
++  success: boolean;
++  data: DatosPermisoApi;
++  message: string;
++  timestamp: string;
++}
++
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Insertar permiso personal
++// ─────────────────────────────────────────────────────────────────────────────
++
+ export interface InsertarPermisoPersonalBody {
+-  fecha:      string;  // YYYY-MM-DD
+-  horas:      string;  // HH:MM
+-  motivo:     string;
++  fecha: string;
++  horas: string;
++  motivo: string;
+   emergencia: boolean;
+ }
+ 
++
+ export interface InsertarPermisoPersonalResponse {
+-  status:          string;  // 'OK'
+-  message:         string;
+-  idpermiso:       string;
++  status: string;
++  message: string;
++  idpermiso: string;
+   horas_solicitadas: number;
+-  emergencia:      boolean;
++  emergencia: boolean;
+ }
+ 
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Insertar permiso oficial
++// ─────────────────────────────────────────────────────────────────────────────
++
+ export interface InsertarPermisoOficialBody {
+-  fecha:  string;  // YYYY-MM-DD
++  fecha: string;
+   motivo: string;
+ }
+ 
++
+ export interface InsertarPermisoOficialResponse {
+-  status:    string;  // 'OK'
+-  message:   string;
++  status: string;
++  message: string;
+   idpermiso: string;
+ }
+ 
+-interface DatosPermisoResponse {
+-  success:   boolean;
+-  data:      DatosPermisoApi;
+-  message:   string;
+-  timestamp: string;
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Respuesta anulación
++// ─────────────────────────────────────────────────────────────────────────────
++
++export interface AnularPermisoResponse {
++  status: string;
++  message?: string;
++  mensaje?: string;
++  idPermiso?: string;
++  idpermiso?: string;
+ }
+ 
+-// ── Mapper API → modelo interno ─────────────────────────────────────────────
++
++// ─────────────────────────────────────────────────────────────────────────────
++// Mapper
++// ─────────────────────────────────────────────────────────────────────────────
+ 
+ function mapSolicitud(s: SolicitudApi): Solicitud {
++
+   return {
+-    fec_solicitud:      s.fecha,
++    idPermiso: s.idPermiso,
++
++    fec_solicitud: s.fecha,
++
+     nom_tipo_solicitud: s.tipo,
+-    nom_estado:         s.estado,
+-    pri_aporbacion:     s.priAprobacion,
+-    seg_aprobacion:     s.segAprobacion,
+-    mot_rechazo:        s.motRechazo,
++
++    nom_estado: s.estado,
++
++    pri_aporbacion: s.priAprobacion,
++
++    seg_aprobacion: s.segAprobacion,
++
++    mot_rechazo: s.motRechazo
+   };
+ }
+ 
+-// ── Servicio ─────────────────────────────────────────────────────────────────
+ 
+-@Injectable({ providedIn: 'root' })
++// ─────────────────────────────────────────────────────────────────────────────
++// Servicio
++// ─────────────────────────────────────────────────────────────────────────────
++
++@Injectable({
++  providedIn: 'root'
++})
+ export class SolicitudesEmpleadoService {
+-  private readonly http        = inject(HttpClient);
++
++  private readonly http = inject(HttpClient);
++
+   private readonly authService = inject(AuthService);
+-  private readonly base        = environment.apiBaseUrl;
++
++  private readonly base = environment.apiBaseUrl;
++
+ 
+   private get emailBody(): { email: string } {
+-    return { email: this.authService.currentUser()?.email ?? '' };
++
++    return {
++      email:
++        this.authService.currentUser()?.email ?? ''
++    };
++
+   }
+ 
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // MIS SOLICITUDES
++  // ───────────────────────────────────────────────────────────────────────────
++
+   getMisSolicitudes(): Observable<Solicitud[]> {
++
+     return this.http
+       .post<MisSolicitudesResponse>(
+         `${this.base}${EP_RRHH_MIS_SOLICITUDES}`,
+         this.emailBody
+       )
+-      .pipe(map(r => r.data.solicitudes
+-        .map(mapSolicitud)
+-        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
+-      ));
++      .pipe(
++
++        map(response =>
++
++          response.data.solicitudes
++
++            .map(mapSolicitud)
++
++            .sort(
++              (a, b) =>
++                b.fec_solicitud.localeCompare(
++                  a.fec_solicitud
++                )
++            )
++
++        )
++
++      );
++
+   }
+ 
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // MIS SOLICITUDES DE EMERGENCIA
++  // ───────────────────────────────────────────────────────────────────────────
++
+   getMisSolicitudesEmergencia(): Observable<Solicitud[]> {
++
+     return this.http
+       .post<MisSolicitudesEmergenciaResponse>(
+         `${this.base}${EP_RRHH_MIS_SOLICITUDES_EMERGENCIA}`,
+         this.emailBody
+       )
+-      .pipe(map(r => r.data.emergencias
+-        .map(mapSolicitud)
+-        .sort((a, b) => b.fec_solicitud.localeCompare(a.fec_solicitud))
+-      ));
++      .pipe(
++
++        map(response =>
++
++          response.data.emergencias
++
++            .map(mapSolicitud)
++
++            .sort(
++              (a, b) =>
++                b.fec_solicitud.localeCompare(
++                  a.fec_solicitud
++                )
++            )
++
++        )
++
++      );
++
+   }
+ 
+-  insertarPermisoOficial(body: InsertarPermisoOficialBody): Observable<InsertarPermisoOficialResponse> {
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // INSERTAR PERMISO OFICIAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  insertarPermisoOficial(
++    body: InsertarPermisoOficialBody
++  ): Observable<InsertarPermisoOficialResponse> {
++
+     return this.http.post<InsertarPermisoOficialResponse>(
++
+       `${this.base}${EP_RRHH_PERMISOS_OFICIALES_INSERTAR}`,
+-      { ...this.emailBody, ...body }
++
++      {
++        ...this.emailBody,
++        ...body
++      }
++
+     );
++
+   }
+ 
+-  insertarPermisoPersonal(body: InsertarPermisoPersonalBody): Observable<InsertarPermisoPersonalResponse> {
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // INSERTAR PERMISO PERSONAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  insertarPermisoPersonal(
++    body: InsertarPermisoPersonalBody
++  ): Observable<InsertarPermisoPersonalResponse> {
++
+     return this.http.post<InsertarPermisoPersonalResponse>(
++
+       `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
+-      { ...this.emailBody, ...body }
++
++      {
++        ...this.emailBody,
++        ...body
++      }
++
++    );
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ANULAR PERMISO PERSONAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  anularPermisoPersonal(
++    idPermiso: string
++  ): Observable<AnularPermisoResponse> {
++
++    return this.http.post<AnularPermisoResponse>(
++
++      `${this.base}${EP_RRHH_PERMISOS_PERSONALES_ANULAR}/${idPermiso}`,
++
++      {}
++
++    );
++
++  }
++
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // ANULAR PERMISO OFICIAL
++  // ───────────────────────────────────────────────────────────────────────────
++
++  anularPermisoOficial(
++    idPermiso: string
++  ): Observable<AnularPermisoResponse> {
++
++    return this.http.post<AnularPermisoResponse>(
++
++      `${this.base}${EP_RRHH_PERMISOS_OFICIALES_ANULAR}/${idPermiso}`,
++
++      {}
++
+     );
++
+   }
+ 
++
++  // ───────────────────────────────────────────────────────────────────────────
++  // DATOS DEL EMPLEADO
++  // ───────────────────────────────────────────────────────────────────────────
++
+   getDatosPermiso(): Observable<DatosPermiso> {
++
+     return this.http
++
+       .post<DatosPermisoResponse>(
++
+         `${this.base}${EP_RRHH_DATOS_PERMISO}`,
++
+         this.emailBody
++
+       )
++
+       .pipe(
+-        map(r => ({
++
++        map(response => ({
++
+           nombre: [
+-            r.data.prinombre,
+-            r.data.segnombre  ?? '',
+-            r.data.priapellido,
+-            r.data.segapellido ?? ''
+-          ].filter(Boolean).join(' '),
+-          dependencia:      r.data.dependencia,
+-          cargo:            r.data.cargo,
+-          horasDisponibles: r.data.horas_disponibles.substring(0, 5),
++
++            response.data.prinombre,
++
++            response.data.segnombre ?? '',
++
++            response.data.priapellido,
++
++            response.data.segapellido ?? ''
++
++          ]
++
++            .filter(Boolean)
++
++            .join(' '),
++
++
++          dependencia:
++            response.data.dependencia,
++
++
++          cargo:
++            response.data.cargo,
++
++
++          horasDisponibles:
++            response.data.horas_disponibles
++              .substring(0, 5)
++
+         }))
++
+       );
++
+   }
++
+ }
+diff --git a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.css b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.css
+index 3bca94c..9543a14 100644
+--- a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.css
++++ b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.css
+@@ -9,7 +9,6 @@
+   box-sizing: border-box;
+ }
+ 
+-
+ /* =========================================================
+    ENCABEZADO
+    ========================================================= */
+@@ -19,154 +18,126 @@
+   align-items: center;
+   justify-content: space-between;
+   gap: 24px;
+-
+   background: #ffffff;
+-
+   padding: 24px 28px;
+-
+   border-radius: 12px;
+   border: 1px solid #e5e7eb;
+-
+   margin-bottom: 20px;
+-
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+ }
+ 
+ .titulo-reporte h1 {
+   margin: 0;
+-
+   font-size: 26px;
+   font-weight: 700;
+-
+   color: #1f2937;
+ }
+ 
+ .titulo-reporte p {
+   margin: 7px 0 0;
+-
+   font-size: 14px;
+-
+   color: #6b7280;
+-
+   line-height: 1.5;
+ }
+ 
+-
+ /* =========================================================
+    CONTROLES
+    ========================================================= */
+ 
+ .controles-reporte {
+   display: flex;
+-
+   align-items: flex-end;
+-
+-  gap: 12px;
++  flex-wrap: wrap;
++  gap: 10px;
+ }
+ 
+ .control-anio {
+   display: flex;
+-
+   flex-direction: column;
+-
+   gap: 6px;
+ }
+ 
+-.control-anio label {
++.control-anio label,
++.campo-busqueda label,
++.campo-administracion label {
+   font-size: 12px;
+-
+   font-weight: 700;
+-
+   color: #475569;
+ }
+ 
+ .control-anio input {
+   width: 110px;
+-
+   height: 42px;
+-
+   padding: 0 12px;
+-
+   box-sizing: border-box;
+-
+   border: 1px solid #cbd5e1;
+-
+   border-radius: 8px;
+-
+   background: #ffffff;
+-
+   color: #1f2937;
+-
+   font-size: 14px;
+-
+   outline: none;
+-
+-  transition:
+-    border-color 0.2s ease,
+-    box-shadow 0.2s ease;
+ }
+ 
+-.control-anio input:focus {
++.control-anio input:focus,
++.campo-busqueda input:focus,
++.campo-administracion input:focus,
++.campo-administracion select:focus,
++.campo-administracion textarea:focus {
+   border-color: #2563eb;
+-
+-  box-shadow:
+-    0 0 0 3px rgba(37, 99, 235, 0.12);
++  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+ }
+ 
+-
+ /* =========================================================
+-   BOTÓN ACTUALIZAR
++   BOTONES SUPERIORES
+    ========================================================= */
+ 
+-.boton-actualizar {
++.boton-actualizar,
++.boton-exportar {
+   display: inline-flex;
+-
+   align-items: center;
+-
+   justify-content: center;
+-
+-  min-width: 120px;
+-
+   height: 42px;
+-
+-  padding: 0 18px;
+-
++  padding: 0 16px;
+   border: none;
+-
+   border-radius: 8px;
+-
+-  background: #2563eb;
+-
+   color: #ffffff;
+-
+-  font-size: 14px;
+-
++  font-size: 13px;
+   font-weight: 600;
+-
+   cursor: pointer;
++}
+ 
+-  transition:
+-    background 0.2s ease,
+-    transform 0.2s ease,
+-    box-shadow 0.2s ease;
++.boton-actualizar {
++  min-width: 120px;
++  background: #2563eb;
+ }
+ 
+ .boton-actualizar:hover:not(:disabled) {
+   background: #1d4ed8;
++}
+ 
+-  transform: translateY(-1px);
++.acciones-reporte {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++}
+ 
+-  box-shadow:
+-    0 4px 10px rgba(37, 99, 235, 0.25);
++.boton-exportar {
++  min-width: 130px;
+ }
+ 
+-.boton-actualizar:disabled {
+-  opacity: 0.6;
++.boton-excel {
++  background: #15803d;
++}
+ 
+-  cursor: not-allowed;
++.boton-pdf {
++  background: #b91c1c;
+ }
+ 
++.boton-actualizar:disabled,
++.boton-exportar:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++}
+ 
+ /* =========================================================
+    MENSAJES
+@@ -174,307 +145,375 @@
+ 
+ .mensaje {
+   padding: 14px 18px;
+-
+   margin-bottom: 18px;
+-
+   border-radius: 8px;
+-
+   font-size: 14px;
+ }
+ 
+ .mensaje.error {
+   background: #fef2f2;
+-
+   border: 1px solid #fecaca;
+-
+   color: #b91c1c;
+ }
+ 
+ .mensaje.exito {
+   background: #f0fdf4;
+-
+   border: 1px solid #bbf7d0;
+-
+   color: #15803d;
+ }
+ 
+-
+ /* =========================================================
+    RESUMEN
+    ========================================================= */
+ 
+ .resumen-reporte {
+   display: grid;
+-
+-  grid-template-columns:
+-    repeat(3, minmax(0, 1fr));
+-
++  grid-template-columns: repeat(3, minmax(0, 1fr));
+   gap: 16px;
+-
+   margin-bottom: 20px;
+ }
+ 
+ .tarjeta-resumen {
+   background: #ffffff;
+-
+   border: 1px solid #e5e7eb;
+-
+   border-radius: 12px;
+-
+   padding: 20px 22px;
+-
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
+-
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+   display: flex;
+-
+   flex-direction: column;
+-
+   gap: 6px;
+ }
+ 
+ .resumen-titulo {
+   font-size: 13px;
+-
+   color: #64748b;
+-
+   font-weight: 600;
+ }
+ 
+ .resumen-valor {
+   font-size: 25px;
+-
+   color: #1f2937;
+-
+   font-weight: 700;
+ }
+ 
+-
+ /* =========================================================
+-   BARRA DE BÚSQUEDA
++   ADMINISTRACIÓN DE SALDOS
+    ========================================================= */
+ 
+-.barra-busqueda {
++.panel-administracion {
+   background: #ffffff;
+-
+   border: 1px solid #e5e7eb;
+-
+   border-radius: 12px;
++  margin-bottom: 20px;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
++  overflow: hidden;
++}
+ 
+-  padding: 18px 20px;
++.panel-administracion summary {
++  position: relative;
++  cursor: pointer;
++  list-style: none;
++  padding: 20px 22px;
++  display: flex;
++  flex-direction: column;
++  gap: 5px;
++}
+ 
+-  margin-bottom: 20px;
++.panel-administracion summary::-webkit-details-marker {
++  display: none;
++}
+ 
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
++.panel-administracion summary::after {
++  content: '＋';
++  position: absolute;
++  right: 22px;
++  top: 18px;
++  font-size: 23px;
++  color: #2563eb;
+ }
+ 
+-.campo-busqueda {
+-  display: flex;
++.panel-administracion[open] summary::after {
++  content: '−';
++}
++
++.titulo-panel {
++  font-size: 16px;
++  font-weight: 700;
++  color: #1f2937;
++}
++
++.subtitulo-panel {
++  font-size: 13px;
++  color: #64748b;
++}
+ 
++.contenido-administracion {
++  border-top: 1px solid #e5e7eb;
++  padding: 20px;
++  display: flex;
+   flex-direction: column;
++  gap: 20px;
++}
+ 
+-  gap: 7px;
++.bloque-administracion {
++  border: 1px solid #e5e7eb;
++  border-radius: 10px;
++  padding: 20px;
++  background: #f8fafc;
+ }
+ 
+-.campo-busqueda label {
+-  font-size: 12px;
++.titulo-bloque {
++  margin-bottom: 18px;
++}
+ 
+-  font-weight: 700;
++.titulo-bloque h2 {
++  margin: 0;
++  font-size: 18px;
++  color: #1f2937;
++}
+ 
+-  color: #475569;
++.titulo-bloque p {
++  margin: 6px 0 0;
++  color: #64748b;
++  font-size: 13px;
++  line-height: 1.5;
+ }
+ 
+-.campo-busqueda input {
++.formulario-administracion {
++  display: grid;
++  grid-template-columns: repeat(3, minmax(0, 1fr));
++  gap: 16px;
++}
++
++.campo-administracion {
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++
++.campo-administracion input,
++.campo-administracion select,
++.campo-administracion textarea {
+   width: 100%;
++  box-sizing: border-box;
++  border: 1px solid #cbd5e1;
++  border-radius: 8px;
++  background: #ffffff;
++  color: #1f2937;
++  font-size: 13px;
++  outline: none;
++}
+ 
++.campo-administracion input,
++.campo-administracion select {
+   height: 42px;
++  padding: 0 12px;
++}
+ 
+-  padding: 0 14px;
++.campo-administracion textarea {
++  min-height: 82px;
++  padding: 10px 12px;
++  resize: vertical;
++  line-height: 1.5;
++}
+ 
+-  box-sizing: border-box;
++.campo-administracion input::placeholder,
++.campo-administracion textarea::placeholder,
++.campo-busqueda input::placeholder {
++  color: #94a3b8;
++}
+ 
+-  border: 1px solid #cbd5e1;
++.campo-ancho {
++  grid-column: 1 / -1;
++}
+ 
++.empleado-seleccionado {
++  padding: 8px 10px;
++  border-radius: 7px;
++  background: #eff6ff;
++  color: #1d4ed8;
++  font-size: 12px;
++  line-height: 1.4;
++}
++
++.acciones-administracion {
++  grid-column: 1 / -1;
++  display: flex;
++  align-items: center;
++  justify-content: flex-end;
++}
++
++.boton-principal {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  min-width: 190px;
++  height: 42px;
++  padding: 0 18px;
++  border: none;
+   border-radius: 8px;
++  background: #2563eb;
++  color: #ffffff;
++  font-size: 13px;
++  font-weight: 600;
++  cursor: pointer;
++}
+ 
+-  background: #ffffff;
++.boton-principal:hover:not(:disabled) {
++  background: #1d4ed8;
++}
+ 
+-  color: #1f2937;
++.boton-principal:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++}
+ 
+-  font-size: 14px;
++/* =========================================================
++   MASIVO
++   ========================================================= */
+ 
+-  outline: none;
++.acciones-masivo {
++  display: flex;
++  align-items: center;
++  flex-wrap: wrap;
++  gap: 10px;
++  margin-bottom: 16px;
++}
+ 
+-  transition:
+-    border-color 0.2s ease,
+-    box-shadow 0.2s ease;
++.boton-secundario {
++  height: 36px;
++  padding: 0 13px;
++  border: 1px solid #cbd5e1;
++  border-radius: 7px;
++  background: #ffffff;
++  color: #334155;
++  font-size: 12px;
++  font-weight: 600;
++  cursor: pointer;
+ }
+ 
+-.campo-busqueda input::placeholder {
+-  color: #94a3b8;
++.boton-secundario:hover:not(:disabled) {
++  background: #f8fafc;
+ }
+ 
+-.campo-busqueda input:focus {
+-  border-color: #2563eb;
++.boton-secundario:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++}
++
++.resumen-seleccion {
++  padding: 9px 13px;
++  border-radius: 8px;
++  background: #eff6ff;
++  color: #1d4ed8;
++  font-size: 13px;
++}
++
++/* =========================================================
++   BÚSQUEDA
++   ========================================================= */
++
++.barra-busqueda {
++  background: #ffffff;
++  border: 1px solid #e5e7eb;
++  border-radius: 12px;
++  padding: 18px 20px;
++  margin-bottom: 20px;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
++}
+ 
+-  box-shadow:
+-    0 0 0 3px rgba(37, 99, 235, 0.12);
++.campo-busqueda {
++  display: flex;
++  flex-direction: column;
++  gap: 7px;
+ }
+ 
++.campo-busqueda input {
++  width: 100%;
++  height: 42px;
++  padding: 0 14px;
++  box-sizing: border-box;
++  border: 1px solid #cbd5e1;
++  border-radius: 8px;
++  background: #ffffff;
++  color: #1f2937;
++  font-size: 14px;
++  outline: none;
++}
+ 
+ /* =========================================================
+-   CARGANDO
++   CARGA / SIN RESULTADOS
+    ========================================================= */
+ 
+ .mensaje-carga {
+   min-height: 250px;
+-
+   display: flex;
+-
+   flex-direction: column;
+-
+   align-items: center;
+-
+   justify-content: center;
+-
+   gap: 12px;
+-
+   background: #ffffff;
+-
+   border: 1px solid #e5e7eb;
+-
+   border-radius: 12px;
+-
+   color: #64748b;
+-
+   font-size: 15px;
+-
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+ }
+ 
+ .cargando-icono {
+   font-size: 28px;
+-
+   color: #2563eb;
+-
+-  animation:
+-    girar 1s linear infinite;
++  animation: girar 1s linear infinite;
+ }
+ 
+ @keyframes girar {
+-  from {
+-    transform: rotate(0deg);
+-  }
+-
+-  to {
+-    transform: rotate(360deg);
+-  }
++  from { transform: rotate(0deg); }
++  to { transform: rotate(360deg); }
+ }
+ 
+-
+-/* =========================================================
+-   SIN RESULTADOS
+-   ========================================================= */
+-
+ .sin-resultados {
+   min-height: 300px;
+-
+   display: flex;
+-
+   flex-direction: column;
+-
+   align-items: center;
+-
+   justify-content: center;
+-
+   text-align: center;
+-
+   background: #ffffff;
+-
+   border: 1px solid #e5e7eb;
+-
+   border-radius: 12px;
+-
+   padding: 40px;
+-
+   color: #64748b;
+-
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+ }
+ 
+ .icono-sin-resultados {
+   width: 64px;
+-
+   height: 64px;
+-
+   display: flex;
+-
+   align-items: center;
+-
+   justify-content: center;
+-
+   margin-bottom: 16px;
+-
+   border-radius: 50%;
+-
+   background: #eff6ff;
+-
+   font-size: 28px;
+ }
+ 
+-.sin-resultados h2 {
+-  margin: 0 0 8px;
+-
+-  font-size: 18px;
+-
+-  color: #374151;
+-}
+-
+-.sin-resultados p {
+-  margin: 0;
+-
+-  max-width: 500px;
+-
+-  color: #94a3b8;
+-
+-  font-size: 14px;
+-
+-  line-height: 1.6;
+-}
+-
+-
+ /* =========================================================
+-   CONTENEDOR DE TABLA
++   TABLA
+    ========================================================= */
+ 
+ .contenedor-tabla {
+   width: 100%;
+-
+   background: #ffffff;
+-
+   border: 1px solid #e5e7eb;
+-
+   border-radius: 12px;
+-
+   overflow-x: auto;
+-
+-  box-shadow:
+-    0 2px 8px rgba(0, 0, 0, 0.04);
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+ }
+ 
+-
+-/* =========================================================
+-   TABLA
+-   ========================================================= */
+-
+ .tabla-reporte {
+   width: 100%;
+-
+-  min-width: 1100px;
+-
++  min-width: 1350px;
+   border-collapse: collapse;
+ }
+ 
+@@ -484,195 +523,228 @@
+ 
+ .tabla-reporte th {
+   padding: 15px 14px;
+-
+   text-align: left;
+-
+   font-size: 11px;
+-
+   font-weight: 700;
+-
+   color: #475569;
+-
+   text-transform: uppercase;
+-
+   letter-spacing: 0.03em;
+-
+   border-bottom: 1px solid #e5e7eb;
+-
+   white-space: nowrap;
+ }
+ 
+ .tabla-reporte td {
+   padding: 15px 14px;
+-
+   font-size: 13px;
+-
+   color: #374151;
+-
+   border-bottom: 1px solid #f1f5f9;
+-
+   vertical-align: middle;
+ }
+ 
+-.tabla-reporte tbody tr {
+-  transition:
+-    background 0.15s ease;
+-}
+-
+ .tabla-reporte tbody tr:hover {
+   background: #f8fafc;
+ }
+ 
+-.tabla-reporte tbody tr:last-child td {
+-  border-bottom: none;
+-}
+-
+-
+-/* =========================================================
+-   COLUMNAS
+-   ========================================================= */
+-
+ .numero-fila {
+   width: 40px;
+-
+   color: #94a3b8 !important;
+-
+   text-align: center;
+ }
+ 
++.columna-checkbox {
++  width: 42px;
++  text-align: center !important;
++}
++
++.columna-checkbox input {
++  width: 16px;
++  height: 16px;
++  margin: 0;
++  cursor: pointer;
++  accent-color: #2563eb;
++}
++
+ .empleado {
+   min-width: 220px;
+ }
+ 
+ .empleado strong {
+   color: #1f2937;
+-
+   font-weight: 600;
+ }
+ 
+ .numero {
+   text-align: center;
+-
+   font-weight: 600;
+ }
+ 
+ .tipo-contratacion {
+   display: inline-block;
+-
+   padding: 5px 9px;
+-
+   border-radius: 6px;
+-
+   background: #f1f5f9;
+-
+   color: #475569;
+-
+   font-size: 12px;
+-
+   font-weight: 600;
+ }
+ 
+-
+-/* =========================================================
+-   DÍAS UTILIZADOS
+-   ========================================================= */
+-
+-.dias-utilizados {
+-  display: inline-flex;
+-
+-  align-items: center;
+-
+-  justify-content: center;
+-
+-  min-width: 32px;
+-
++.estado-pendiente,
++.estado-cargado {
++  display: inline-block;
+   padding: 5px 8px;
+-
+   border-radius: 6px;
+-
+-  background: #fef3c7;
+-
+-  color: #92400e;
+-
++  font-size: 10px;
+   font-weight: 700;
++  white-space: nowrap;
+ }
+ 
++.estado-pendiente {
++  background: #fff7ed;
++  color: #c2410c;
++}
+ 
+-/* =========================================================
+-   DÍAS RESERVADOS
+-   ========================================================= */
++.estado-cargado {
++  background: #dcfce7;
++  color: #166534;
++}
+ 
+-.dias-reservados {
++.dias-utilizados,
++.dias-reservados,
++.dias-disponibles {
+   display: inline-flex;
+-
+   align-items: center;
+-
+   justify-content: center;
+-
+   min-width: 32px;
+-
+   padding: 5px 8px;
+-
+   border-radius: 6px;
++  font-weight: 700;
++}
+ 
+-  background: #e0e7ff;
++.dias-utilizados {
++  background: #fef3c7;
++  color: #92400e;
++}
+ 
++.dias-reservados {
++  background: #e0e7ff;
+   color: #3730a3;
++}
+ 
+-  font-weight: 700;
++.dias-disponibles {
++  min-width: 38px;
++}
++
++.dias-disponibles.con-dias {
++  background: #dcfce7;
++  color: #166534;
+ }
+ 
++.dias-disponibles.sin-dias {
++  background: #fee2e2;
++  color: #b91c1c;
++}
+ 
+ /* =========================================================
+-   DÍAS DISPONIBLES
++   HISTORIAL
+    ========================================================= */
+ 
+-.dias-disponibles {
+-  display: inline-flex;
+-
+-  align-items: center;
++.boton-historial {
++  height: 34px;
++  padding: 0 12px;
++  border: 1px solid #cbd5e1;
++  border-radius: 7px;
++  background: #ffffff;
++  color: #334155;
++  font-size: 12px;
++  font-weight: 600;
++  cursor: pointer;
++}
+ 
+-  justify-content: center;
++.boton-historial:hover:not(:disabled) {
++  background: #f8fafc;
++}
+ 
+-  min-width: 38px;
++.boton-historial:disabled {
++  opacity: 0.6;
++  cursor: not-allowed;
++}
+ 
+-  padding: 5px 9px;
++.panel-historial {
++  margin-top: 20px;
++  background: #ffffff;
++  border: 1px solid #e5e7eb;
++  border-radius: 12px;
++  padding: 20px;
++  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
++}
+ 
+-  border-radius: 6px;
++.encabezado-historial {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 16px;
++  margin-bottom: 18px;
++}
+ 
+-  font-weight: 700;
++.encabezado-historial h2 {
++  margin: 0;
++  font-size: 20px;
++  color: #1f2937;
+ }
+ 
+-.dias-disponibles.con-dias {
+-  background: #dcfce7;
++.encabezado-historial p {
++  margin: 5px 0 0;
++  color: #64748b;
++  font-size: 13px;
++}
+ 
+-  color: #166534;
++.boton-cerrar {
++  height: 36px;
++  padding: 0 14px;
++  border: none;
++  border-radius: 7px;
++  background: #e5e7eb;
++  color: #374151;
++  font-size: 12px;
++  font-weight: 600;
++  cursor: pointer;
+ }
+ 
+-.dias-disponibles.sin-dias {
+-  background: #fee2e2;
++.historial-vacio {
++  min-height: 180px;
++  display: flex;
++  flex-direction: column;
++  align-items: center;
++  justify-content: center;
++  text-align: center;
++  color: #64748b;
++}
+ 
+-  color: #b91c1c;
++.historial-tabla .tabla-reporte {
++  min-width: 900px;
+ }
+ 
++.tipo-movimiento {
++  display: inline-block;
++  padding: 5px 8px;
++  border-radius: 6px;
++  background: #f1f5f9;
++  color: #475569;
++  font-size: 11px;
++  font-weight: 700;
++}
+ 
+ /* =========================================================
+-   INFORMACIÓN DE LA TABLA
++   INFORMACIÓN
+    ========================================================= */
+ 
+ .informacion-tabla {
+   display: flex;
+-
+   align-items: center;
+-
+   justify-content: space-between;
+-
+   gap: 20px;
+-
+   padding: 14px 4px;
+-
+   color: #64748b;
+-
+   font-size: 13px;
+ }
+ 
+@@ -680,20 +752,23 @@
+   color: #374151;
+ }
+ 
+-
+ /* =========================================================
+    RESPONSIVE
+    ========================================================= */
+ 
+-@media (max-width: 900px) {
++@media (max-width: 1100px) {
++  .formulario-administracion {
++    grid-template-columns: repeat(2, minmax(0, 1fr));
++  }
++}
+ 
++@media (max-width: 900px) {
+   .pagina-reporte-vacaciones {
+     padding: 20px;
+   }
+ 
+   .encabezado-reporte {
+     flex-direction: column;
+-
+     align-items: flex-start;
+   }
+ 
+@@ -701,64 +776,73 @@
+     width: 100%;
+   }
+ 
+-  .control-anio {
+-    flex: 1;
++  .resumen-reporte {
++    grid-template-columns: 1fr;
+   }
+ 
+-  .control-anio input {
+-    width: 100%;
++  .formulario-administracion {
++    grid-template-columns: 1fr;
+   }
+ 
+-  .boton-actualizar {
+-    min-width: 140px;
++  .campo-ancho,
++  .acciones-administracion {
++    grid-column: auto;
+   }
+ 
+-  .resumen-reporte {
+-    grid-template-columns:
+-      1fr;
++  .acciones-reporte {
++    width: 100%;
++    flex-wrap: wrap;
+   }
+ 
++  .boton-exportar {
++    flex: 1;
++  }
+ }
+ 
+-
+ @media (max-width: 600px) {
+-
+   .pagina-reporte-vacaciones {
+     padding: 16px;
+   }
+ 
+-  .encabezado-reporte {
+-    padding: 20px;
++  .controles-reporte {
++    flex-direction: column;
++    align-items: stretch;
+   }
+ 
+-  .titulo-reporte h1 {
+-    font-size: 22px;
++  .boton-actualizar,
++  .boton-exportar {
++    width: 100%;
+   }
+ 
+-  .titulo-reporte p {
+-    font-size: 13px;
++  .acciones-reporte {
++    flex-direction: column;
++    align-items: stretch;
+   }
+ 
+-  .controles-reporte {
++  .acciones-masivo {
+     flex-direction: column;
+-
+     align-items: stretch;
+   }
+ 
+-  .boton-actualizar {
++  .boton-secundario,
++  .resumen-seleccion {
+     width: 100%;
+-  }
+-
+-  .barra-busqueda {
+-    padding: 16px;
++    text-align: center;
++    box-sizing: border-box;
+   }
+ 
+   .informacion-tabla {
+     flex-direction: column;
+-
+     align-items: flex-start;
+-
+     gap: 6px;
+   }
+ 
++  .encabezado-historial {
++    flex-direction: column;
++    align-items: flex-start;
++  }
++
++  .boton-cerrar {
++    width: 100%;
++  }
+ }
+diff --git a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.html b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.html
+index fb1f23a..9fab689 100644
+--- a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.html
++++ b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.html
+@@ -1,32 +1,16 @@
+ <section class="pagina-reporte-vacaciones">
+-
+-  <!-- =========================================================
+-       ENCABEZADO
+-       ========================================================= -->
+-
+   <header class="encabezado-reporte">
+-
+     <div class="titulo-reporte">
+-
+-      <h1>
+-        Reporte de vacaciones
+-      </h1>
+-
++      <h1>Reporte de vacaciones</h1>
+       <p>
+-        Consulta los días de vacaciones asignados,
+-        utilizados, reservados y disponibles por empleado.
++        Consulta los días de vacaciones asignados, utilizados,
++        reservados y disponibles por empleado.
+       </p>
+-
+     </div>
+ 
+     <div class="controles-reporte">
+-
+       <div class="control-anio">
+-
+-        <label for="anio">
+-          Año
+-        </label>
+-
++        <label for="anio">Año</label>
+         <input
+           id="anio"
+           type="number"
+@@ -35,120 +19,383 @@
+           max="2100"
+           (change)="cambiarAnio($event)"
+         />
+-
+       </div>
+ 
+       <button
+         type="button"
+         class="boton-actualizar"
+-        [disabled]="cargando()"
++        [disabled]="cargando() || procesando()"
+         (click)="cargarReporte()"
+       >
+-
+-        {{
+-          cargando()
+-            ? 'Actualizando...'
+-            : 'Actualizar'
+-        }}
+-
++        {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+       </button>
+ 
++      <div class="acciones-reporte">
++        <button
++          type="button"
++          class="boton-exportar boton-excel"
++          [disabled]="cargando() || procesando() || empleadosFiltrados().length === 0"
++          (click)="exportarExcel()"
++        >
++          Exportar Excel
++        </button>
++
++        <button
++          type="button"
++          class="boton-exportar boton-pdf"
++          [disabled]="cargando() || procesando() || empleadosFiltrados().length === 0"
++          (click)="exportarPdf()"
++        >
++          Exportar PDF
++        </button>
++      </div>
+     </div>
+-
+   </header>
+ 
+-
+-  <!-- =========================================================
+-       MENSAJE DE ERROR
+-       ========================================================= -->
+-
+   @if (errorMessage()) {
+-
+-    <div
+-      class="mensaje error"
+-      role="alert"
+-    >
+-
++    <div class="mensaje error" role="alert">
+       {{ errorMessage() }}
+-
+     </div>
+-
+   }
+ 
+-
+-  <!-- =========================================================
+-       MENSAJE DE ÉXITO
+-       ========================================================= -->
+-
+   @if (successMessage()) {
+-
+-    <div
+-      class="mensaje exito"
+-      role="status"
+-    >
+-
++    <div class="mensaje exito" role="status">
+       {{ successMessage() }}
+-
+     </div>
+-
+   }
+ 
+-
+-  <!-- =========================================================
+-       RESUMEN
+-       ========================================================= -->
+-
+   <div class="resumen-reporte">
+-
+     <div class="tarjeta-resumen">
+-
+-      <span class="resumen-titulo">
+-        Año
+-      </span>
+-
+-      <strong class="resumen-valor">
+-        {{ anio() }}
+-      </strong>
+-
++      <span class="resumen-titulo">Año</span>
++      <strong class="resumen-valor">{{ anio() }}</strong>
+     </div>
+ 
+-
+     <div class="tarjeta-resumen">
+-
+-      <span class="resumen-titulo">
+-        Total de empleados
+-      </span>
+-
+-      <strong class="resumen-valor">
+-        {{ totalEmpleados() }}
+-      </strong>
+-
++      <span class="resumen-titulo">Total de empleados</span>
++      <strong class="resumen-valor">{{ totalEmpleados() }}</strong>
+     </div>
+ 
+-
+     <div class="tarjeta-resumen">
++      <span class="resumen-titulo">Empleados mostrados</span>
++      <strong class="resumen-valor">{{ empleadosFiltrados().length }}</strong>
++    </div>
++  </div>
+ 
+-      <span class="resumen-titulo">
+-        Empleados mostrados
++  <details class="panel-administracion">
++    <summary>
++      <span class="titulo-panel">Administración de saldos de vacaciones</span>
++      <span class="subtitulo-panel">
++        Carga inicial, ajustes y descuentos
+       </span>
++    </summary>
++
++    <div class="contenido-administracion">
++
++      <div class="bloque-administracion">
++        <div class="titulo-bloque">
++          <h2>Cargar saldo inicial</h2>
++          <p>
++            Registre el saldo inicial real de un empleado.
++            La justificación es obligatoria.
++          </p>
++        </div>
++
++        <div class="formulario-administracion">
++          <div class="campo-administracion">
++            <label for="cargaEmpleado">Empleado</label>
++            <select
++              id="cargaEmpleado"
++              [value]="cargaInicial().idUsuario"
++              (change)="actualizarCargaInicial({
++                idUsuario: $any($event.target).value
++              })"
++            >
++              <option value="">Seleccione un empleado</option>
++
++              @for (
++                empleado of empleadosDisponiblesCarga();
++                track empleado.idUsuario
++              ) {
++                <option [value]="empleado.idUsuario">
++                  {{ empleado.nombreCompleto }} — {{ empleado.identidad }}
++                </option>
++              }
++            </select>
++
++            @if (cargaInicial().idUsuario) {
++              <div class="empleado-seleccionado">
++                <strong>Empleado seleccionado:</strong>
++                {{ obtenerNombreEmpleado(cargaInicial().idUsuario) }}
++              </div>
++            }
++          </div>
++
++          <div class="campo-administracion">
++            <label for="cargaAnio">Año</label>
++            <input
++              id="cargaAnio"
++              type="number"
++              min="2000"
++              max="2100"
++              [value]="cargaInicial().anio"
++              (input)="actualizarCargaInicial({
++                anio: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion">
++            <label for="cargaAsignados">Días asignados</label>
++            <input
++              id="cargaAsignados"
++              type="number"
++              min="0"
++              max="365"
++              [value]="cargaInicial().diasAsignados"
++              (input)="actualizarCargaInicial({
++                diasAsignados: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion">
++            <label for="cargaUtilizados">Días utilizados</label>
++            <input
++              id="cargaUtilizados"
++              type="number"
++              min="0"
++              max="365"
++              [value]="cargaInicial().diasUtilizados"
++              (input)="actualizarCargaInicial({
++                diasUtilizados: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion">
++            <label for="cargaReservados">Días reservados</label>
++            <input
++              id="cargaReservados"
++              type="number"
++              min="0"
++              max="365"
++              [value]="cargaInicial().diasReservados"
++              (input)="actualizarCargaInicial({
++                diasReservados: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion campo-ancho">
++            <label for="cargaObservacion">Justificación</label>
++            <textarea
++              id="cargaObservacion"
++              rows="3"
++              maxlength="500"
++              placeholder="Indique la justificación de la carga inicial..."
++              [value]="cargaInicial().observacion"
++              (input)="actualizarCargaInicial({
++                observacion: $any($event.target).value
++              })"
++            ></textarea>
++          </div>
++
++          <div class="acciones-administracion">
++            <button
++              type="button"
++              class="boton-principal"
++              [disabled]="procesando()"
++              (click)="cargarSaldoInicialEmpleado()"
++            >
++              {{ procesando() ? 'Guardando...' : 'Guardar saldo inicial' }}
++            </button>
++          </div>
++        </div>
++      </div>
+ 
+-      <strong class="resumen-valor">
+-        {{ empleadosFiltrados().length }}
+-      </strong>
++      <div class="bloque-administracion">
++        <div class="titulo-bloque">
++          <h2>Ajuste individual</h2>
++          <p>
++            Agregue o descuente días de un empleado.
++            La justificación es obligatoria.
++          </p>
++        </div>
++
++        <div class="formulario-administracion">
++          <div class="campo-administracion">
++            <label for="ajusteEmpleado">Empleado</label>
++            <select
++              id="ajusteEmpleado"
++              [value]="ajusteIndividual().idUsuario"
++              (change)="actualizarAjusteIndividual({
++                idUsuario: $any($event.target).value
++              })"
++            >
++              <option value="">Seleccione un empleado</option>
++
++              @for (
++                empleado of empleadosDisponiblesAjuste();
++                track empleado.idUsuario
++              ) {
++                <option [value]="empleado.idUsuario">
++                  {{ empleado.nombreCompleto }} — {{ empleado.identidad }}
++                </option>
++              }
++            </select>
++
++            @if (ajusteIndividual().idUsuario) {
++              <div class="empleado-seleccionado">
++                <strong>Empleado seleccionado:</strong>
++                {{ obtenerNombreEmpleado(ajusteIndividual().idUsuario) }}
++              </div>
++            }
++          </div>
++
++          <div class="campo-administracion">
++            <label for="tipoAjuste">Operación</label>
++            <select
++              id="tipoAjuste"
++              [value]="ajusteIndividual().tipo"
++              (change)="actualizarAjusteIndividual({
++                tipo: $any($event.target).value
++              })"
++            >
++              <option value="DESCONTAR">Descontar días</option>
++              <option value="AGREGAR">Agregar días</option>
++            </select>
++          </div>
++
++          <div class="campo-administracion">
++            <label for="diasAjuste">Días</label>
++            <input
++              id="diasAjuste"
++              type="number"
++              min="1"
++              max="365"
++              [value]="ajusteIndividual().dias"
++              (input)="actualizarAjusteIndividual({
++                dias: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion campo-ancho">
++            <label for="justificacionAjuste">Justificación</label>
++            <textarea
++              id="justificacionAjuste"
++              rows="3"
++              maxlength="500"
++              placeholder="Indique por qué se modifica el saldo..."
++              [value]="ajusteIndividual().justificacion"
++              (input)="actualizarAjusteIndividual({
++                justificacion: $any($event.target).value
++              })"
++            ></textarea>
++          </div>
++
++          <div class="acciones-administracion">
++            <button
++              type="button"
++              class="boton-principal"
++              [disabled]="procesando()"
++              (click)="ejecutarAjusteIndividual()"
++            >
++              {{ procesando() ? 'Procesando...' : 'Aplicar ajuste' }}
++            </button>
++          </div>
++        </div>
++      </div>
+ 
++      <div class="bloque-administracion">
++        <div class="titulo-bloque">
++          <h2>Descuento masivo</h2>
++          <p>
++            Si no selecciona empleados, al aplicar el descuento
++            se seleccionarán automáticamente todos los empleados
++            del reporte. Luego puede quitar los que no correspondan.
++          </p>
++        </div>
++
++        <div class="acciones-masivo">
++          <button
++            type="button"
++            class="boton-secundario"
++            [disabled]="procesando()"
++            (click)="seleccionarTodosEmpleados()"
++          >
++            Seleccionar todos
++          </button>
++
++          <button
++            type="button"
++            class="boton-secundario"
++            [disabled]="procesando()"
++            (click)="deseleccionarTodosEmpleados()"
++          >
++            Quitar selección
++          </button>
++
++          <div class="resumen-seleccion">
++            <strong>{{ empleadosSeleccionados().length }}</strong>
++            empleados seleccionados
++          </div>
++        </div>
++
++        <div class="formulario-administracion">
++          <div class="campo-administracion">
++            <label for="diasMasivo">Días a descontar</label>
++            <input
++              id="diasMasivo"
++              type="number"
++              min="1"
++              max="365"
++              [value]="descuentoMasivo().dias"
++              (input)="actualizarDescuentoMasivo({
++                dias: convertirNumero($any($event.target).value)
++              })"
++            />
++          </div>
++
++          <div class="campo-administracion campo-ancho">
++            <label for="justificacionMasivo">Justificación</label>
++            <textarea
++              id="justificacionMasivo"
++              rows="3"
++              maxlength="500"
++              placeholder="Indique la justificación del descuento masivo..."
++              [value]="descuentoMasivo().justificacion"
++              (input)="actualizarDescuentoMasivo({
++                justificacion: $any($event.target).value
++              })"
++            ></textarea>
++          </div>
++
++          <div class="acciones-administracion">
++            <button
++              type="button"
++              class="boton-principal"
++              [disabled]="procesando()"
++              (click)="ejecutarDescuentoMasivo()"
++            >
++              {{
++                procesando()
++                  ? 'Procesando...'
++                  : 'Aplicar descuento masivo'
++              }}
++            </button>
++          </div>
++        </div>
++      </div>
+     </div>
+-
+-  </div>
+-
++  </details>
+ 
+   <!-- =========================================================
+        BÚSQUEDA
+        ========================================================= -->
+ 
+   <div class="barra-busqueda">
+-
+     <div class="campo-busqueda">
+-
+       <label for="buscarEmpleado">
+         Buscar empleado
+       </label>
+@@ -156,170 +403,127 @@
+       <input
+         id="buscarEmpleado"
+         type="text"
+-        placeholder="Buscar por nombre o identidad..."
++        placeholder="Buscar por nombre, identidad o contratación..."
+         [value]="busqueda()"
+         (input)="cambiarBusqueda($event)"
+       />
+-
+     </div>
+-
+   </div>
+ 
+-
+   <!-- =========================================================
+-       CARGANDO
++       CONTENIDO
+        ========================================================= -->
+ 
+   @if (cargando()) {
+-
+-    <div
+-      class="mensaje-carga"
+-      role="status"
+-    >
+-
+-      <div class="cargando-icono">
+-        ⟳
+-      </div>
+-
+-      <span>
+-        Consultando reporte de vacaciones...
+-      </span>
+-
++    <div class="mensaje-carga" role="status">
++      <div class="cargando-icono">⟳</div>
++      <span>Consultando reporte de vacaciones...</span>
+     </div>
+-
+-  }
+-
+-
+-  <!-- =========================================================
+-       SIN RESULTADOS
+-       ========================================================= -->
+-
+-  @else if (empleadosFiltrados().length === 0) {
+-
++  } @else if (empleadosFiltrados().length === 0) {
+     <div class="sin-resultados">
++      <div class="icono-sin-resultados">📅</div>
+ 
+-      <div class="icono-sin-resultados">
+-        📅
+-      </div>
+-
+-      <h2>
+-        No hay resultados
+-      </h2>
++      <h2>No hay resultados</h2>
+ 
+       @if (busqueda()) {
+-
+         <p>
+           No se encontraron empleados que coincidan
+           con "{{ busqueda() }}".
+         </p>
+-
+       } @else {
+-
+         <p>
+-          No existen registros de vacaciones para
+-          el año {{ anio() }}.
++          No existen registros de vacaciones para el año {{ anio() }}.
+         </p>
+-
+       }
+-
+     </div>
++  } @else {
+ 
+-  }
+-
+-
+-  <!-- =========================================================
+-       TABLA
+-       ========================================================= -->
+-
+-  @else {
++    <!-- =======================================================
++         TABLA COMPLETA
++         ======================================================= -->
+ 
+     <div class="contenedor-tabla">
+-
+       <table class="tabla-reporte">
+ 
+         <thead>
+-
+           <tr>
+-
+-            <th>
+-              #
+-            </th>
+-
+-            <th>
+-              Empleado
+-            </th>
+-
+-            <th>
+-              Identidad
+-            </th>
+-
+-            <th>
+-              Tipo de contratación
+-            </th>
+-
+-            <th>
+-              Año
+-            </th>
+-
+-            <th>
+-              Días asignados
+-            </th>
+-
+-            <th>
+-              Días utilizados
+-            </th>
+-
+-            <th>
+-              Días reservados
+-            </th>
+-
+-            <th>
+-              Días disponibles
++            <th class="columna-checkbox">
++              <input
++                type="checkbox"
++                [checked]="todosSeleccionados()"
++                (change)="alternarSeleccionTodos()"
++                title="Seleccionar todos los empleados visibles"
++              />
+             </th>
++            <th>#</th>
++            <th>Empleado</th>
++            <th>Identidad</th>
++            <th>Tipo de contratación</th>
++            <th>Año</th>
++            <th>Días asignados</th>
++            <th>Días utilizados</th>
++            <th>Días reservados</th>
++            <th>Días disponibles</th>
++            <th>Estado</th>
++            <th>Acciones</th>
+           </tr>
+         </thead>
++
+         <tbody>
+           @for (
+             empleado of empleadosFiltrados();
+             track empleado.idUsuario;
+             let i = $index
+           ) {
+-
+             <tr>
++
++              <td class="columna-checkbox">
++                <input
++                  type="checkbox"
++                  [checked]="estaSeleccionado(empleado.idUsuario)"
++                  (change)="alternarSeleccionEmpleado(empleado.idUsuario)"
++                />
++              </td>
++
+               <td class="numero-fila">
+                 {{ i + 1 }}
+               </td>
++
+               <td class="empleado">
+-                <strong>
+-                  {{ empleado.nombreCompleto }}
+-                </strong>
++                <strong>{{ empleado.nombreCompleto }}</strong>
+               </td>
++
+               <td>
+                 {{ empleado.identidad || '-' }}
+               </td>
++
+               <td>
+                 <span class="tipo-contratacion">
+                   {{ empleado.tipoContratacion || '-' }}
+                 </span>
+               </td>
++
+               <td>
+                 {{ empleado.anio }}
+               </td>
++
+               <td class="numero">
+                 {{ formatearDias(empleado.diasAsignados) }}
+               </td>
++
+               <td class="numero">
+                 <span class="dias-utilizados">
+                   {{ formatearDias(empleado.diasUtilizados) }}
+                 </span>
+               </td>
++
+               <td class="numero">
+                 <span class="dias-reservados">
+                   {{ formatearDias(empleado.diasReservados) }}
+                 </span>
+               </td>
+-              <td class="numero">
+ 
++              <td class="numero">
+                 <span
+                   class="dias-disponibles"
+                   [class.sin-dias]="empleado.diasDisponibles <= 0"
+@@ -328,35 +532,146 @@
+                   {{ formatearDias(empleado.diasDisponibles) }}
+                 </span>
+               </td>
++
++              <td>
++                @if (empleado.saldoInicialPendiente) {
++                  <span class="estado-pendiente">
++                    Saldo pendiente
++                  </span>
++                } @else {
++                  <span class="estado-cargado">
++                    Saldo cargado
++                  </span>
++                }
++              </td>
++
++              <td>
++                <button
++                  type="button"
++                  class="boton-historial"
++                  [disabled]="procesando()"
++                  (click)="verHistorial(empleado)"
++                >
++                  Historial
++                </button>
++              </td>
++
+             </tr>
+           }
+         </tbody>
++
+       </table>
+     </div>
+-    <!-- =======================================================
+-         INFORMACIÓN DE LA TABLA
+-         ======================================================= -->
+ 
+     <div class="informacion-tabla">
+       <span>
+         Mostrando
+-        <strong>
+-          {{ empleadosFiltrados().length }}
+-        </strong>
++        <strong>{{ empleadosFiltrados().length }}</strong>
+         de
+-        <strong>
+-          {{ totalEmpleados() }}
+-        </strong>
++        <strong>{{ totalEmpleados() }}</strong>
+         empleados
+       </span>
++
++      <span>
++        Seleccionados:
++        <strong>{{ empleadosSeleccionados().length }}</strong>
++      </span>
++
+       <span>
+         Año:
+-        <strong>
+-          {{ anio() }}
+-        </strong>
++        <strong>{{ anio() }}</strong>
+       </span>
+     </div>
+   }
+ 
+-</section>
++  <!-- =========================================================
++       HISTORIAL
++       ========================================================= -->
++
++  @if (mostrandoHistorial()) {
++    <div class="panel-historial">
++
++      <div class="encabezado-historial">
++        <div>
++          <h2>Historial de vacaciones</h2>
+ 
++          @if (empleadoHistorial()) {
++            <p>
++              {{ empleadoHistorial()?.nombreCompleto }}
++              —
++              {{ empleadoHistorial()?.identidad }}
++            </p>
++          }
++        </div>
++
++        <button
++          type="button"
++          class="boton-cerrar"
++          (click)="cerrarHistorial()"
++        >
++          Cerrar
++        </button>
++      </div>
++
++      @if (historial().length === 0) {
++        <div class="historial-vacio">
++          <div class="icono-sin-resultados">📋</div>
++          <h3>No hay movimientos registrados</h3>
++          <p>
++            Este empleado todavía no tiene movimientos
++            en el historial de vacaciones.
++          </p>
++        </div>
++      } @else {
++        <div class="contenedor-tabla historial-tabla">
++          <table class="tabla-reporte">
++            <thead>
++              <tr>
++                <th>Fecha</th>
++                <th>Acción</th>
++                <th>Observación</th>
++                <th>Solicitud</th>
++                <th>Saldo</th>
++              </tr>
++            </thead>
++
++            <tbody>
++              @for (
++                movimiento of historial();
++                track movimiento.idHistorial
++              ) {
++                <tr>
++                  <td>
++                    {{
++                      movimiento.fechaAccion
++                        | date:'dd/MM/yyyy HH:mm'
++                    }}
++                  </td>
++
++                  <td>
++                    <span class="tipo-movimiento">
++                      {{ movimiento.accion }}
++                    </span>
++                  </td>
++
++                  <td>
++                    {{ movimiento.observacion || '-' }}
++                  </td>
++
++                  <td>
++                    {{ movimiento.idPermisoVaca || '-' }}
++                  </td>
++
++                  <td>
++                    {{ movimiento.idSaldoVacacion || '-' }}
++                  </td>
++                </tr>
++              }
++            </tbody>
++          </table>
++        </div>
++      }
++    </div>
++  }
++
++</section>
+diff --git a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.ts b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.ts
+index 6587869..7aff55c 100644
+--- a/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.ts
++++ b/apps/frontend-sedh/src/app/pages/vacaciones/reporte-vacaciones/reporte-vacaciones.component.ts
+@@ -2,33 +2,57 @@ import {
+   ChangeDetectionStrategy,
+   Component,
+   OnInit,
++  computed,
+   inject,
+   signal,
+-  computed,
+ } from '@angular/core';
+ 
+-import { CommonModule } from '@angular/common';
++import { CommonModule, DatePipe } from '@angular/common';
++
++import * as XLSX from 'xlsx';
++
++import jsPDF from 'jspdf';
++
++import autoTable from 'jspdf-autotable';
+ 
+ import {
++  AjusteSaldoVacaciones,
++  CargaInicialSaldo,
++  DescuentoMasivoVacaciones,
++  HistorialVacaciones,
+   ReporteVacacionesEmpleado,
+   VacacionesApiService,
+ } from '../../../core/services/vacaciones-api';
+ 
++
+ @Component({
+   selector: 'app-reporte-vacaciones',
++
+   standalone: true,
+-  imports: [CommonModule],
+-  templateUrl: './reporte-vacaciones.component.html',
+-  styleUrl: './reporte-vacaciones.component.css',
+-  changeDetection: ChangeDetectionStrategy.OnPush,
++
++  imports: [
++    CommonModule,
++    DatePipe,
++  ],
++
++  templateUrl:
++    './reporte-vacaciones.component.html',
++
++  styleUrl:
++    './reporte-vacaciones.component.css',
++
++  changeDetection:
++    ChangeDetectionStrategy.OnPush,
+ })
+-export class ReporteVacacionesComponent implements OnInit {
++export class ReporteVacacionesComponent
++  implements OnInit {
+ 
+   private readonly vacacionesApi =
+     inject(VacacionesApiService);
+ 
++
+   // =========================================================
+-  // DATOS
++  // ESTADO PRINCIPAL
+   // =========================================================
+ 
+   readonly empleados =
+@@ -40,26 +64,28 @@ export class ReporteVacacionesComponent implements OnInit {
+   readonly totalEmpleados =
+     signal(0);
+ 
+-  // =========================================================
+-  // ESTADO
+-  // =========================================================
+ 
+   readonly cargando =
+     signal(false);
+ 
++  readonly procesando =
++    signal(false);
++
+   readonly errorMessage =
+     signal('');
+ 
+   readonly successMessage =
+     signal('');
+ 
+-  // =========================================================
+-  // BÚSQUEDA
+-  // =========================================================
+ 
+   readonly busqueda =
+     signal('');
+ 
++
++  // =========================================================
++  // FILTRO DE EMPLEADOS
++  // =========================================================
++
+   readonly empleadosFiltrados =
+     computed(() => {
+ 
+@@ -79,19 +105,154 @@ export class ReporteVacacionesComponent implements OnInit {
+             .includes(texto) ||
+ 
+           empleado.identidad
++            ?.toLowerCase()
++            .includes(texto) ||
++
++          empleado.tipoContratacion
+             ?.toLowerCase()
+             .includes(texto),
+       );
+     });
+ 
++
++  // =========================================================
++  // SELECCIÓN
++  // =========================================================
++
++  readonly empleadosSeleccionados =
++    signal<string[]>([]);
++
++
++  readonly todosSeleccionados =
++    computed(() => {
++
++      const visibles =
++        this.empleadosFiltrados();
++
++      const seleccionados =
++        new Set(
++          this.empleadosSeleccionados(),
++        );
++
++      return (
++        visibles.length > 0 &&
++        visibles.every(
++          (empleado) =>
++            seleccionados.has(
++              empleado.idUsuario,
++            ),
++        )
++      );
++    });
++
++
++  // =========================================================
++  // CARGA INICIAL
++  // =========================================================
++
++  readonly cargaInicial =
++    signal<CargaInicialSaldo>({
++      idUsuario: '',
++      anio: new Date().getFullYear(),
++      diasAsignados: 0,
++      diasUtilizados: 0,
++      diasReservados: 0,
++      observacion: '',
++    });
++
++
++  // =========================================================
++  // AJUSTE INDIVIDUAL
++  // =========================================================
++
++  readonly ajusteIndividual =
++    signal<AjusteSaldoVacaciones>({
++      idUsuario: '',
++      tipo: 'DESCONTAR',
++      dias: 0,
++      justificacion: '',
++    });
++
++
++  // =========================================================
++  // DESCUENTO MASIVO
++  // =========================================================
++
++  readonly descuentoMasivo =
++    signal<DescuentoMasivoVacaciones>({
++      idUsuarios: [],
++      dias: 0,
++      justificacion: '',
++    });
++
++
++  // =========================================================
++  // HISTORIAL
++  // =========================================================
++
++  readonly historial =
++    signal<HistorialVacaciones[]>([]);
++
++  readonly empleadoHistorial =
++    signal<ReporteVacacionesEmpleado | null>(
++      null,
++    );
++
++  readonly mostrandoHistorial =
++    signal(false);
++
++
++  // =========================================================
++  // EMPLEADOS DISPONIBLES PARA CARGA
++  // =========================================================
++
++  readonly empleadosDisponiblesCarga =
++    computed(() => {
++
++      const carga =
++        this.cargaInicial().idUsuario;
++
++      const ajuste =
++        this.ajusteIndividual().idUsuario;
++
++      return this.empleados().filter(
++        (empleado) =>
++          empleado.idUsuario === carga ||
++          empleado.idUsuario !== ajuste,
++      );
++    });
++
++
++  // =========================================================
++  // EMPLEADOS DISPONIBLES PARA AJUSTE
++  // =========================================================
++
++  readonly empleadosDisponiblesAjuste =
++    computed(() => {
++
++      const carga =
++        this.cargaInicial().idUsuario;
++
++      const ajuste =
++        this.ajusteIndividual().idUsuario;
++
++      return this.empleados().filter(
++        (empleado) =>
++          empleado.idUsuario === ajuste ||
++          empleado.idUsuario !== carga,
++      );
++    });
++
++
+   // =========================================================
+-  // INICIO
++  // INIT
+   // =========================================================
+ 
+   ngOnInit(): void {
+     this.cargarReporte();
+   }
+ 
++
+   // =========================================================
+   // CARGAR REPORTE
+   // =========================================================
+@@ -101,47 +262,101 @@ export class ReporteVacacionesComponent implements OnInit {
+     this.cargando.set(true);
+ 
+     this.errorMessage.set('');
++
+     this.successMessage.set('');
+ 
++
+     this.vacacionesApi
+-      .obtenerReporteVacaciones(this.anio())
++      .obtenerReporteVacaciones(
++        this.anio(),
++      )
+       .subscribe({
+ 
+         next: (respuesta) => {
+ 
++          const empleados =
++            respuesta.empleados ?? [];
++
+           this.empleados.set(
+-            respuesta.empleados ?? [],
++            empleados,
+           );
+ 
+           this.totalEmpleados.set(
+             respuesta.totalEmpleados ?? 0,
+           );
+ 
++
++          const ids =
++            new Set(
++              empleados.map(
++                (empleado) =>
++                  empleado.idUsuario,
++              ),
++            );
++
++
++          const seleccion =
++            this.empleadosSeleccionados()
++              .filter(
++                (id) =>
++                  ids.has(id),
++              );
++
++
++          this.empleadosSeleccionados.set(
++            seleccion,
++          );
++
++
++          this.descuentoMasivo.update(
++            (actual) => ({
++              ...actual,
++              idUsuarios:
++                seleccion,
++            }),
++          );
++
++
+           this.cargando.set(false);
+         },
+ 
+-        error: (error) => {
++
++        error: (error: unknown) => {
+ 
+           console.error(
+-            'Error al consultar reporte de vacaciones:',
++            'Error al consultar reporte:',
+             error,
+           );
+ 
+-          this.errorMessage.set(
++          this.mostrarError(
+             this.obtenerMensajeError(
+               error,
+               'No se pudo consultar el reporte de vacaciones.',
+             ),
+           );
+ 
++
+           this.empleados.set([]);
++
+           this.totalEmpleados.set(0);
+ 
++          this.empleadosSeleccionados.set([]);
++
++
++          this.descuentoMasivo.update(
++            (actual) => ({
++              ...actual,
++              idUsuarios: [],
++            }),
++          );
++
++
+           this.cargando.set(false);
+         },
+       });
+   }
+ 
++
+   // =========================================================
+   // CAMBIAR AÑO
+   // =========================================================
+@@ -150,11 +365,12 @@ export class ReporteVacacionesComponent implements OnInit {
+     event: Event,
+   ): void {
+ 
+-    const valor =
+-      (event.target as HTMLInputElement).value;
+-
+     const nuevoAnio =
+-      Number(valor);
++      Number(
++        (event.target as HTMLInputElement)
++          .value,
++      );
++
+ 
+     if (
+       !Number.isInteger(nuevoAnio) ||
+@@ -164,52 +380,1019 @@ export class ReporteVacacionesComponent implements OnInit {
+       return;
+     }
+ 
+-    this.anio.set(nuevoAnio);
++
++    this.anio.set(
++      nuevoAnio,
++    );
++
++
++    this.cargaInicial.update(
++      (actual) => ({
++        ...actual,
++        anio: nuevoAnio,
++      }),
++    );
++
+ 
+     this.cargarReporte();
+   }
+ 
++
+   // =========================================================
+-  // BÚSQUEDA
++  // BUSCAR
+   // =========================================================
+ 
+   cambiarBusqueda(
+     event: Event,
+   ): void {
+ 
+-    const valor =
+-      (event.target as HTMLInputElement).value;
++    this.busqueda.set(
++      (event.target as HTMLInputElement)
++        .value,
++    );
++  }
++
++
++  // =========================================================
++  // SELECCIONAR EMPLEADO
++  // =========================================================
++
++  alternarSeleccionEmpleado(
++    idUsuario: string,
++  ): void {
++
++    const actuales =
++      this.empleadosSeleccionados();
++
++
++    const nuevos =
++      actuales.includes(idUsuario)
++
++        ? actuales.filter(
++            (id) =>
++              id !== idUsuario,
++          )
++
++        : [
++            ...actuales,
++            idUsuario,
++          ];
++
++
++    this.empleadosSeleccionados.set(
++      nuevos,
++    );
+ 
+-    this.busqueda.set(valor);
++
++    this.descuentoMasivo.update(
++      (actual) => ({
++        ...actual,
++        idUsuarios: nuevos,
++      }),
++    );
+   }
+ 
++
+   // =========================================================
+-  // FORMATEAR NÚMEROS
++  // SELECCIONAR TODOS
+   // =========================================================
+ 
+-  formatearDias(
+-    dias: number | null | undefined,
+-  ): string {
++  seleccionarTodosEmpleados(): void {
+ 
+-    return String(
+-      Number(dias ?? 0),
++    const ids =
++      this.empleadosFiltrados()
++        .map(
++          (empleado) =>
++            empleado.idUsuario,
++        );
++
++
++    this.empleadosSeleccionados.set(
++      ids,
++    );
++
++
++    this.descuentoMasivo.update(
++      (actual) => ({
++        ...actual,
++        idUsuarios: ids,
++      }),
+     );
+   }
+ 
++
+   // =========================================================
+-  // MENSAJE DE ERROR
++  // DESELECCIONAR TODOS
+   // =========================================================
+ 
+-  private obtenerMensajeError(
+-    error: any,
+-    mensajePredeterminado: string,
+-  ): string {
++  deseleccionarTodosEmpleados(): void {
++
++    const visibles =
++      new Set(
++        this.empleadosFiltrados()
++          .map(
++            (empleado) =>
++              empleado.idUsuario,
++          ),
++      );
++
++
++    const restantes =
++      this.empleadosSeleccionados()
++        .filter(
++          (id) =>
++            !visibles.has(id),
++        );
++
++
++    this.empleadosSeleccionados.set(
++      restantes,
++    );
+ 
+-    return (
+-      error?.error?.error?.message ??
+-      error?.error?.message ??
+-      error?.message ??
+-      mensajePredeterminado
++
++    this.descuentoMasivo.update(
++      (actual) => ({
++        ...actual,
++        idUsuarios: restantes,
++      }),
+     );
+   }
++
++
++  // =========================================================
++  // ALTERNAR TODOS
++  // =========================================================
++
++  alternarSeleccionTodos(): void {
++
++    if (
++      this.todosSeleccionados()
++    ) {
++
++      this.deseleccionarTodosEmpleados();
++
++    } else {
++
++      this.seleccionarTodosEmpleados();
++
++    }
++  }
++
++
++  // =========================================================
++  // ESTÁ SELECCIONADO
++  // =========================================================
++
++  estaSeleccionado(
++    idUsuario: string,
++  ): boolean {
++
++    return this
++      .empleadosSeleccionados()
++      .includes(idUsuario);
++  }
++
++
++  // =========================================================
++  // NOMBRE EMPLEADO
++  // =========================================================
++
++  obtenerNombreEmpleado(
++    idUsuario: string,
++  ): string {
++
++    const empleado =
++      this.empleados().find(
++        (item) =>
++          item.idUsuario === idUsuario,
++      );
++
++
++    return empleado
++      ? `${empleado.nombreCompleto} — ${empleado.identidad}`
++      : '';
++  }
++
++
++  // =========================================================
++  // CARGA INICIAL
++  // =========================================================
++
++  cargarSaldoInicialEmpleado(): void {
++
++    const datos =
++      this.cargaInicial();
++
++
++    if (!datos.idUsuario) {
++      return this.mostrarError(
++        'Debe seleccionar un empleado.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(datos.anio) ||
++      datos.anio < 2000 ||
++      datos.anio > 2100
++    ) {
++      return this.mostrarError(
++        'El año de la carga inicial no es válido.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(
++        datos.diasAsignados,
++      ) ||
++      datos.diasAsignados < 0 ||
++      datos.diasAsignados > 365
++    ) {
++      return this.mostrarError(
++        'La cantidad de días asignados no es válida.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(
++        datos.diasUtilizados,
++      ) ||
++      datos.diasUtilizados < 0 ||
++      datos.diasUtilizados >
++        datos.diasAsignados
++    ) {
++      return this.mostrarError(
++        'Los días utilizados no pueden superar los días asignados.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(
++        datos.diasReservados,
++      ) ||
++      datos.diasReservados < 0 ||
++      datos.diasReservados >
++        datos.diasAsignados -
++          datos.diasUtilizados
++    ) {
++      return this.mostrarError(
++        'Los días reservados no pueden superar el saldo disponible.',
++      );
++    }
++
++
++    if (
++      !datos.observacion.trim()
++    ) {
++      return this.mostrarError(
++        'La justificación de la carga inicial es obligatoria.',
++      );
++    }
++
++
++    this.procesando.set(true);
++
++    this.errorMessage.set('');
++
++    this.successMessage.set('');
++
++
++    this.vacacionesApi
++      .cargarSaldoInicial({
++        ...datos,
++
++        observacion:
++          datos.observacion.trim(),
++      })
++      .subscribe({
++
++        next: () => {
++
++          this.procesando.set(false);
++
++          this.successMessage.set(
++            `Saldo inicial de ${this.obtenerNombreEmpleado(
++              datos.idUsuario,
++            )} registrado correctamente.`,
++          );
++
++
++          this.limpiarCargaInicial();
++
++          this.cargarReporte();
++        },
++
++
++        error: (error: unknown) => {
++
++          console.error(
++            'Error al cargar saldo inicial:',
++            error,
++          );
++
++          this.procesando.set(false);
++
++          this.mostrarError(
++            this.obtenerMensajeError(
++              error,
++              'No se pudo registrar el saldo inicial.',
++            ),
++          );
++        },
++      });
++  }
++
++
++  // =========================================================
++  // AJUSTE INDIVIDUAL
++  // =========================================================
++
++  ejecutarAjusteIndividual(): void {
++
++    const datos =
++      this.ajusteIndividual();
++
++
++    if (!datos.idUsuario) {
++      return this.mostrarError(
++        'Debe seleccionar un empleado.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(datos.dias) ||
++      datos.dias <= 0 ||
++      datos.dias > 365
++    ) {
++      return this.mostrarError(
++        'La cantidad de días debe ser mayor que cero y menor o igual a 365.',
++      );
++    }
++
++
++    if (
++      !datos.justificacion.trim()
++    ) {
++      return this.mostrarError(
++        'La justificación es obligatoria.',
++      );
++    }
++
++
++    this.procesando.set(true);
++
++    this.errorMessage.set('');
++
++    this.successMessage.set('');
++
++
++    this.vacacionesApi
++      .ajustarSaldo({
++        ...datos,
++
++        justificacion:
++          datos.justificacion.trim(),
++      })
++      .subscribe({
++
++        next: () => {
++
++          this.procesando.set(false);
++
++
++          this.successMessage.set(
++            datos.tipo === 'DESCONTAR'
++
++              ? `Descuento aplicado a ${this.obtenerNombreEmpleado(
++                  datos.idUsuario,
++                )}.`
++
++              : `Días agregados a ${this.obtenerNombreEmpleado(
++                  datos.idUsuario,
++                )}.`,
++          );
++
++
++          this.limpiarAjusteIndividual();
++
++          this.cargarReporte();
++        },
++
++
++        error: (error: unknown) => {
++
++          console.error(
++            'Error al ajustar saldo:',
++            error,
++          );
++
++          this.procesando.set(false);
++
++          this.mostrarError(
++            this.obtenerMensajeError(
++              error,
++              'No se pudo actualizar el saldo.',
++            ),
++          );
++        },
++      });
++  }
++
++
++  // =========================================================
++  // DESCUENTO MASIVO
++  // =========================================================
++
++  ejecutarDescuentoMasivo(): void {
++
++    let seleccionados =
++      this.empleadosSeleccionados();
++
++
++    if (
++      seleccionados.length === 0
++    ) {
++
++      this.seleccionarTodosEmpleados();
++
++      seleccionados =
++        this.empleadosSeleccionados();
++    }
++
++
++    const datos =
++      this.descuentoMasivo();
++
++
++    if (
++      seleccionados.length === 0
++    ) {
++      return this.mostrarError(
++        'No existen empleados disponibles para el descuento masivo.',
++      );
++    }
++
++
++    if (
++      !Number.isInteger(datos.dias) ||
++      datos.dias <= 0 ||
++      datos.dias > 365
++    ) {
++      return this.mostrarError(
++        'La cantidad de días debe ser mayor que cero y menor o igual a 365.',
++      );
++    }
++
++
++    if (
++      !datos.justificacion.trim()
++    ) {
++      return this.mostrarError(
++        'La justificación es obligatoria.',
++      );
++    }
++
++
++    if (
++      !window.confirm(
++        `Se aplicará un descuento de ${datos.dias} día(s) a ${seleccionados.length} empleado(s). ¿Desea continuar?`,
++      )
++    ) {
++      return;
++    }
++
++
++    this.procesando.set(true);
++
++    this.errorMessage.set('');
++
++    this.successMessage.set('');
++
++
++    this.vacacionesApi
++      .aplicarDescuentoMasivo({
++        idUsuarios:
++          seleccionados,
++
++        dias:
++          datos.dias,
++
++        justificacion:
++          datos.justificacion.trim(),
++      })
++      .subscribe({
++
++        next: () => {
++
++          this.procesando.set(false);
++
++
++          this.successMessage.set(
++            `Descuento masivo aplicado a ${seleccionados.length} empleado(s).`,
++          );
++
++
++          this.limpiarDescuentoMasivo();
++
++          this.cargarReporte();
++        },
++
++
++        error: (error: unknown) => {
++
++          console.error(
++            'Error en descuento masivo:',
++            error,
++          );
++
++          this.procesando.set(false);
++
++          this.mostrarError(
++            this.obtenerMensajeError(
++              error,
++              'No se pudo aplicar el descuento masivo.',
++            ),
++          );
++        },
++      });
++  }
++
++
++  // =========================================================
++  // HISTORIAL
++  // =========================================================
++
++  verHistorial(
++    empleado: ReporteVacacionesEmpleado,
++  ): void {
++
++    this.procesando.set(true);
++
++    this.errorMessage.set('');
++
++
++    this.vacacionesApi
++      .obtenerHistorialVacaciones(
++        empleado.idUsuario,
++      )
++      .subscribe({
++
++        next: (
++          historial: HistorialVacaciones[],
++        ) => {
++
++          this.historial.set(
++            historial ?? [],
++          );
++
++          this.empleadoHistorial.set(
++            empleado,
++          );
++
++          this.mostrandoHistorial.set(
++            true,
++          );
++
++          this.procesando.set(false);
++        },
++
++
++        error: (error: unknown) => {
++
++          console.error(
++            'Error al consultar historial:',
++            error,
++          );
++
++          this.procesando.set(false);
++
++          this.mostrarError(
++            this.obtenerMensajeError(
++              error,
++              'No se pudo consultar el historial.',
++            ),
++          );
++        },
++      });
++  }
++
++
++  // =========================================================
++  // CERRAR HISTORIAL
++  // =========================================================
++
++  cerrarHistorial(): void {
++
++    this.mostrandoHistorial.set(
++      false,
++    );
++
++    this.historial.set([]);
++
++    this.empleadoHistorial.set(
++      null,
++    );
++  }
++
++
++  // =========================================================
++  // ACTUALIZAR CARGA
++  // =========================================================
++
++  actualizarCargaInicial(
++    cambios: Partial<CargaInicialSaldo>,
++  ): void {
++
++    this.cargaInicial.update(
++      (actual) => ({
++        ...actual,
++        ...cambios,
++      }),
++    );
++  }
++
++
++  // =========================================================
++  // ACTUALIZAR AJUSTE
++  // =========================================================
++
++  actualizarAjusteIndividual(
++    cambios: Partial<AjusteSaldoVacaciones>,
++  ): void {
++
++    this.ajusteIndividual.update(
++      (actual) => ({
++        ...actual,
++        ...cambios,
++      }),
++    );
++  }
++
++
++  // =========================================================
++  // ACTUALIZAR DESCUENTO MASIVO
++  // =========================================================
++
++  actualizarDescuentoMasivo(
++    cambios: Partial<DescuentoMasivoVacaciones>,
++  ): void {
++
++    this.descuentoMasivo.update(
++      (actual) => ({
++        ...actual,
++        ...cambios,
++      }),
++    );
++  }
++
++
++  // =========================================================
++  // LIMPIAR CARGA INICIAL
++  // =========================================================
++
++  limpiarCargaInicial(): void {
++
++    this.cargaInicial.set({
++      idUsuario: '',
++
++      anio:
++        this.anio(),
++
++      diasAsignados: 0,
++
++      diasUtilizados: 0,
++
++      diasReservados: 0,
++
++      observacion: '',
++    });
++  }
++
++
++  // =========================================================
++  // LIMPIAR AJUSTE
++  // =========================================================
++
++  limpiarAjusteIndividual(): void {
++
++    this.ajusteIndividual.set({
++      idUsuario: '',
++
++      tipo: 'DESCONTAR',
++
++      dias: 0,
++
++      justificacion: '',
++    });
++  }
++
++
++  // =========================================================
++  // LIMPIAR DESCUENTO MASIVO
++  // =========================================================
++
++  limpiarDescuentoMasivo(): void {
++
++    this.empleadosSeleccionados.set(
++      [],
++    );
++
++
++    this.descuentoMasivo.set({
++      idUsuarios: [],
++
++      dias: 0,
++
++      justificacion: '',
++    });
++  }
++
++
++  // =========================================================
++  // CONVERTIR NÚMERO
++  // =========================================================
++
++  convertirNumero(
++    valor: string,
++  ): number {
++
++    const numero =
++      Number(valor);
++
++    return Number.isFinite(numero)
++      ? numero
++      : 0;
++  }
++
++
++  // =========================================================
++  // FORMATEAR DÍAS
++  // =========================================================
++
++  formatearDias(
++    dias: number | null | undefined,
++  ): string {
++
++    return String(
++      Number(dias ?? 0),
++    );
++  }
++
++
++  // =========================================================
++  // EXPORTAR EXCEL
++  // =========================================================
++
++  exportarExcel(): void {
++
++    const empleados =
++      this.empleadosFiltrados();
++
++
++    if (
++      empleados.length === 0
++    ) {
++      return this.mostrarError(
++        'No hay registros para exportar.',
++      );
++    }
++
++
++    const datos =
++      empleados.map(
++        (empleado, index) => ({
++
++          '#':
++            index + 1,
++
++          Empleado:
++            empleado.nombreCompleto,
++
++          Identidad:
++            empleado.identidad || '-',
++
++          'Tipo de contratación':
++            empleado.tipoContratacion || '-',
++
++          Año:
++            empleado.anio,
++
++          'Días asignados':
++            empleado.diasAsignados,
++
++          'Días utilizados':
++            empleado.diasUtilizados,
++
++          'Días reservados':
++            empleado.diasReservados,
++
++          'Días disponibles':
++            empleado.diasDisponibles,
++        }),
++      );
++
++
++    const hoja =
++      XLSX.utils.json_to_sheet(
++        datos,
++      );
++
++
++    const libro =
++      XLSX.utils.book_new();
++
++
++    XLSX.utils.book_append_sheet(
++      libro,
++      hoja,
++      'Vacaciones',
++    );
++
++
++    XLSX.writeFile(
++      libro,
++      `reporte-vacaciones-${this.anio()}.xlsx`,
++    );
++  }
++
++
++  // =========================================================
++  // EXPORTAR PDF
++  // =========================================================
++
++  exportarPdf(): void {
++
++    const empleados =
++      this.empleadosFiltrados();
++
++
++    if (
++      empleados.length === 0
++    ) {
++      return this.mostrarError(
++        'No hay registros para exportar.',
++      );
++    }
++
++
++    const pdf =
++      new jsPDF({
++        orientation: 'landscape',
++        unit: 'mm',
++        format: 'a4',
++      });
++
++
++    pdf.setFontSize(16);
++
++    pdf.text(
++      'Reporte de vacaciones',
++      14,
++      15,
++    );
++
++
++    pdf.setFontSize(10);
++
++    pdf.text(
++      `Año: ${this.anio()}`,
++      14,
++      22,
++    );
++
++
++    pdf.text(
++      `Total de empleados: ${empleados.length}`,
++      14,
++      28,
++    );
++
++
++    const filas =
++      empleados.map(
++        (empleado, index) => [
++
++          index + 1,
++
++          empleado.nombreCompleto,
++
++          empleado.identidad || '-',
++
++          empleado.tipoContratacion || '-',
++
++          empleado.anio,
++
++          empleado.diasAsignados,
++
++          empleado.diasUtilizados,
++
++          empleado.diasReservados,
++
++          empleado.diasDisponibles,
++        ],
++      );
++
++
++    autoTable(pdf, {
++
++      startY: 34,
++
++      head: [[
++        '#',
++        'Empleado',
++        'Identidad',
++        'Contratación',
++        'Año',
++        'Asignados',
++        'Utilizados',
++        'Reservados',
++        'Disponibles',
++      ]],
++
++      body: filas,
++
++      styles: {
++        fontSize: 7,
++        cellPadding: 2,
++      },
++
++      headStyles: {
++        fontSize: 7,
++        fontStyle: 'bold',
++      },
++
++      margin: {
++        left: 10,
++        right: 10,
++      },
++    });
++
++
++    pdf.save(
++      `reporte-vacaciones-${this.anio()}.pdf`,
++    );
++  }
++
++
++  // =========================================================
++  // MOSTRAR ERROR
++  // =========================================================
++
++  private mostrarError(
++    mensaje: string,
++  ): void {
++
++    this.errorMessage.set(
++      mensaje,
++    );
++
++    this.successMessage.set(
++      '',
++    );
++  }
++
++
++  // =========================================================
++  // OBTENER MENSAJE DE ERROR
++  // =========================================================
++
++  private obtenerMensajeError(
++    error: unknown,
++    mensajePredeterminado: string,
++  ): string {
++
++    if (
++      typeof error === 'object' &&
++      error !== null
++    ) {
++
++      const respuesta =
++        error as {
++          error?: {
++            error?: {
++              message?: string;
++            };
++
++            message?: string;
++          };
++
++          message?: string;
++        };
++
++
++      return (
++        respuesta.error?.error?.message ??
++        respuesta.error?.message ??
++        respuesta.message ??
++        mensajePredeterminado
++      );
++    }
++
++
++    return mensajePredeterminado;
++  }
+ }
+diff --git a/apps/frontend-sedh/src/core/usuarios/pages/gestion-usuarios.ts b/apps/frontend-sedh/src/core/usuarios/pages/gestion-usuarios.ts
+index 8827b9f..07c9295 100644
+--- a/apps/frontend-sedh/src/core/usuarios/pages/gestion-usuarios.ts
++++ b/apps/frontend-sedh/src/core/usuarios/pages/gestion-usuarios.ts
+@@ -26,7 +26,6 @@ export interface Usuario {
+   actualizadoPor?: string | null;
+   roles?: Rol[];
+ }
+-
+ @Component({
+   selector: 'app-gestion-usuarios',
+   templateUrl: './gestion-usuarios.html',

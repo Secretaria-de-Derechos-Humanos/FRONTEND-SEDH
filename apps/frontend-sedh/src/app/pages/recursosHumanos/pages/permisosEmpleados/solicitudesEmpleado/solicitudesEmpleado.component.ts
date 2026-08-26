@@ -1,572 +1,675 @@
 import {
-  ChangeDetectionStrategy,
   Component,
+  ChangeDetectionStrategy,
   OnInit,
-  PLATFORM_ID,
+  signal,
   computed,
   inject,
-  signal,
+  PLATFORM_ID
 } from '@angular/core';
-import {
-  DatePipe,
-  isPlatformBrowser,
-} from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 
 import {
-  EncabezadosPaginaComponent,
+  DatePipe,
+  isPlatformBrowser
+} from '@angular/common';
+
+import { FormsModule } from '@angular/forms';
+
+import {
+  forkJoin,
+  of
+} from 'rxjs';
+
+import {
+  catchError
+} from 'rxjs/operators';
+
+import {
+  EncabezadosPaginaComponent
 } from '../../../../../components/encabezadosPagina/encabezadosPagina.component';
 
 import {
-  DatosPermiso,
-  InsertarPermisoOficialBody,
-  InsertarPermisoPersonalBody,
   SolicitudesEmpleadoService,
+  DatosPermiso,
+  InsertarPermisoPersonalBody,
+  InsertarPermisoOficialBody
 } from './solicitudesEmpleado.service';
+
+import {
+  VacacionesApiService,
+  SolicitudVacaciones,
+  SaldoVacaciones
+} from '../../../../../core/services/vacaciones-api';
+
 
 export type TipoSolicitud =
   | 'permiso-personal'
-  | 'permiso-oficial';
+  | 'permiso-oficial'
+  | 'vacaciones';
+
 
 export interface NuevaSolicitudForm {
+
   nombreEmpleado: string;
+
   dependencia: string;
+
   cargo: string;
+
   tipoSolicitud: TipoSolicitud | '';
+
 }
 
+
 export interface Solicitud {
+
+  idPermiso: string;
+
   fec_solicitud: string;
+
   nom_tipo_solicitud: string;
 
   nom_estado:
     | 'EN PROCESO'
     | 'APROBADO'
-    | 'RECHAZADO';
+    | 'RECHAZADO'
+    | 'ANULADO';
 
   pri_aporbacion: string | null;
+
   seg_aprobacion: string | null;
+
   mot_rechazo: string | null;
+
 }
 
-/**
- * Devuelve la fecha local en formato YYYY-MM-DD.
- */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FECHAS
+// ─────────────────────────────────────────────────────────────────────────────
+
 function hoyStr(): string {
+
   return new Date().toLocaleDateString('en-CA');
+
 }
 
-/**
- * Permisos personales:
- * máximo siete días desde la fecha actual.
- */
+
 function maxFechaStr(): string {
-  const fecha = new Date();
 
-  fecha.setDate(
-    fecha.getDate() + 7,
-  );
+  const d = new Date();
 
-  return fecha.toLocaleDateString('en-CA');
+  d.setDate(d.getDate() + 7);
+
+  return d.toLocaleDateString('en-CA');
+
 }
 
-/**
- * Permisos oficiales:
- * máximo catorce días desde la fecha actual.
- */
+
 function maxFechaOficialStr(): string {
-  const fecha = new Date();
 
-  fecha.setDate(
-    fecha.getDate() + 14,
-  );
+  const d = new Date();
 
-  return fecha.toLocaleDateString('en-CA');
+  d.setDate(d.getDate() + 14);
+
+  return d.toLocaleDateString('en-CA');
+
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENTE
+// ─────────────────────────────────────────────────────────────────────────────
 
 @Component({
+
   selector: 'app-solicitudes-empleado',
+
   standalone: true,
 
   imports: [
     DatePipe,
     FormsModule,
-    EncabezadosPaginaComponent,
+    EncabezadosPaginaComponent
   ],
 
   templateUrl:
     './solicitudesEmpleado.component.html',
 
   styleUrls: [
-    './solicitudesEmpleado.component.css',
+    './solicitudesEmpleado.component.css'
   ],
 
   changeDetection:
-    ChangeDetectionStrategy.OnPush,
+    ChangeDetectionStrategy.OnPush
+
 })
 export class SolicitudesEmpleadoComponent
-  implements OnInit
-{
+  implements OnInit {
+
+
   private readonly solicitudesService =
     inject(SolicitudesEmpleadoService);
+
+  private readonly vacacionesApi =
+    inject(VacacionesApiService);
+
 
   private readonly platformId =
     inject(PLATFORM_ID);
 
-  /* =========================================================
-     LISTADOS
-     ========================================================= */
 
-  readonly solicitudes =
+  // ───────────────────────────────────────────────────────────────────────────
+  // SOLICITUDES
+  // ───────────────────────────────────────────────────────────────────────────
+
+  solicitudes =
     signal<Solicitud[]>([]);
 
-  readonly solicitudesEmergencia =
+
+  solicitudesEmergencia =
     signal<Solicitud[]>([]);
 
-  readonly isActualizando =
+  solicitudesVacaciones =
+    signal<SolicitudVacaciones[]>([]);
+
+  isAnulandoVacaciones =
+    signal(false);
+
+  idVacacionAnulando =
+    signal<string | null>(null);
+
+
+  isActualizando =
     signal(true);
 
-  readonly errorMessage =
+
+  errorMessage =
     signal('');
 
-  /* =========================================================
-     FILTROS: SOLICITUDES NORMALES
-     ========================================================= */
 
-  readonly filtroFecha =
+  // ───────────────────────────────────────────────────────────────────────────
+  // ANULACIÓN
+  // ───────────────────────────────────────────────────────────────────────────
+
+  isAnulando =
+    signal(false);
+
+
+  idPermisoAnulando =
+    signal<string | null>(null);
+
+
+  mensajeAnulacion =
     signal('');
 
-  readonly filtroTipo =
+
+  errorAnulacion =
     signal('');
 
-  readonly filtroEstado =
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // FILTROS
+  // ───────────────────────────────────────────────────────────────────────────
+
+  filtroFecha =
     signal('');
 
-  /* =========================================================
-     FILTROS: EMERGENCIAS
-     ========================================================= */
-
-  readonly filtroFechaE =
+  filtroTipo =
     signal('');
 
-  readonly filtroTipoE =
+  filtroEstado =
     signal('');
 
-  readonly filtroEstadoE =
+
+  filtroFechaE =
     signal('');
 
-  readonly solicitudesFiltradas =
+  filtroTipoE =
+    signal('');
+
+  filtroEstadoE =
+    signal('');
+
+
+  solicitudesFiltradas =
     computed(() => {
-      const filtroFecha =
+
+      const f =
         this.filtroFecha()
-          .trim()
           .toLowerCase();
 
-      const filtroTipo =
+      const t =
         this.filtroTipo()
-          .trim()
           .toLowerCase();
 
-      const filtroEstado =
+      const e =
         this.filtroEstado()
-          .trim()
           .toLowerCase();
 
-      return this.solicitudes().filter(
-        (solicitud) =>
-          (
-            filtroFecha
-              ? solicitud.fec_solicitud
-                  .toLowerCase()
-                  .includes(filtroFecha)
-              : true
-          ) &&
-          (
-            filtroTipo
-              ? solicitud.nom_tipo_solicitud
-                  .toLowerCase()
-                  .includes(filtroTipo)
-              : true
-          ) &&
-          (
-            filtroEstado
-              ? solicitud.nom_estado
-                  .toLowerCase()
-                  .includes(filtroEstado)
-              : true
-          ),
-      );
+
+      return this.solicitudes()
+        .filter(s =>
+
+          (f
+            ? s.fec_solicitud
+                .includes(f)
+            : true
+          )
+
+          &&
+
+          (t
+            ? s.nom_tipo_solicitud
+                .toLowerCase()
+                .includes(t)
+            : true
+          )
+
+          &&
+
+          (e
+            ? s.nom_estado
+                .toLowerCase()
+                .includes(e)
+            : true
+          )
+
+        );
+
     });
 
-  readonly solicitudesEmergenciaFiltradas =
+
+  solicitudesEmergenciaFiltradas =
     computed(() => {
-      const filtroFecha =
+
+      const f =
         this.filtroFechaE()
-          .trim()
           .toLowerCase();
 
-      const filtroTipo =
+      const t =
         this.filtroTipoE()
-          .trim()
           .toLowerCase();
 
-      const filtroEstado =
+      const e =
         this.filtroEstadoE()
-          .trim()
           .toLowerCase();
+
 
       return this.solicitudesEmergencia()
-        .filter(
-          (solicitud) =>
-            (
-              filtroFecha
-                ? solicitud.fec_solicitud
-                    .toLowerCase()
-                    .includes(filtroFecha)
-                : true
-            ) &&
-            (
-              filtroTipo
-                ? solicitud.nom_tipo_solicitud
-                    .toLowerCase()
-                    .includes(filtroTipo)
-                : true
-            ) &&
-            (
-              filtroEstado
-                ? solicitud.nom_estado
-                    .toLowerCase()
-                    .includes(filtroEstado)
-                : true
-            ),
+        .filter(s =>
+
+          (f
+            ? s.fec_solicitud
+                .includes(f)
+            : true
+          )
+
+          &&
+
+          (t
+            ? s.nom_tipo_solicitud
+                .toLowerCase()
+                .includes(t)
+            : true
+          )
+
+          &&
+
+          (e
+            ? s.nom_estado
+                .toLowerCase()
+                .includes(e)
+            : true
+          )
+
         );
+
     });
 
-  readonly badgeClass = 'badge';
 
-  /* =========================================================
-     MODAL
-     ========================================================= */
+  readonly badgeClass =
+    'badge';
 
-  readonly modalAbierto =
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // MODAL
+  // ───────────────────────────────────────────────────────────────────────────
+
+  modalAbierto =
     signal(false);
 
-  readonly cargandoModal =
+
+  cargandoModal =
     signal(false);
 
-  readonly isEnviando =
+
+  isEnviando =
     signal(false);
 
-  readonly modalError =
-    signal('');
 
-  readonly form =
+  form =
     signal<NuevaSolicitudForm>({
+
       nombreEmpleado: '',
+
       dependencia: '',
+
       cargo: '',
-      tipoSolicitud: '',
+
+      tipoSolicitud: ''
+
     });
 
-  /* =========================================================
-     PERMISO PERSONAL
-     ========================================================= */
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // PERMISO PERSONAL
+  // ───────────────────────────────────────────────────────────────────────────
 
   readonly ppFechaMin =
     hoyStr();
 
+
   readonly ppFechaMax =
     maxFechaStr();
 
-  readonly ppFecha =
+
+  ppFecha =
     signal(hoyStr());
 
-  readonly ppHoras =
+
+  ppHoras =
+    signal(3);
+
+
+  ppMinutos =
     signal(0);
 
-  readonly ppMinutos =
-    signal(0);
 
-  readonly ppMotivo =
+  ppMotivo =
     signal('Asunto Personal.');
 
-  readonly ppCitaMedica =
+
+  ppCitaMedica =
     signal(0);
 
-  /**
-   * Texto que se muestra en la tarjeta.
-   */
-  readonly ppHorasDisponibles =
-    signal('--:--');
 
-  readonly ppDisponibilidadDia =
-    signal('--:--');
+  ppHorasDisponibles =
+    signal<string>('--:--');
 
-  readonly ppConsultandoDisponibilidad =
-    signal(false);
 
-  /**
-   * Valores en minutos para validar el formulario.
-   */
-  readonly ppDisponibleMesMinutos =
-    signal(0);
+  ppErrores =
+    computed(() => ({
 
-  readonly ppDisponibleDiaMinutos =
-    signal(0);
+      fecha:
+        !this.ppFecha()
 
-  readonly ppDisponibilidadCargada =
-    signal(false);
+        ||
 
-  readonly ppMinutosSolicitados =
+        this.ppFecha()
+          < this.ppFechaMin
+
+        ||
+
+        this.ppFecha()
+          > this.ppFechaMax,
+
+
+      horas:
+        this.ppHoras() < 0
+        ||
+        this.ppHoras() > 9,
+
+
+      minutos:
+        this.ppMinutos() < 0
+        ||
+        this.ppMinutos() > 59,
+
+
+      motivo:
+        !this.ppMotivo().trim()
+
+    }));
+
+
+  ppFormInvalido =
+    computed(() =>
+
+      Object
+        .values(this.ppErrores())
+        .some(Boolean)
+
+      ||
+
+      (
+        this.ppCitaMedica() !== 0
+        &&
+        this.ppCitaMedica() !== 1
+      )
+
+    );
+
+
+  ppFormatHM =
     computed(() => {
-      const horas =
-        Number(this.ppHoras()) || 0;
 
-      const minutos =
-        Number(this.ppMinutos()) || 0;
+      const h =
+        String(this.ppHoras())
+          .padStart(2, '0');
 
-      return (
-        horas * 60 +
-        minutos
-      );
+
+      const m =
+        String(this.ppMinutos())
+          .padStart(2, '0');
+
+
+      return `${h}:${m}`;
+
     });
 
-  readonly ppErrores =
-    computed(() => {
-      const horas =
-        Number(this.ppHoras());
 
-      const minutos =
-        Number(this.ppMinutos());
-
-      const minutosSolicitados =
-        this.ppMinutosSolicitados();
-
-      const fechaInvalida =
-        !this.ppFecha() ||
-        this.ppFecha() <
-          this.ppFechaMin ||
-        this.ppFecha() >
-          this.ppFechaMax;
-
-      const horasInvalidas =
-        !Number.isInteger(horas) ||
-        horas < 0 ||
-        horas > 3 ||
-        (
-          horas === 3 &&
-          minutos > 0
-        );
-
-      const minutosInvalidos =
-        !Number.isInteger(minutos) ||
-        minutos < 0 ||
-        minutos > 59;
-
-      const tiempoVacio =
-        minutosSolicitados <= 0;
-
-      const excedeLimiteDiario =
-        minutosSolicitados > 180;
-
-      const excedeDisponibleDia =
-        this.ppDisponibilidadCargada() &&
-        minutosSolicitados >
-          this.ppDisponibleDiaMinutos();
-
-      const excedeDisponibleMes =
-        this.ppDisponibilidadCargada() &&
-        minutosSolicitados >
-          this.ppDisponibleMesMinutos();
-
-      return {
-        fecha:
-          fechaInvalida,
-
-        horas:
-          horasInvalidas,
-
-        minutos:
-          minutosInvalidos,
-
-        tiempoVacio,
-
-        excedeLimiteDiario,
-
-        excedeDisponibleDia,
-
-        excedeDisponibleMes,
-
-        motivo:
-          !this.ppMotivo().trim(),
-      };
-    });
-
-  readonly ppFormInvalido =
-    computed(() => {
-      const errores =
-        this.ppErrores();
-
-      return (
-        errores.fecha ||
-        errores.horas ||
-        errores.minutos ||
-        errores.tiempoVacio ||
-        errores.excedeLimiteDiario ||
-        errores.excedeDisponibleDia ||
-        errores.excedeDisponibleMes ||
-        errores.motivo ||
-        !this.ppDisponibilidadCargada() ||
-        this.ppConsultandoDisponibilidad() ||
-        (
-          this.ppCitaMedica() !== 0 &&
-          this.ppCitaMedica() !== 1
-        )
-      );
-    });
-
-  readonly ppFormatHM =
-    computed(() => {
-      const horas =
-        String(
-          Math.max(
-            0,
-            Number(this.ppHoras()) || 0,
-          ),
-        ).padStart(2, '0');
-
-      const minutos =
-        String(
-          Math.max(
-            0,
-            Number(this.ppMinutos()) || 0,
-          ),
-        ).padStart(2, '0');
-
-      return `${horas}:${minutos}`;
-    });
-
-  /* =========================================================
-     PERMISO OFICIAL
-     ========================================================= */
+  // ───────────────────────────────────────────────────────────────────────────
+  // PERMISO OFICIAL
+  // ───────────────────────────────────────────────────────────────────────────
 
   readonly poFechaMin =
     hoyStr();
 
+
   readonly poFechaMax =
     maxFechaOficialStr();
 
-  readonly poFecha =
+
+  poFecha =
     signal(hoyStr());
 
-  readonly poMotivo =
+
+  poMotivo =
     signal('');
 
-  readonly poErrores =
+
+  poErrores =
     computed(() => ({
+
       fecha:
-        !this.poFecha() ||
-        this.poFecha() <
-          this.poFechaMin ||
-        this.poFecha() >
-          this.poFechaMax,
+        !this.poFecha()
+
+        ||
+
+        this.poFecha()
+          < this.poFechaMin
+
+        ||
+
+        this.poFecha()
+          > this.poFechaMax,
+
 
       motivo:
-        !this.poMotivo().trim(),
+        !this.poMotivo().trim()
+
     }));
 
-  readonly poFormInvalido =
+
+  poFormInvalido =
     computed(() =>
-      Object.values(
-        this.poErrores(),
-      ).some(Boolean),
+
+      Object
+        .values(this.poErrores())
+        .some(Boolean)
+
     );
 
-  /* =========================================================
-     CICLO DE VIDA
-     ========================================================= */
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // VACACIONES - NUEVA SOLICITUD
+  // ───────────────────────────────────────────────────────────────────────────
+
+  readonly vacacionesFechaMin = hoyStr();
+  vacacionesFechaInicio = signal(hoyStr());
+  vacacionesFechaFin = signal(hoyStr());
+  vacacionesObservaciones = signal('');
+  vacacionesDiasSolicitados = signal(0);
+  vacacionesSaldo = signal<SaldoVacaciones | null>(null);
+  cargandoSaldoVacaciones = signal(false);
+  calculandoDiasVacaciones = signal(false);
+
+  vacacionesFormInvalido = computed(() => {
+    const inicio = this.vacacionesFechaInicio();
+    const fin = this.vacacionesFechaFin();
+    const dias = this.vacacionesDiasSolicitados();
+    const saldo = this.vacacionesSaldo();
+
+    return (
+      !inicio ||
+      !fin ||
+      fin < inicio ||
+      dias <= 0 ||
+      !saldo ||
+      saldo.saldoInicialPendiente === true ||
+      dias > saldo.diasDisponibles
+    );
+  });
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // INICIO
+  // ───────────────────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
+
     if (
       isPlatformBrowser(
-        this.platformId,
+        this.platformId
       )
     ) {
+
       this.cargarDatos();
+
     }
+
   }
 
-  /* =========================================================
-     CARGA DE SOLICITUDES
-     ========================================================= */
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // ACTUALIZAR
+  // ───────────────────────────────────────────────────────────────────────────
 
   actualizarDatos(): void {
+
     this.cargarDatos();
+
   }
 
+
   private cargarDatos(): void {
+
     this.isActualizando.set(true);
+
     this.errorMessage.set('');
 
+
     forkJoin({
+
       solicitudes:
         this.solicitudesService
           .getMisSolicitudes()
           .pipe(
-            catchError(() => of(null)),
+            catchError(() => of(null))
           ),
+
 
       emergencias:
         this.solicitudesService
           .getMisSolicitudesEmergencia()
           .pipe(
-            catchError(() => of(null)),
+            catchError(() => of(null))
           ),
-    }).subscribe({
-      next: ({
-        solicitudes,
-        emergencias,
-      }) => {
-        if (
-          solicitudes === null &&
-          emergencias === null
-        ) {
-          this.errorMessage.set(
-            'No fue posible cargar las solicitudes. Intente nuevamente.',
+
+      vacaciones:
+        this.vacacionesApi
+          .obtenerMisSolicitudes()
+          .pipe(
+            catchError(() => of(null))
+          )
+
+    })
+
+      .subscribe(
+        ({
+          solicitudes,
+          emergencias,
+          vacaciones
+        }) => {
+
+          if (
+            solicitudes === null
+            &&
+            emergencias === null
+            &&
+            vacaciones === null
+          ) {
+
+            this.errorMessage.set(
+              'No fue posible cargar las solicitudes. Intente de nuevo más tarde.'
+            );
+
+          }
+
+
+          this.solicitudes.set(
+            solicitudes ?? []
           );
+
+
+          this.solicitudesEmergencia.set(
+            emergencias ?? []
+          );
+
+          this.solicitudesVacaciones.set(
+            vacaciones ?? []
+          );
+
+
+          this.isActualizando.set(false);
+
         }
+      );
 
-        this.solicitudes.set(
-          solicitudes ?? [],
-        );
-
-        this.solicitudesEmergencia.set(
-          emergencias ?? [],
-        );
-
-        this.isActualizando.set(false);
-      },
-
-      error: () => {
-        this.errorMessage.set(
-          'No fue posible cargar las solicitudes.',
-        );
-
-        this.isActualizando.set(false);
-      },
-    });
   }
 
-  /* =========================================================
-     MODAL
-     ========================================================= */
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // MODAL
+  // ───────────────────────────────────────────────────────────────────────────
 
   private resetModal(
-    datos?: DatosPermiso,
+    datos?: DatosPermiso
   ): void {
+
     this.form.set({
+
       nombreEmpleado:
         datos?.nombre ?? '',
 
@@ -577,528 +680,851 @@ export class SolicitudesEmpleadoComponent
         datos?.cargo ?? '',
 
       tipoSolicitud:
-        'permiso-personal',
+        ''
+
     });
 
-    this.modalError.set('');
 
     this.ppFecha.set(
-      hoyStr(),
+      hoyStr()
     );
 
-    this.ppHoras.set(0);
+
+    this.ppHoras.set(3);
+
     this.ppMinutos.set(0);
 
     this.ppMotivo.set(
-      'Asunto Personal.',
+      'Asunto Personal.'
     );
 
     this.ppCitaMedica.set(0);
 
     this.ppHorasDisponibles.set(
-      datos?.horasDisponibles ??
-        '--:--',
+      datos?.horasDisponibles
+      ?? '--:--'
     );
 
-    this.ppDisponibilidadDia.set(
-      '--:--',
-    );
-
-    this.ppDisponibleMesMinutos.set(
-      0,
-    );
-
-    this.ppDisponibleDiaMinutos.set(
-      0,
-    );
-
-    this.ppDisponibilidadCargada.set(
-      false,
-    );
-
-    this.ppConsultandoDisponibilidad.set(
-      false,
-    );
 
     this.poFecha.set(
-      hoyStr(),
+      hoyStr()
     );
 
     this.poMotivo.set('');
+
+    this.vacacionesFechaInicio.set(hoyStr());
+    this.vacacionesFechaFin.set(hoyStr());
+    this.vacacionesObservaciones.set('');
+    this.vacacionesDiasSolicitados.set(0);
+    this.vacacionesSaldo.set(null);
+    this.cargandoSaldoVacaciones.set(false);
+    this.calculandoDiasVacaciones.set(false);
+
   }
 
+
   abrirModal(): void {
+
     this.cargandoModal.set(true);
-    this.modalError.set('');
+
 
     this.solicitudesService
       .getDatosPermiso()
       .subscribe({
-        next: (
-          datos: DatosPermiso,
-        ) => {
+
+        next: (datos) => {
+
           this.resetModal(datos);
 
-          this.cargandoModal.set(
-            false,
-          );
+          this.cargandoModal.set(false);
 
-          this.modalAbierto.set(
-            true,
-          );
+          this.modalAbierto.set(true);
 
-          this.cargarDisponibilidadPermisoPersonal(
-            this.ppFecha(),
-          );
         },
 
-        error: (error: unknown) => {
+
+        error: (error) => {
+
           console.error(
-            'Error cargando datos del permiso:',
-            error,
+            'Error al cargar los datos del empleado para el permiso:',
+            error
           );
 
           this.resetModal();
 
-          this.modalError.set(
-            'No fue posible cargar la información del empleado.',
+          this.cargandoModal.set(false);
+
+          this.errorMessage.set(
+            error?.error?.message ??
+            error?.error?.mensaje ??
+            error?.message ??
+            'No fue posible cargar los datos del empleado. Verifique el endpoint de datos del permiso.'
           );
 
-          this.cargandoModal.set(
-            false,
-          );
+          // No abrir el modal con los campos vacíos.
+          this.modalAbierto.set(false);
 
-          this.modalAbierto.set(
-            true,
-          );
+        }
 
-          this.cargarDisponibilidadPermisoPersonal(
-            this.ppFecha(),
-          );
-        },
       });
+
   }
+
 
   cerrarModal(): void {
-    if (this.isEnviando()) {
-      return;
-    }
 
     this.modalAbierto.set(false);
-    this.modalError.set('');
+
   }
 
-  onTipoChange(
-    tipo: string,
+
+  onTipoChange(tipo: string): void {
+
+    // Mantener los datos del empleado cargados al abrir el modal.
+    // Al seleccionar un tipo solo se cambia el formulario específico.
+    this.form.update(f => ({
+      ...f,
+      tipoSolicitud: tipo as TipoSolicitud | ''
+    }));
+
+    if (tipo === 'permiso-personal') {
+      if (!this.ppFecha()) {
+        this.ppFecha.set(hoyStr());
+      }
+
+      if (!this.ppMotivo().trim()) {
+        this.ppMotivo.set('Asunto Personal.');
+      }
+
+      return;
+    }
+
+    if (tipo === 'permiso-oficial') {
+      if (!this.poFecha()) {
+        this.poFecha.set(hoyStr());
+      }
+
+      return;
+    }
+
+    if (tipo === 'vacaciones') {
+      this.vacacionesFechaInicio.set(hoyStr());
+      this.vacacionesFechaFin.set(hoyStr());
+      this.vacacionesObservaciones.set('');
+      this.vacacionesDiasSolicitados.set(0);
+      this.vacacionesSaldo.set(null);
+      this.cargarSaldoVacaciones();
+      return;
+    }
+
+    this.vacacionesSaldo.set(null);
+    this.vacacionesDiasSolicitados.set(0);
+  }
+
+
+  private cargarSaldoVacaciones(): void {
+    this.cargandoSaldoVacaciones.set(true);
+
+    this.vacacionesApi.obtenerMiSaldo().subscribe({
+      next: (saldo) => {
+        this.vacacionesSaldo.set(saldo);
+        this.cargandoSaldoVacaciones.set(false);
+        this.calcularDiasVacaciones();
+      },
+      error: (error) => {
+        console.error('Error al consultar saldo de vacaciones:', error);
+        this.vacacionesSaldo.set(null);
+        this.cargandoSaldoVacaciones.set(false);
+        this.vacacionesDiasSolicitados.set(0);
+        this.errorMessage.set(
+          error?.error?.message ??
+          error?.error?.mensaje ??
+          'No fue posible consultar el saldo de vacaciones.'
+        );
+      }
+    });
+  }
+
+
+  calcularDiasVacaciones(): void {
+    const fechaInicio = this.vacacionesFechaInicio();
+    const fechaFin = this.vacacionesFechaFin();
+
+    if (!fechaInicio || !fechaFin || fechaFin < fechaInicio) {
+      this.vacacionesDiasSolicitados.set(0);
+      return;
+    }
+
+    this.calculandoDiasVacaciones.set(true);
+
+    this.vacacionesApi.calcularDias(fechaInicio, fechaFin).subscribe({
+      next: (dias) => {
+        this.vacacionesDiasSolicitados.set(Number(dias) || 0);
+        this.calculandoDiasVacaciones.set(false);
+      },
+      error: (error) => {
+        console.error('Error al calcular días de vacaciones:', error);
+        this.vacacionesDiasSolicitados.set(0);
+        this.calculandoDiasVacaciones.set(false);
+      }
+    });
+  }
+
+
+  onCampoChange(
+    campo: keyof NuevaSolicitudForm,
+    valor: string
   ): void {
+
     this.form.update(
-      (formulario) => ({
-        ...formulario,
+      f => ({
 
-        tipoSolicitud:
-          tipo as
-            | TipoSolicitud
-            | '',
-      }),
+        ...f,
+
+        [campo]: valor
+
+      })
     );
 
-    this.modalError.set('');
-
-    if (
-      tipo ===
-      'permiso-personal'
-    ) {
-      this.cargarDisponibilidadPermisoPersonal(
-        this.ppFecha(),
-      );
-    }
   }
 
-  /* =========================================================
-     DISPONIBILIDAD DEL PERMISO PERSONAL
-     ========================================================= */
 
-  cambiarFechaPermisoPersonal(
-    fecha: string,
-  ): void {
-    this.ppFecha.set(fecha);
-    this.modalError.set('');
-
-    if (
-      !fecha ||
-      fecha <
-        this.ppFechaMin ||
-      fecha >
-        this.ppFechaMax
-    ) {
-      this.ppHorasDisponibles.set(
-        '--:--',
-      );
-
-      this.ppDisponibilidadDia.set(
-        '--:--',
-      );
-
-      this.ppDisponibleMesMinutos.set(
-        0,
-      );
-
-      this.ppDisponibleDiaMinutos.set(
-        0,
-      );
-
-      this.ppDisponibilidadCargada.set(
-        false,
-      );
-
-      return;
-    }
-
-    this.cargarDisponibilidadPermisoPersonal(
-      fecha,
-    );
-  }
-
-  private cargarDisponibilidadPermisoPersonal(
-    fecha: string,
-  ): void {
-    if (!fecha) {
-      return;
-    }
-
-    this.ppConsultandoDisponibilidad.set(
-      true,
-    );
-
-    this.ppDisponibilidadCargada.set(
-      false,
-    );
-
-    this.solicitudesService
-      .consultarDisponibilidadPermisoPersonal(
-        fecha,
-      )
-      .subscribe({
-        next: (
-          disponibilidad,
-        ) => {
-          const disponibleMes =
-            Math.max(
-              0,
-              Number(
-                disponibilidad
-                  .disponibleMesMinutos,
-              ) || 0,
-            );
-
-          const disponibleDia =
-            Math.max(
-              0,
-              Number(
-                disponibilidad
-                  .disponibleDiaMinutos,
-              ) || 0,
-            );
-
-          this.ppDisponibleMesMinutos.set(
-            disponibleMes,
-          );
-
-          this.ppDisponibleDiaMinutos.set(
-            disponibleDia,
-          );
-
-          this.ppHorasDisponibles.set(
-            this.formatearMinutos(
-              disponibleMes,
-            ),
-          );
-
-          this.ppDisponibilidadDia.set(
-            this.formatearMinutos(
-              disponibleDia,
-            ),
-          );
-
-          this.ppDisponibilidadCargada.set(
-            true,
-          );
-
-          this.ppConsultandoDisponibilidad.set(
-            false,
-          );
-        },
-
-        error: (error: unknown) => {
-          console.error(
-            'Error al consultar disponibilidad:',
-            error,
-          );
-
-          this.ppHorasDisponibles.set(
-            '--:--',
-          );
-
-          this.ppDisponibilidadDia.set(
-            '--:--',
-          );
-
-          this.ppDisponibleMesMinutos.set(
-            0,
-          );
-
-          this.ppDisponibleDiaMinutos.set(
-            0,
-          );
-
-          this.ppDisponibilidadCargada.set(
-            false,
-          );
-
-          this.ppConsultandoDisponibilidad.set(
-            false,
-          );
-
-          this.modalError.set(
-            this.obtenerMensajeError(
-              error,
-              'No fue posible consultar las horas disponibles.',
-            ),
-          );
-        },
-      });
-  }
-
-  private formatearMinutos(
-    minutosTotales: number,
-  ): string {
-    const valor =
-      Math.max(
-        0,
-        Math.round(
-          Number(minutosTotales) ||
-            0,
-        ),
-      );
-
-    const horas =
-      Math.floor(
-        valor / 60,
-      );
-
-    const minutos =
-      valor % 60;
-
-    return (
-      `${String(horas).padStart(2, '0')}:` +
-      `${String(minutos).padStart(2, '0')}`
-    );
-  }
-
-  /* =========================================================
-     ENVÍO
-     ========================================================= */
+  // ───────────────────────────────────────────────────────────────────────────
+  // ENVIAR
+  // ───────────────────────────────────────────────────────────────────────────
 
   enviarSolicitud(): void {
-    this.modalError.set('');
+
+
+    // PERSONAL
 
     if (
-      this.form().tipoSolicitud ===
+      this.form().tipoSolicitud
+      ===
       'permiso-personal'
     ) {
-      if (
-        this.ppFormInvalido()
-      ) {
-        this.modalError.set(
-          'Revise los datos del permiso personal.',
-        );
-
-        return;
-      }
 
       const body:
         InsertarPermisoPersonalBody = {
-          fecha:
-            this.ppFecha(),
 
-          horas:
-            this.ppFormatHM(),
+        fecha:
+          this.ppFecha(),
 
-          motivo:
-            this.ppMotivo().trim(),
+        horas:
+          this.ppFormatHM(),
 
-          emergencia:
-            this.ppCitaMedica() ===
-            1,
-        };
+        motivo:
+          this.ppMotivo(),
+
+        emergencia:
+          this.ppCitaMedica() === 1
+
+      };
+
 
       this.isEnviando.set(true);
 
+
       this.solicitudesService
-        .insertarPermisoPersonal(
-          body,
-        )
+        .insertarPermisoPersonal(body)
         .subscribe({
+
           next: () => {
-            this.isEnviando.set(
-              false,
-            );
+
+            this.isEnviando.set(false);
 
             this.cerrarModal();
+
             this.cargarDatos();
+
           },
 
-          error: (
-            error: unknown,
-          ) => {
-            this.isEnviando.set(
-              false,
+
+          error: (error) => {
+
+            console.error(
+              'Error al registrar permiso personal:',
+              error
             );
 
-            this.modalError.set(
-              this.obtenerMensajeError(
-                error,
-                'No fue posible registrar el permiso personal.',
-              ),
-            );
+            this.isEnviando.set(false);
 
-            this.cargarDisponibilidadPermisoPersonal(
-              this.ppFecha(),
-            );
-          },
+          }
+
         });
+
+
+      return;
+
+    }
+
+
+    // OFICIAL
+
+    if (
+      this.form().tipoSolicitud
+      ===
+      'permiso-oficial'
+    ) {
+
+      const body:
+        InsertarPermisoOficialBody = {
+
+        fecha:
+          this.poFecha(),
+
+        motivo:
+          this.poMotivo()
+
+      };
+
+
+      this.isEnviando.set(true);
+
+
+      this.solicitudesService
+        .insertarPermisoOficial(body)
+        .subscribe({
+
+          next: () => {
+
+            this.isEnviando.set(false);
+
+            this.cerrarModal();
+
+            this.cargarDatos();
+
+          },
+
+
+          error: (error) => {
+
+            console.error(
+              'Error al registrar permiso oficial:',
+              error
+            );
+
+            this.isEnviando.set(false);
+
+          }
+
+        });
+
+
+      return;
+
+    }
+
+    // VACACIONES
+    if (this.form().tipoSolicitud === 'vacaciones') {
+      if (this.vacacionesFormInvalido()) {
+        this.errorMessage.set(
+          'Complete correctamente la solicitud de vacaciones y verifique que tenga días disponibles.'
+        );
+        return;
+      }
+
+      this.isEnviando.set(true);
+      this.errorMessage.set('');
+
+      this.vacacionesApi.crearSolicitud({
+        fechaInicio: this.vacacionesFechaInicio(),
+        fechaFin: this.vacacionesFechaFin(),
+        observaciones: this.vacacionesObservaciones().trim() || undefined
+      }).subscribe({
+        next: () => {
+          this.isEnviando.set(false);
+          this.cerrarModal();
+          this.cargarDatos();
+        },
+        error: (error) => {
+          console.error('Error al registrar vacaciones:', error);
+          this.isEnviando.set(false);
+          this.errorMessage.set(
+            error?.error?.message ??
+            error?.error?.mensaje ??
+            error?.message ??
+            'No fue posible registrar la solicitud de vacaciones.'
+          );
+        }
+      });
 
       return;
     }
 
+  }
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // ¿PUEDE ANULAR?
+  // ───────────────────────────────────────────────────────────────────────────
+
+  puedeAnular(
+    solicitud: Solicitud
+  ): boolean {
+
+    return (
+
+      !!solicitud.idPermiso
+
+      &&
+
+      (
+        solicitud.nom_estado
+        === 'EN PROCESO'
+
+        ||
+
+        solicitud.nom_estado
+        === 'APROBADO'
+      )
+
+    );
+
+  }
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // ¿SE ESTÁ ANULANDO?
+  // ───────────────────────────────────────────────────────────────────────────
+
+  estaAnulando(
+    solicitud: Solicitud
+  ): boolean {
+
+    return (
+
+      this.isAnulando()
+
+      &&
+
+      this.idPermisoAnulando()
+      ===
+      solicitud.idPermiso
+
+    );
+
+  }
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // ANULAR SOLICITUD
+  // ───────────────────────────────────────────────────────────────────────────
+
+  anularSolicitud(
+    solicitud: Solicitud
+  ): void {
+
     if (
-      this.form().tipoSolicitud ===
-      'permiso-oficial'
+      !this.puedeAnular(solicitud)
     ) {
-      if (
-        this.poFormInvalido()
-      ) {
-        this.modalError.set(
-          'Revise los datos del permiso oficial.',
-        );
 
-        return;
-      }
+      return;
 
-      const body:
-        InsertarPermisoOficialBody = {
-          fecha:
-            this.poFecha(),
+    }
 
-          motivo:
-            this.poMotivo().trim(),
-        };
 
-      this.isEnviando.set(true);
+    if (
+      this.isAnulando()
+    ) {
+
+      return;
+
+    }
+
+
+    const confirmado =
+      window.confirm(
+        `¿Está seguro de que desea anular este ${this.obtenerTipoPermiso(solicitud)}?`
+      );
+
+
+    if (!confirmado) {
+
+      return;
+
+    }
+
+
+    this.errorAnulacion.set('');
+
+    this.mensajeAnulacion.set('');
+
+    this.isAnulando.set(true);
+
+    this.idPermisoAnulando.set(
+      solicitud.idPermiso
+    );
+
+
+    const tipo =
+      solicitud.nom_tipo_solicitud
+        .trim()
+        .toLowerCase();
+
+
+    // PERSONAL
+
+    if (
+      tipo.includes('permiso personal')
+    ) {
 
       this.solicitudesService
-        .insertarPermisoOficial(
-          body,
+        .anularPermisoPersonal(
+          solicitud.idPermiso
         )
         .subscribe({
-          next: () => {
-            this.isEnviando.set(
-              false,
+
+          next: (respuesta) => {
+
+            this.isAnulando.set(false);
+
+            this.idPermisoAnulando.set(null);
+
+
+            this.mensajeAnulacion.set(
+
+              respuesta.message
+              ??
+              respuesta.mensaje
+              ??
+              'Permiso personal anulado correctamente.'
+
             );
 
-            this.cerrarModal();
+
             this.cargarDatos();
+
           },
 
-          error: (
-            error: unknown,
-          ) => {
-            this.isEnviando.set(
-              false,
+
+          error: (error) => {
+
+            console.error(
+              'Error al anular permiso personal:',
+              error
             );
 
-            this.modalError.set(
-              this.obtenerMensajeError(
-                error,
-                'No fue posible registrar el permiso oficial.',
-              ),
+
+            this.isAnulando.set(false);
+
+            this.idPermisoAnulando.set(null);
+
+
+            this.errorAnulacion.set(
+
+              error?.error?.message
+              ??
+              error?.error?.mensaje
+              ??
+              'No fue posible anular el permiso personal.'
+
             );
-          },
+
+          }
+
         });
+
+
+      return;
+
     }
-  }
 
-  private obtenerMensajeError(
-    error: unknown,
-    mensajePredeterminado: string,
-  ): string {
-    const respuesta =
-      error as {
-        error?: {
-          message?: string;
 
-          error?: {
-            message?: string;
-            details?: string[];
-          };
-
-          data?: {
-            message?: string;
-          };
-        };
-
-        message?: string;
-      };
-
-    const detalles =
-      respuesta.error?.error
-        ?.details;
+    // OFICIAL
 
     if (
-      Array.isArray(detalles) &&
-      detalles.length > 0
+      tipo.includes('permiso oficial')
     ) {
-      return detalles.join(', ');
+
+      this.solicitudesService
+        .anularPermisoOficial(
+          solicitud.idPermiso
+        )
+        .subscribe({
+
+          next: (respuesta) => {
+
+            this.isAnulando.set(false);
+
+            this.idPermisoAnulando.set(null);
+
+
+            this.mensajeAnulacion.set(
+
+              respuesta.message
+              ??
+              respuesta.mensaje
+              ??
+              'Permiso oficial anulado correctamente.'
+
+            );
+
+
+            this.cargarDatos();
+
+          },
+
+
+          error: (error) => {
+
+            console.error(
+              'Error al anular permiso oficial:',
+              error
+            );
+
+
+            this.isAnulando.set(false);
+
+            this.idPermisoAnulando.set(null);
+
+
+            this.errorAnulacion.set(
+
+              error?.error?.message
+              ??
+              error?.error?.mensaje
+              ??
+              'No fue posible anular el permiso oficial.'
+
+            );
+
+          }
+
+        });
+
+
+      return;
+
     }
 
+
+    this.isAnulando.set(false);
+
+    this.idPermisoAnulando.set(null);
+
+
+    this.errorAnulacion.set(
+      'No se reconoce el tipo de permiso.'
+    );
+
+  }
+
+
+  private obtenerTipoPermiso(
+    solicitud: Solicitud
+  ): string {
+
+    const tipo =
+      solicitud.nom_tipo_solicitud
+        .toLowerCase();
+
+
+    if (
+      tipo.includes('permiso personal')
+    ) {
+
+      return 'permiso personal';
+
+    }
+
+
+    if (
+      tipo.includes('permiso oficial')
+    ) {
+
+      return 'permiso oficial';
+
+    }
+
+
+    return 'permiso';
+
+  }
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // VACACIONES
+  // ───────────────────────────────────────────────────────────────────────────
+
+  puedeAnularVacaciones(
+    solicitud: SolicitudVacaciones
+  ): boolean {
+
+    const id =
+      solicitud.idVacaciones ??
+      solicitud.idVacacion;
+
+    if (!id) {
+      return false;
+    }
+
+    const estado =
+      solicitud.estadoSolicitud?.nomEstado ??
+      solicitud.estadoSolicitud?.nomestado ??
+      '';
+
+    if (
+      estado !== 'EN PROCESO' &&
+      estado !== 'APROBADO'
+    ) {
+      return false;
+    }
+
+    // La solicitud solo puede anularse antes de que inicie el período.
+    const fechaInicio =
+      new Date(`${solicitud.fecInicial}T00:00:00`);
+
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    return fechaInicio > hoy;
+  }
+
+
+  estaAnulandoVacaciones(
+    solicitud: SolicitudVacaciones
+  ): boolean {
+
+    const id =
+      solicitud.idVacaciones ??
+      solicitud.idVacacion;
+
     return (
-      respuesta.error?.error
-        ?.message ??
-      respuesta.error?.data
-        ?.message ??
-      respuesta.error?.message ??
-      respuesta.message ??
-      mensajePredeterminado
+      this.isAnulandoVacaciones() &&
+      !!id &&
+      this.idVacacionAnulando() === id
     );
   }
 
-  /* =========================================================
-     DATOS DE LAS TABLAS
-     ========================================================= */
+
+  anularVacaciones(
+    solicitud: SolicitudVacaciones
+  ): void {
+
+    if (!this.puedeAnularVacaciones(solicitud)) {
+      return;
+    }
+
+    if (this.isAnulandoVacaciones()) {
+      return;
+    }
+
+    const id =
+      solicitud.idVacaciones ??
+      solicitud.idVacacion;
+
+    if (!id) {
+      return;
+    }
+
+    if (
+      !window.confirm(
+        '¿Está seguro de que desea anular esta solicitud de vacaciones?'
+      )
+    ) {
+      return;
+    }
+
+    this.errorAnulacion.set('');
+    this.mensajeAnulacion.set('');
+    this.isAnulandoVacaciones.set(true);
+    this.idVacacionAnulando.set(id);
+
+    this.vacacionesApi
+      .anularVacaciones(id)
+      .subscribe({
+
+        next: (respuesta: any) => {
+
+          this.isAnulandoVacaciones.set(false);
+          this.idVacacionAnulando.set(null);
+
+          this.mensajeAnulacion.set(
+            respuesta?.message ??
+            respuesta?.mensaje ??
+            'Solicitud de vacaciones anulada correctamente.'
+          );
+
+          this.cargarDatos();
+        },
+
+        error: (error) => {
+
+          console.error(
+            'Error al anular vacaciones:',
+            error
+          );
+
+          this.isAnulandoVacaciones.set(false);
+          this.idVacacionAnulando.set(null);
+
+          this.errorAnulacion.set(
+            error?.error?.message ??
+            error?.error?.mensaje ??
+            'No fue posible anular la solicitud de vacaciones.'
+          );
+        }
+
+      });
+  }
+
+
+  nombreEstadoVacaciones(
+    solicitud: SolicitudVacaciones
+  ): string {
+
+    return (
+      solicitud.estadoSolicitud?.nomEstado ??
+      solicitud.estadoSolicitud?.nomestado ??
+      'SIN ESTADO'
+    );
+  }
+
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // REVISIONES
+  // ───────────────────────────────────────────────────────────────────────────
 
   primerRevision(
-    solicitud: Solicitud,
+    s: Solicitud
   ): string {
+
     return (
-      solicitud.pri_aporbacion ??
+
+      s.pri_aporbacion
+
+      ??
+
       (
-        solicitud.mot_rechazo
+        s.mot_rechazo
           ? '----------------'
           : 'PENDIENTE'
       )
+
     );
+
   }
 
+
   segundaRevision(
-    solicitud: Solicitud,
+    s: Solicitud
   ): string {
+
     return (
-      solicitud.seg_aprobacion ??
+
+      s.seg_aprobacion
+
+      ??
+
       (
-        solicitud.mot_rechazo
+        s.mot_rechazo
           ? '----------------'
           : 'PENDIENTE'
       )
+
     );
+
   }
+
 }

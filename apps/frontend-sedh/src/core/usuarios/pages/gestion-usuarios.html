@@ -1,17 +1,33 @@
 <app-encabezados-pagina
   [titulo]="'Gestión de Usuarios'"
 ></app-encabezados-pagina>
+
 <div class="gestion-container">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
   <div class="gestion-header">
-    <h2 class="gestion-title">Gestión de Cuentas de Usuario</h2>
+
+    <h2 class="gestion-title">
+      Gestión de Cuentas de Usuario
+    </h2>
+
     <p class="gestion-subtitle">
-      Administración de roles, estados y contraseñas de las cuentas del sistema
+      Administración de roles, estados, dependencias y contraseñas de las cuentas del sistema
     </p>
+
   </div>
 
   <hr class="gestion-divider" />
 
+  <!-- ===================================================== -->
+  <!-- BUSCADOR -->
+  <!-- ===================================================== -->
+
   <div class="toolbar">
+
     <input
       type="text"
       class="buscar"
@@ -19,37 +35,90 @@
       [(ngModel)]="textoBusqueda"
       (input)="filtrarUsuarios()"
     />
+
   </div>
 
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
   @if (cargando) {
+
     <div class="loading-spinner">
       Cargando usuarios...
     </div>
+
   } @else {
+
+    <!-- =================================================== -->
+    <!-- TABLA -->
+    <!-- =================================================== -->
+
     <div class="table-card">
+
       <table class="table">
+
         <thead>
+
           <tr>
-            <th>ID</th>
-            <th>Correo</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+
+            <th>
+              ID
+            </th>
+
+            <th>
+              Correo
+            </th>
+
+            <th>
+              Rol
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th>
+              Acciones
+            </th>
+
           </tr>
+
         </thead>
 
         <tbody>
-          @for (user of usuariosFiltrados; track user.idUsuario) {
-            <tr>
-              <td>{{ user.idUsuario }}</td>
 
-              <td>{{ user.emailInstitucional }}</td>
+          @for (
+            user of usuariosFiltrados;
+            track user.idUsuario
+          ) {
+
+            <tr>
 
               <td>
-                {{ user.roles?.[0]?.nomRol || 'Sin rol' }}
+                {{ user.idUsuario }}
               </td>
 
               <td>
+                {{ user.emailInstitucional }}
+              </td>
+
+              <td>
+                @if (user.roles?.length) {
+                  <div class="roles-lista">
+                    @for (rol of user.roles; track rol.idRol) {
+                      <span class="rol-badge">
+                        {{ rol.nomRol }}
+                      </span>
+                    }
+                  </div>
+                } @else {
+                  Sin rol
+                }
+              </td>
+
+              <td>
+
                 <span
                   class="estado-badge"
                   [ngClass]="{
@@ -57,11 +126,19 @@
                     'estado-inactivo': !user.activo
                   }"
                 >
-                  {{ user.activo ? 'Activo' : 'Inactivo' }}
+
+                  {{
+                    user.activo
+                      ? 'Activo'
+                      : 'Inactivo'
+                  }}
+
                 </span>
+
               </td>
 
               <td>
+
                 <button
                   type="button"
                   class="btn-edit"
@@ -69,32 +146,63 @@
                 >
                   ✏️ Editar
                 </button>
+
               </td>
+
             </tr>
+
           } @empty {
+
             <tr>
+
               <td colspan="5">
                 No hay usuarios registrados.
               </td>
+
             </tr>
+
           }
+
         </tbody>
+
       </table>
+
     </div>
+
   }
 
-  @if (mostrarModal && usuarioSeleccionado) {
+  <!-- ===================================================== -->
+  <!-- MODAL -->
+  <!-- ===================================================== -->
+
+  @if (
+    mostrarModal &&
+    usuarioSeleccionado
+  ) {
+
     <div class="modal-overlay">
+
       <div class="modal-container">
+
+        <!-- =============================================== -->
+        <!-- HEADER -->
+        <!-- =============================================== -->
+
         <div class="modal-header">
+
           <h3>
+
             Editar:
+
             <span class="highlight-user">
+
               {{
                 usuarioSeleccionado.nombre ||
                 usuarioSeleccionado.emailInstitucional
               }}
+
             </span>
+
           </h3>
 
           <button
@@ -104,20 +212,37 @@
           >
             &times;
           </button>
+
         </div>
 
+        <!-- =============================================== -->
+        <!-- BODY -->
+        <!-- =============================================== -->
+
         <div class="modal-body">
+
+          <!-- ============================================= -->
+          <!-- SEGURIDAD -->
+          <!-- ============================================= -->
+
           <div class="modal-section">
+
             <div class="security-header">
+
               <div>
-                <h4>Seguridad</h4>
+
+                <h4>
+                  Seguridad
+                </h4>
 
                 <p class="section-desc">
                   Asignar una contraseña temporal al usuario.
                 </p>
+
               </div>
 
               @if (!mostrarCambioPassword) {
+
                 <button
                   type="button"
                   class="btn-reset-password"
@@ -125,21 +250,33 @@
                 >
                   🔑 Cambiar contraseña
                 </button>
+
               }
+
             </div>
 
             @if (mostrarCambioPassword) {
+
               <div class="password-panel">
+
+                <!-- NUEVA PASSWORD -->
+
                 <div class="form-group">
+
                   <label for="nueva-password">
                     Nueva contraseña temporal
                   </label>
 
                   <div class="password-input-wrapper">
+
                     <input
                       id="nueva-password"
                       class="form-control"
-                      [type]="mostrarNuevaPassword ? 'text' : 'password'"
+                      [type]="
+                        mostrarNuevaPassword
+                          ? 'text'
+                          : 'password'
+                      "
                       [(ngModel)]="nuevaPassword"
                       placeholder="Mínimo 8 caracteres"
                       minlength="8"
@@ -155,25 +292,34 @@
                           !mostrarNuevaPassword
                       "
                     >
+
                       {{
                         mostrarNuevaPassword
                           ? 'Ocultar'
                           : 'Mostrar'
                       }}
+
                     </button>
+
                   </div>
 
                   @if (
                     nuevaPassword &&
                     nuevaPassword.length < 8
                   ) {
+
                     <p class="password-error">
                       La contraseña debe tener al menos 8 caracteres.
                     </p>
+
                   }
+
                 </div>
 
+                <!-- CONFIRMAR PASSWORD -->
+
                 <div class="form-group">
+
                   <label for="confirmar-password">
                     Confirmar contraseña
                   </label>
@@ -181,13 +327,18 @@
                   <input
                     id="confirmar-password"
                     class="form-control"
-                    [type]="mostrarNuevaPassword ? 'text' : 'password'"
+                    [type]="
+                      mostrarNuevaPassword
+                        ? 'text'
+                        : 'password'
+                    "
                     [(ngModel)]="confirmarPassword"
                     placeholder="Repita la contraseña"
                     minlength="8"
                     maxlength="100"
                     autocomplete="new-password"
                   />
+
                 </div>
 
                 @if (
@@ -195,12 +346,17 @@
                   confirmarPassword &&
                   nuevaPassword !== confirmarPassword
                 ) {
+
                   <p class="password-error">
                     Las contraseñas no coinciden.
                   </p>
+
                 }
 
+                <!-- ACCIONES PASSWORD -->
+
                 <div class="password-actions">
+
                   <button
                     type="button"
                     class="btn-secondary"
@@ -220,73 +376,125 @@
                       nuevaPassword !== confirmarPassword
                     "
                   >
+
                     {{
                       guardandoPassword
                         ? 'Guardando...'
                         : 'Asignar contraseña'
                     }}
+
                   </button>
+
                 </div>
+
               </div>
+
             }
+
           </div>
 
           <hr class="modal-inner-divider" />
 
+          <!-- ============================================= -->
+          <!-- ROL -->
+          <!-- ============================================= -->
+
           <div class="modal-form-grid">
+
+            <fieldset class="form-group roles-fieldset">
+
+              <legend>
+                Roles del Sistema
+              </legend>
+
+              <div class="roles-checkbox-list">
+
+                <div class="rol-checkbox">
+                  <input
+                    type="checkbox"
+                    id="rol-empleado"
+                    [checked]="tieneRol(1)"
+                    (change)="cambiarRol(1, $any($event.target).checked)"
+                  />
+                  <label for="rol-empleado">
+                    Empleado Normal
+                  </label>
+                </div>
+
+                <div class="rol-checkbox">
+                  <input
+                    type="checkbox"
+                    id="rol-jefe"
+                    [checked]="tieneRol(2)"
+                    (change)="cambiarRol(2, $any($event.target).checked)"
+                  />
+                  <label for="rol-jefe">
+                    Jefe Inmediato
+                  </label>
+                </div>
+
+                <div class="rol-checkbox">
+                  <input
+                    type="checkbox"
+                    id="rol-subrrhh"
+                    [checked]="tieneRol(3)"
+                    (change)="cambiarRol(3, $any($event.target).checked)"
+                  />
+                  <label for="rol-subrrhh">
+                    Sub RRHH
+                  </label>
+                </div>
+
+                <div class="rol-checkbox">
+                  <input
+                    type="checkbox"
+                    id="rol-agente"
+                    [checked]="tieneRol(4)"
+                    (change)="cambiarRol(4, $any($event.target).checked)"
+                  />
+                  <label for="rol-agente">
+                    Agente Seg
+                  </label>
+                </div>
+
+                <div class="rol-checkbox">
+                  <input
+                    type="checkbox"
+                    id="rol-administrador"
+                    [checked]="tieneRol(5)"
+                    (change)="cambiarRol(5, $any($event.target).checked)"
+                  />
+                  <label for="rol-administrador">
+                    Administrador
+                  </label>
+                </div>
+
+              </div>
+
+            </fieldset>
+
+            <!-- =========================================== -->
+            <!-- ESTADO -->
+            <!-- =========================================== -->
+
             <div class="form-group">
-              <label for="user-role">
-                Rol del Sistema
-              </label>
 
-              <select
-                id="user-role"
-                class="form-control"
-                [(ngModel)]="rolTemporal"
-              >
-                <option
-                  [ngValue]="null"
-                  disabled
-                >
-                  Seleccione un rol
-                </option>
-
-                <option [ngValue]="1">
-                  Empleado Normal
-                </option>
-
-                <option [ngValue]="2">
-                  Jefe Inmediato
-                </option>
-
-                <option [ngValue]="3">
-                  Sub RRHH
-                </option>
-
-                <option [ngValue]="4">
-                  Agente Seg
-                </option>
-
-                <option [ngValue]="5">
-                  Administrador
-                </option>
-              </select>
-            </div>
-
-            <div class="form-group">
               <label for="user-status">
                 Estado
               </label>
 
               <div class="estado-switch">
+
                 <button
                   type="button"
                   class="estado-btn"
                   [ngClass]="{
-                    activo: usuarioSeleccionado.activo
+                    activo:
+                      usuarioSeleccionado.activo
                   }"
                   (click)="
-                    usuarioSeleccionado.activo = true
+                    usuarioSeleccionado.activo =
+                      true
                   "
                 >
                   🟢 Activo
@@ -296,20 +504,117 @@
                   type="button"
                   class="estado-btn"
                   [ngClass]="{
-                    inactivo: !usuarioSeleccionado.activo
+                    inactivo:
+                      !usuarioSeleccionado.activo
                   }"
                   (click)="
-                    usuarioSeleccionado.activo = false
+                    usuarioSeleccionado.activo =
+                      false
                   "
                 >
                   🔴 Inactivo
                 </button>
+
               </div>
+
             </div>
+
           </div>
+
+          <!-- ============================================= -->
+          <!-- DEPENDENCIA -->
+          <!-- ============================================= -->
+
+          <div class="form-group dependencia-group">
+
+            <label for="user-dependencia">
+              Dependencia
+            </label>
+
+            @if (cargandoDependencias) {
+
+              <p class="section-desc">
+                Consultando dependencia...
+              </p>
+
+            } @else {
+
+              <select
+                id="user-dependencia"
+                class="form-control"
+                [(ngModel)]="dependenciaTemporal"
+              >
+
+                <option
+                  [ngValue]="null"
+                >
+                  Seleccione una dependencia
+                </option>
+
+                @for (
+                  dependencia of dependencias;
+                  track dependencia.idDependencia
+                ) {
+
+                  <option
+                    [ngValue]="dependencia.idDependencia"
+                  >
+
+                    {{ dependencia.nomDependencia }}
+
+                  </option>
+
+                }
+
+              </select>
+
+              @if (
+                dependencias.length === 0
+              ) {
+
+                <p class="password-error">
+                  No se encontraron dependencias disponibles.
+                </p>
+
+              }
+
+            }
+
+          </div>
+
+          <!-- ============================================= -->
+          <!-- INFORMACIÓN DE LA DEPENDENCIA ACTUAL -->
+          <!-- ============================================= -->
+
+          @if (
+            dependenciaActual &&
+            !cargandoDependencias
+          ) {
+
+            <div class="dependencia-info">
+
+              <strong>
+                Dependencia actual:
+              </strong>
+
+              <span>
+                {{
+                  dependenciaActual.nomDependencia
+                }}
+              </span>
+
+            </div>
+
+          }
+
         </div>
 
+        <!-- =============================================== -->
+        <!-- FOOTER -->
+        <!-- =============================================== -->
+
         <div class="modal-footer">
+
           <button
             type="button"
             class="btn-secondary"
@@ -322,12 +627,26 @@
             type="button"
             class="btn-primary-save"
             (click)="guardarCambios()"
-            [disabled]="cargando"
+            [disabled]="
+              cargando ||
+              cargandoDependencias
+            "
           >
-            Guardar Cambios
+
+            {{
+              cargando
+                ? 'Guardando...'
+                : 'Guardar Cambios'
+            }}
+
           </button>
+
         </div>
+
       </div>
+
     </div>
+
   }
+
 </div>

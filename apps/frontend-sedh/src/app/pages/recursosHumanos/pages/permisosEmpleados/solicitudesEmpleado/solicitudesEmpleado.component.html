@@ -358,7 +358,6 @@
 
   }
 
-
   <!-- ═══════════════════════════════════════════════════════════════════════
        SOLICITUDES DE EMERGENCIA
   ═══════════════════════════════════════════════════════════════════════ -->
@@ -742,6 +741,8 @@
           class="form-control form-control--readonly"
           type="text"
           readonly
+          tabindex="-1"
+          autocomplete="off"
           [value]="form().nombreEmpleado"
         />
 
@@ -765,6 +766,8 @@
             class="form-control form-control--readonly"
             type="text"
             readonly
+            tabindex="-1"
+            autocomplete="off"
             [value]="form().dependencia"
           />
 
@@ -786,6 +789,8 @@
             class="form-control form-control--readonly"
             type="text"
             readonly
+            tabindex="-1"
+            autocomplete="off"
             [value]="form().cargo"
           />
 

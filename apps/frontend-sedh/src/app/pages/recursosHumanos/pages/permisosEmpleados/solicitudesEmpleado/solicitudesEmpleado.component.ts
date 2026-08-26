@@ -37,13 +37,15 @@ import {
 
 import {
   VacacionesApiService,
-  SolicitudVacaciones
+  SolicitudVacaciones,
+  SaldoVacaciones
 } from '../../../../../core/services/vacaciones-api';
 
 
 export type TipoSolicitud =
   | 'permiso-personal'
-  | 'permiso-oficial';
+  | 'permiso-oficial'
+  | 'vacaciones';
 
 
 export interface NuevaSolicitudForm {
@@ -521,6 +523,37 @@ export class SolicitudesEmpleadoComponent
 
 
   // ───────────────────────────────────────────────────────────────────────────
+  // VACACIONES - NUEVA SOLICITUD
+  // ───────────────────────────────────────────────────────────────────────────
+
+  readonly vacacionesFechaMin = hoyStr();
+  vacacionesFechaInicio = signal(hoyStr());
+  vacacionesFechaFin = signal(hoyStr());
+  vacacionesObservaciones = signal('');
+  vacacionesDiasSolicitados = signal(0);
+  vacacionesSaldo = signal<SaldoVacaciones | null>(null);
+  cargandoSaldoVacaciones = signal(false);
+  calculandoDiasVacaciones = signal(false);
+
+  vacacionesFormInvalido = computed(() => {
+    const inicio = this.vacacionesFechaInicio();
+    const fin = this.vacacionesFechaFin();
+    const dias = this.vacacionesDiasSolicitados();
+    const saldo = this.vacacionesSaldo();
+
+    return (
+      !inicio ||
+      !fin ||
+      fin < inicio ||
+      dias <= 0 ||
+      !saldo ||
+      saldo.saldoInicialPendiente === true ||
+      dias > saldo.diasDisponibles
+    );
+  });
+
+
+  // ───────────────────────────────────────────────────────────────────────────
   // INICIO
   // ───────────────────────────────────────────────────────────────────────────
 
@@ -679,6 +712,14 @@ export class SolicitudesEmpleadoComponent
 
     this.poMotivo.set('');
 
+    this.vacacionesFechaInicio.set(hoyStr());
+    this.vacacionesFechaFin.set(hoyStr());
+    this.vacacionesObservaciones.set('');
+    this.vacacionesDiasSolicitados.set(0);
+    this.vacacionesSaldo.set(null);
+    this.cargandoSaldoVacaciones.set(false);
+    this.calculandoDiasVacaciones.set(false);
+
   }
 
 
@@ -702,13 +743,26 @@ export class SolicitudesEmpleadoComponent
         },
 
 
-        error: () => {
+        error: (error) => {
+
+          console.error(
+            'Error al cargar los datos del empleado para el permiso:',
+            error
+          );
 
           this.resetModal();
 
           this.cargandoModal.set(false);
 
-          this.modalAbierto.set(true);
+          this.errorMessage.set(
+            error?.error?.message ??
+            error?.error?.mensaje ??
+            error?.message ??
+            'No fue posible cargar los datos del empleado. Verifique el endpoint de datos del permiso.'
+          );
+
+          // No abrir el modal con los campos vacíos.
+          this.modalAbierto.set(false);
 
         }
 
@@ -724,21 +778,96 @@ export class SolicitudesEmpleadoComponent
   }
 
 
-  onTipoChange(
-    tipo: string
-  ): void {
+  onTipoChange(tipo: string): void {
 
-    this.form.update(
-      f => ({
+    // Mantener los datos del empleado cargados al abrir el modal.
+    // Al seleccionar un tipo solo se cambia el formulario específico.
+    this.form.update(f => ({
+      ...f,
+      tipoSolicitud: tipo as TipoSolicitud | ''
+    }));
 
-        ...f,
+    if (tipo === 'permiso-personal') {
+      if (!this.ppFecha()) {
+        this.ppFecha.set(hoyStr());
+      }
 
-        tipoSolicitud:
-          tipo as TipoSolicitud | ''
+      if (!this.ppMotivo().trim()) {
+        this.ppMotivo.set('Asunto Personal.');
+      }
 
-      })
-    );
+      return;
+    }
 
+    if (tipo === 'permiso-oficial') {
+      if (!this.poFecha()) {
+        this.poFecha.set(hoyStr());
+      }
+
+      return;
+    }
+
+    if (tipo === 'vacaciones') {
+      this.vacacionesFechaInicio.set(hoyStr());
+      this.vacacionesFechaFin.set(hoyStr());
+      this.vacacionesObservaciones.set('');
+      this.vacacionesDiasSolicitados.set(0);
+      this.vacacionesSaldo.set(null);
+      this.cargarSaldoVacaciones();
+      return;
+    }
+
+    this.vacacionesSaldo.set(null);
+    this.vacacionesDiasSolicitados.set(0);
+  }
+
+
+  private cargarSaldoVacaciones(): void {
+    this.cargandoSaldoVacaciones.set(true);
+
+    this.vacacionesApi.obtenerMiSaldo().subscribe({
+      next: (saldo) => {
+        this.vacacionesSaldo.set(saldo);
+        this.cargandoSaldoVacaciones.set(false);
+        this.calcularDiasVacaciones();
+      },
+      error: (error) => {
+        console.error('Error al consultar saldo de vacaciones:', error);
+        this.vacacionesSaldo.set(null);
+        this.cargandoSaldoVacaciones.set(false);
+        this.vacacionesDiasSolicitados.set(0);
+        this.errorMessage.set(
+          error?.error?.message ??
+          error?.error?.mensaje ??
+          'No fue posible consultar el saldo de vacaciones.'
+        );
+      }
+    });
+  }
+
+
+  calcularDiasVacaciones(): void {
+    const fechaInicio = this.vacacionesFechaInicio();
+    const fechaFin = this.vacacionesFechaFin();
+
+    if (!fechaInicio || !fechaFin || fechaFin < fechaInicio) {
+      this.vacacionesDiasSolicitados.set(0);
+      return;
+    }
+
+    this.calculandoDiasVacaciones.set(true);
+
+    this.vacacionesApi.calcularDias(fechaInicio, fechaFin).subscribe({
+      next: (dias) => {
+        this.vacacionesDiasSolicitados.set(Number(dias) || 0);
+        this.calculandoDiasVacaciones.set(false);
+      },
+      error: (error) => {
+        console.error('Error al calcular días de vacaciones:', error);
+        this.vacacionesDiasSolicitados.set(0);
+        this.calculandoDiasVacaciones.set(false);
+      }
+    });
   }
 
 
@@ -884,6 +1013,43 @@ export class SolicitudesEmpleadoComponent
 
       return;
 
+    }
+
+    // VACACIONES
+    if (this.form().tipoSolicitud === 'vacaciones') {
+      if (this.vacacionesFormInvalido()) {
+        this.errorMessage.set(
+          'Complete correctamente la solicitud de vacaciones y verifique que tenga días disponibles.'
+        );
+        return;
+      }
+
+      this.isEnviando.set(true);
+      this.errorMessage.set('');
+
+      this.vacacionesApi.crearSolicitud({
+        fechaInicio: this.vacacionesFechaInicio(),
+        fechaFin: this.vacacionesFechaFin(),
+        observaciones: this.vacacionesObservaciones().trim() || undefined
+      }).subscribe({
+        next: () => {
+          this.isEnviando.set(false);
+          this.cerrarModal();
+          this.cargarDatos();
+        },
+        error: (error) => {
+          console.error('Error al registrar vacaciones:', error);
+          this.isEnviando.set(false);
+          this.errorMessage.set(
+            error?.error?.message ??
+            error?.error?.mensaje ??
+            error?.message ??
+            'No fue posible registrar la solicitud de vacaciones.'
+          );
+        }
+      });
+
+      return;
     }
 
   }

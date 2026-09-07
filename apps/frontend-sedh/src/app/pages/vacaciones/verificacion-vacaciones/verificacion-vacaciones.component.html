@@ -1,0 +1,222 @@
+<main class="verificacion-page">
+
+  <header class="page-header">
+    <div>
+      <h1>Verificación de Vacaciones</h1>
+
+      <p>
+        Verificación del saldo disponible de los empleados
+        antes de enviar la solicitud a Recursos Humanos.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-refresh"
+      (click)="cargarSolicitudes()"
+      [disabled]="cargando()"
+    >
+      ↻ Actualizar
+    </button>
+  </header>
+
+  @if (successMessage()) {
+    <div
+      class="alert alert-success"
+      role="status"
+    >
+      {{ successMessage() }}
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div
+      class="alert alert-error"
+      role="alert"
+    >
+      {{ errorMessage() }}
+
+      <button
+        type="button"
+        class="alert-close"
+        aria-label="Cerrar mensaje"
+        (click)="limpiarMensajes()"
+      >
+        ×
+      </button>
+    </div>
+  }
+
+  <section class="toolbar">
+
+    <div class="search-box">
+      <label for="buscar-vacacion">
+        Buscar solicitud
+      </label>
+
+      <input
+        id="buscar-vacacion"
+        type="search"
+        placeholder="Buscar por correo..."
+        [value]="busqueda()"
+        (input)="busqueda.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="counter">
+      Solicitudes pendientes:
+      <strong>
+        {{ solicitudesFiltradas().length }}
+      </strong>
+    </div>
+
+  </section>
+
+  @if (cargando()) {
+
+    <section class="state-box">
+      <div class="spinner"></div>
+
+      <p>
+        Consultando solicitudes pendientes de verificación...
+      </p>
+    </section>
+
+  } @else if (solicitudesFiltradas().length === 0) {
+
+    <section class="state-box empty">
+      <div class="empty-icon">✓</div>
+
+      <h2>No hay solicitudes pendientes</h2>
+
+      <p>
+        Actualmente no existen solicitudes de vacaciones
+        pendientes de verificación de saldo.
+      </p>
+    </section>
+
+  } @else {
+
+    <section class="table-card">
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Empleado</th>
+              <th>Solicitud</th>
+              <th>Fecha inicial</th>
+              <th>Fecha final</th>
+              <th>Días solicitados</th>
+              <th>Días disponibles</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (
+              solicitud of solicitudesFiltradas();
+              track solicitud.idPermisoVaca ?? solicitud.id
+            ) {
+
+              <tr>
+
+                <td>
+                  <div class="employee">
+                    <span class="employee-icon">
+                      👤
+                    </span>
+
+                    <div>
+                      <strong>
+                        {{ solicitud.emailInstitucional }}
+                      </strong>
+
+                      @if (solicitud.motivo) {
+                        <small>
+                          {{ solicitud.motivo }}
+                        </small>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="vacation-badge">
+                    VACACIONES
+                  </span>
+                </td>
+
+                <td>
+                  {{ solicitud.fecInicial | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td>
+                  {{ solicitud.fecFinal | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td>
+                  <strong class="days-requested">
+                    {{ solicitud.cantVacaciones ?? 0 }}
+                  </strong>
+                </td>
+
+                <td>
+                  <strong
+                    class="days-available"
+                    [class.no-days]="
+                      (solicitud.totDiasRestantes ?? 0) <= 0
+                    "
+                  >
+                    {{ solicitud.totDiasRestantes ?? 0 }}
+                  </strong>
+                </td>
+
+                <td>
+                  <span class="status">
+                    Pendiente
+                  </span>
+                </td>
+
+                <td>
+
+                  <button
+                    type="button"
+                    class="btn-verify"
+                    [disabled]="
+                      procesandoId() ===
+                      (solicitud.idPermisoVaca ?? solicitud.id)
+                    "
+                    (click)="verificarSaldo(solicitud)"
+                  >
+                    @if (
+                      procesandoId() ===
+                      (solicitud.idPermisoVaca ?? solicitud.id)
+                    ) {
+                      Verificando...
+                    } @else {
+                      Verificar saldo
+                    }
+                  </button>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  }
+
+</main>

@@ -84,6 +84,24 @@ export class RecursosHumanosMainComponent {
       },
 
       // =====================================================
+// SOLICITAR CONSTANCIA
+// ROLES: 1, 5
+// =====================================================
+
+{
+  label: 'Solicitar constancia',
+
+  imageUrl: 'solicitar_constancia.png',
+
+  route: '/constancias/solicitar',
+
+  rolesPermitidos: [
+    1,
+    5,
+  ],
+},
+
+      // =====================================================
       // CONTROL DE SALIDAS Y RETORNOS
       // ROLES: 4, 5
       // =====================================================
@@ -154,6 +172,23 @@ export class RecursosHumanosMainComponent {
         ],
       },
 
+      // =====================================================
+// GESTIÓN DE CONSTANCIAS
+// ROLES: 3, 5
+// =====================================================
+
+{
+  label: 'Gestión de constancias',
+
+  imageUrl: 'gestion_constancia.png',
+
+  route: '/constancias/gestion',
+
+  rolesPermitidos: [
+    3,
+    5,
+  ],
+},
       // =====================================================
       // VACACIONES PENDIENTES JEFE
       // ROLES: 2, 5

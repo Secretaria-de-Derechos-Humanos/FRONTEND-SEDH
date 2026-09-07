@@ -23,20 +23,66 @@
   <hr class="gestion-divider" />
 
   <!-- ===================================================== -->
-  <!-- BUSCADOR -->
-  <!-- ===================================================== -->
+<!-- BUSCADOR Y FILTROS -->
+<!-- ===================================================== -->
 
-  <div class="toolbar">
+<div class="toolbar">
 
-    <input
-      type="text"
-      class="buscar"
-      placeholder="🔍 Buscar usuario..."
-      [(ngModel)]="textoBusqueda"
-      (input)="filtrarUsuarios()"
-    />
+  <input
+    type="text"
+    class="buscar"
+    placeholder="🔍 Buscar usuario..."
+    [(ngModel)]="textoBusqueda"
+    (input)="filtrarUsuarios()"
+  />
+
+  <div class="filtros-estado">
+
+    <!-- TODOS -->
+
+    <button
+      type="button"
+      class="filtro-btn"
+      [class.seleccionado]="tipoEstado === 'todos'"
+      (click)="cambiarFiltroEstado('todos')"
+    >
+      👥 Todos
+      <span class="filtro-contador">
+        {{ cantidadUsuarios }}
+      </span>
+    </button>
+
+    <!-- ACTIVOS -->
+
+    <button
+      type="button"
+      class="filtro-btn filtro-activos"
+      [class.seleccionado]="tipoEstado === 'activos'"
+      (click)="cambiarFiltroEstado('activos')"
+    >
+      🟢 Activos
+      <span class="filtro-contador">
+        {{ cantidadActivos }}
+      </span>
+    </button>
+
+    <!-- INACTIVOS -->
+
+    <button
+      type="button"
+      class="filtro-btn filtro-inactivos"
+      [class.seleccionado]="tipoEstado === 'inactivos'"
+      (click)="cambiarFiltroEstado('inactivos')"
+    >
+      🔴 Inactivos
+      <span class="filtro-contador">
+        {{ cantidadInactivos }}
+      </span>
+    </button>
 
   </div>
+
+</div>
 
   <!-- ===================================================== -->
   <!-- CARGANDO -->
@@ -104,36 +150,47 @@
               </td>
 
               <td>
+
                 @if (user.roles?.length) {
+
                   <div class="roles-lista">
-                    @for (rol of user.roles; track rol.idRol) {
+
+                    @for (
+                      rol of user.roles;
+                      track rol.idRol
+                    ) {
+
                       <span class="rol-badge">
                         {{ rol.nomRol }}
                       </span>
+
                     }
+
                   </div>
+
                 } @else {
+
                   Sin rol
+
                 }
+
               </td>
 
               <td>
 
-                <span
-                  class="estado-badge"
-                  [ngClass]="{
-                    'estado-activo': user.activo,
-                    'estado-inactivo': !user.activo
-                  }"
-                >
+                @if (user.activo) {
 
-                  {{
-                    user.activo
-                      ? 'Activo'
-                      : 'Inactivo'
-                  }}
+                  <span class="estado-badge estado-activo">
+                    Activo
+                  </span>
 
-                </span>
+                } @else {
+
+                  <span class="estado-badge estado-inactivo">
+                    Inactivo
+                  </span>
+
+                }
 
               </td>
 
@@ -184,9 +241,9 @@
 
       <div class="modal-container">
 
-        <!-- =============================================== -->
+        <!-- ================================================= -->
         <!-- HEADER -->
-        <!-- =============================================== -->
+        <!-- ================================================= -->
 
         <div class="modal-header">
 
@@ -209,21 +266,22 @@
             type="button"
             class="modal-close-btn"
             (click)="cerrarModal()"
+            aria-label="Cerrar"
           >
             &times;
           </button>
 
         </div>
 
-        <!-- =============================================== -->
+        <!-- ================================================= -->
         <!-- BODY -->
-        <!-- =============================================== -->
+        <!-- ================================================= -->
 
         <div class="modal-body">
 
-          <!-- ============================================= -->
+          <!-- ================================================= -->
           <!-- SEGURIDAD -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
 
           <div class="modal-section">
 
@@ -255,11 +313,15 @@
 
             </div>
 
+            <!-- ================================================= -->
+            <!-- CAMBIO DE CONTRASEÑA -->
+            <!-- ================================================= -->
+
             @if (mostrarCambioPassword) {
 
               <div class="password-panel">
 
-                <!-- NUEVA PASSWORD -->
+                <!-- NUEVA CONTRASEÑA -->
 
                 <div class="form-group">
 
@@ -316,7 +378,7 @@
 
                 </div>
 
-                <!-- CONFIRMAR PASSWORD -->
+                <!-- CONFIRMAR CONTRASEÑA -->
 
                 <div class="form-group">
 
@@ -393,255 +455,390 @@
 
           </div>
 
-          <hr class="modal-inner-divider" />
+          <!-- ================================================= -->
+          <!-- RESTO DEL FORMULARIO -->
+          <!-- SE OCULTA AL CAMBIAR CONTRASEÑA -->
+          <!-- ================================================= -->
 
-          <!-- ============================================= -->
-          <!-- ROL -->
-          <!-- ============================================= -->
+          @if (!mostrarCambioPassword) {
 
-          <div class="modal-form-grid">
+            <hr class="modal-inner-divider" />
 
-            <fieldset class="form-group roles-fieldset">
+            <!-- =============================================== -->
+            <!-- ROLES -->
+            <!-- =============================================== -->
 
-              <legend>
+            <div class="form-group roles-group">
+
+              <div class="field-label">
                 Roles del Sistema
-              </legend>
-
-              <div class="roles-checkbox-list">
-
-                <div class="rol-checkbox">
-                  <input
-                    type="checkbox"
-                    id="rol-empleado"
-                    [checked]="tieneRol(1)"
-                    (change)="cambiarRol(1, $any($event.target).checked)"
-                  />
-                  <label for="rol-empleado">
-                    Empleado Normal
-                  </label>
-                </div>
-
-                <div class="rol-checkbox">
-                  <input
-                    type="checkbox"
-                    id="rol-jefe"
-                    [checked]="tieneRol(2)"
-                    (change)="cambiarRol(2, $any($event.target).checked)"
-                  />
-                  <label for="rol-jefe">
-                    Jefe Inmediato
-                  </label>
-                </div>
-
-                <div class="rol-checkbox">
-                  <input
-                    type="checkbox"
-                    id="rol-subrrhh"
-                    [checked]="tieneRol(3)"
-                    (change)="cambiarRol(3, $any($event.target).checked)"
-                  />
-                  <label for="rol-subrrhh">
-                    Sub RRHH
-                  </label>
-                </div>
-
-                <div class="rol-checkbox">
-                  <input
-                    type="checkbox"
-                    id="rol-agente"
-                    [checked]="tieneRol(4)"
-                    (change)="cambiarRol(4, $any($event.target).checked)"
-                  />
-                  <label for="rol-agente">
-                    Agente Seg
-                  </label>
-                </div>
-
-                <div class="rol-checkbox">
-                  <input
-                    type="checkbox"
-                    id="rol-administrador"
-                    [checked]="tieneRol(5)"
-                    (change)="cambiarRol(5, $any($event.target).checked)"
-                  />
-                  <label for="rol-administrador">
-                    Administrador
-                  </label>
-                </div>
-
               </div>
 
-            </fieldset>
+              <details class="roles-select">
 
-            <!-- =========================================== -->
+                <summary>
+
+                  <span class="roles-summary-text">
+
+                    @if (rolesTemporales.length === 0) {
+
+                      Seleccione uno o varios roles
+
+                    } @else {
+
+                      @if (rolesTemporales.includes(1)) {
+                        Empleado Normal
+                      }
+
+                      @if (
+                        rolesTemporales.includes(1) &&
+                        (
+                          rolesTemporales.includes(2) ||
+                          rolesTemporales.includes(3) ||
+                          rolesTemporales.includes(4) ||
+                          rolesTemporales.includes(5)
+                        )
+                      ) {
+                        ,
+                      }
+
+                      @if (rolesTemporales.includes(2)) {
+                        Jefe Inmediato
+                      }
+
+                      @if (
+                        rolesTemporales.includes(2) &&
+                        (
+                          rolesTemporales.includes(3) ||
+                          rolesTemporales.includes(4) ||
+                          rolesTemporales.includes(5)
+                        )
+                      ) {
+                        ,
+                      }
+
+                      @if (rolesTemporales.includes(3)) {
+                        Sub RRHH
+                      }
+
+                      @if (
+                        rolesTemporales.includes(3) &&
+                        (
+                          rolesTemporales.includes(4) ||
+                          rolesTemporales.includes(5)
+                        )
+                      ) {
+                        ,
+                      }
+
+                      @if (rolesTemporales.includes(4)) {
+                        Agente Seg
+                      }
+
+                      @if (
+                        rolesTemporales.includes(4) &&
+                        rolesTemporales.includes(5)
+                      ) {
+                        ,
+                      }
+
+                      @if (rolesTemporales.includes(5)) {
+                        Administrador
+                      }
+
+                    }
+
+                  </span>
+
+                  <span class="select-arrow">
+                    ▼
+                  </span>
+
+                </summary>
+
+                <div class="roles-dropdown">
+
+                  <!-- EMPLEADO -->
+
+                  <label class="rol-option">
+
+                    <input
+                      type="checkbox"
+                      [checked]="tieneRol(1)"
+                      (change)="
+                        cambiarRol(
+                          1,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+
+                    <span>
+                      Empleado Normal
+                    </span>
+
+                  </label>
+
+                  <!-- JEFE -->
+
+                  <label class="rol-option">
+
+                    <input
+                      type="checkbox"
+                      [checked]="tieneRol(2)"
+                      (change)="
+                        cambiarRol(
+                          2,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+
+                    <span>
+                      Jefe Inmediato
+                    </span>
+
+                  </label>
+
+                  <!-- SUB RRHH -->
+
+                  <label class="rol-option">
+
+                    <input
+                      type="checkbox"
+                      [checked]="tieneRol(3)"
+                      (change)="
+                        cambiarRol(
+                          3,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+
+                    <span>
+                      Sub RRHH
+                    </span>
+
+                  </label>
+
+                  <!-- AGENTE SEGURIDAD -->
+
+                  <label class="rol-option">
+
+                    <input
+                      type="checkbox"
+                      [checked]="tieneRol(4)"
+                      (change)="
+                        cambiarRol(
+                          4,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+
+                    <span>
+                      Agente Seg
+                    </span>
+
+                  </label>
+
+                  <!-- ADMINISTRADOR -->
+
+                  <label class="rol-option">
+
+                    <input
+                      type="checkbox"
+                      [checked]="tieneRol(5)"
+                      (change)="
+                        cambiarRol(
+                          5,
+                          $any($event.target).checked
+                        )
+                      "
+                    />
+
+                    <span>
+                      Administrador
+                    </span>
+
+                  </label>
+
+                </div>
+
+              </details>
+
+            </div>
+
+            <!-- =============================================== -->
             <!-- ESTADO -->
-            <!-- =========================================== -->
+            <!-- =============================================== -->
 
             <div class="form-group">
 
-              <label for="user-status">
+              <div class="field-label">
                 Estado
-              </label>
+              </div>
 
               <div class="estado-switch">
 
-                <button
-                  type="button"
-                  class="estado-btn"
-                  [ngClass]="{
-                    activo:
-                      usuarioSeleccionado.activo
-                  }"
-                  (click)="
-                    usuarioSeleccionado.activo =
-                      true
-                  "
-                >
-                  🟢 Activo
-                </button>
+                <!-- ACTIVO -->
 
                 <button
                   type="button"
                   class="estado-btn"
-                  [ngClass]="{
-                    inactivo:
-                      !usuarioSeleccionado.activo
-                  }"
+                  [class.activo]="
+                    usuarioSeleccionado.activo === true
+                  "
                   (click)="
-                    usuarioSeleccionado.activo =
-                      false
+                    usuarioSeleccionado.activo = true
                   "
                 >
+
+                  🟢 Activo
+
+                </button>
+
+                <!-- INACTIVO -->
+
+                <button
+                  type="button"
+                  class="estado-btn"
+                  [class.inactivo]="
+                    usuarioSeleccionado.activo === false
+                  "
+                  (click)="
+                    usuarioSeleccionado.activo = false
+                  "
+                >
+
                   🔴 Inactivo
+
                 </button>
 
               </div>
 
             </div>
 
-          </div>
+            <!-- =============================================== -->
+            <!-- DEPENDENCIA -->
+            <!-- =============================================== -->
 
-          <!-- ============================================= -->
-          <!-- DEPENDENCIA -->
-          <!-- ============================================= -->
+            <div class="form-group dependencia-group">
 
-          <div class="form-group dependencia-group">
+              <label for="user-dependencia">
+                Dependencia
+              </label>
 
-            <label for="user-dependencia">
-              Dependencia
-            </label>
+              @if (cargandoDependencias) {
 
-            @if (cargandoDependencias) {
+                <p class="section-desc">
+                  Consultando dependencia...
+                </p>
 
-              <p class="section-desc">
-                Consultando dependencia...
-              </p>
+              } @else {
 
-            } @else {
-
-              <select
-                id="user-dependencia"
-                class="form-control"
-                [(ngModel)]="dependenciaTemporal"
-              >
-
-                <option
-                  [ngValue]="null"
+                <select
+                  id="user-dependencia"
+                  class="form-control"
+                  [(ngModel)]="dependenciaTemporal"
                 >
-                  Seleccione una dependencia
-                </option>
 
-                @for (
-                  dependencia of dependencias;
-                  track dependencia.idDependencia
-                ) {
-
-                  <option
-                    [ngValue]="dependencia.idDependencia"
-                  >
-
-                    {{ dependencia.nomDependencia }}
-
+                  <option [ngValue]="null">
+                    Seleccione una dependencia
                   </option>
+
+                  @for (
+                    dependencia of dependencias;
+                    track dependencia.idDependencia
+                  ) {
+
+                    <option
+                      [ngValue]="dependencia.idDependencia"
+                    >
+                      {{ dependencia.nomDependencia }}
+                    </option>
+
+                  }
+
+                </select>
+
+                @if (dependencias.length === 0) {
+
+                  <p class="password-error">
+                    No se encontraron dependencias disponibles.
+                  </p>
 
                 }
 
-              </select>
-
-              @if (
-                dependencias.length === 0
-              ) {
-
-                <p class="password-error">
-                  No se encontraron dependencias disponibles.
-                </p>
-
               }
 
-            }
-
-          </div>
-
-          <!-- ============================================= -->
-          <!-- INFORMACIÓN DE LA DEPENDENCIA ACTUAL -->
-          <!-- ============================================= -->
-
-          @if (
-            dependenciaActual &&
-            !cargandoDependencias
-          ) {
-
-            <div class="dependencia-info">
-
-              <strong>
-                Dependencia actual:
-              </strong>
-
-              <span>
-                {{
-                  dependenciaActual.nomDependencia
-                }}
-              </span>
-
             </div>
+
+            <!-- =============================================== -->
+            <!-- DEPENDENCIA ACTUAL -->
+            <!-- =============================================== -->
+
+            @if (
+              dependenciaActual &&
+              !cargandoDependencias
+            ) {
+
+              <div class="dependencia-info">
+
+                <strong>
+                  Dependencia actual:
+                </strong>
+
+                <span>
+                  {{ dependenciaActual.nomDependencia }}
+                </span>
+
+              </div>
+
+            }
 
           }
 
         </div>
 
-        <!-- =============================================== -->
+        <!-- ================================================= -->
         <!-- FOOTER -->
-        <!-- =============================================== -->
+        <!-- TAMBIÉN SE OCULTA CON CAMBIO DE PASSWORD -->
+        <!-- ================================================= -->
 
-        <div class="modal-footer">
+        @if (!mostrarCambioPassword) {
 
-          <button
-            type="button"
-            class="btn-secondary"
-            (click)="cerrarModal()"
-          >
-            Cancelar
-          </button>
+          <div class="modal-footer">
 
-          <button
-            type="button"
-            class="btn-primary-save"
-            (click)="guardarCambios()"
-            [disabled]="
-              cargando ||
-              cargandoDependencias
-            "
-          >
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
 
-            {{
-              cargando
-                ? 'Guardando...'
-                : 'Guardar Cambios'
-            }}
+            <button
+              type="button"
+              class="btn-primary-save"
+              (click)="guardarCambios()"
+              [disabled]="
+                cargando ||
+                cargandoDependencias
+              "
+            >
 
-          </button>
+              {{
+                cargando
+                  ? 'Guardando...'
+                  : 'Guardar Cambios'
+              }}
 
-        </div>
+            </button>
+
+          </div>
+
+        }
 
       </div>
 

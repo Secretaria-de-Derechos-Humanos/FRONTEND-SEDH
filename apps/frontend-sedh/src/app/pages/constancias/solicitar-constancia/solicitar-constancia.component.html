@@ -1,0 +1,614 @@
+<div class="constancias-container">
+
+  <!-- ENCABEZADO -->
+  <section class="page-header">
+    <div class="header-content">
+      <div>
+        <span class="section-label">RECURSOS HUMANOS</span>
+        <h1>Solicitud de Constancia de Trabajo</h1>
+        <p>
+          Solicite una constancia de trabajo y consulte el estado de sus solicitudes.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENSAJE DE INFORMACIÓN -->
+  <div class="info-message">
+    <div class="message-icon">
+      <span>i</span>
+    </div>
+
+    <div>
+      <strong>Información importante</strong>
+      <p>
+        La constancia será preparada por Recursos Humanos y estará disponible
+        dentro de un plazo de tres días hábiles después de realizada la solicitud.
+      </p>
+    </div>
+  </div>
+
+  <!-- MENSAJE DE ÉXITO -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="alert-icon">✓</span>
+
+      <div>
+        <strong>Solicitud registrada</strong>
+        <p>{{ successMessage() }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="limpiarMensajes()"
+      >
+        ×
+      </button>
+    </div>
+  }
+
+  <!-- MENSAJE DE ERROR -->
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="alert-icon">!</span>
+
+      <div>
+        <strong>Ocurrió un problema</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="limpiarMensajes()"
+      >
+        ×
+      </button>
+    </div>
+  }
+
+  <!-- FORMULARIO -->
+  <section class="card">
+
+    <div class="card-header">
+      <div>
+        <h2>Nueva solicitud</h2>
+        <p>
+          Complete la información requerida para solicitar su constancia.
+        </p>
+      </div>
+    </div>
+
+    <form
+      [formGroup]="formulario"
+      (ngSubmit)="enviarSolicitud()"
+      class="formulario"
+    >
+
+      <!-- FINALIDADES -->
+      <div class="form-section">
+
+        <div class="section-title">
+          <span class="number">1</span>
+
+          <div>
+            <h3>Finalidad de la constancia</h3>
+            <p>
+              Puede seleccionar una o varias finalidades.
+            </p>
+          </div>
+        </div>
+
+        <div class="finalidades-grid">
+
+          @for (
+            finalidad of finalidadesDisponibles;
+            track finalidad.valor
+          ) {
+            <button
+              type="button"
+              class="finalidad-option"
+              [class.selected]="estaSeleccionada(finalidad.valor)"
+              (click)="seleccionarFinalidad(finalidad.valor)"
+            >
+
+              <div class="checkbox-custom">
+                @if (estaSeleccionada(finalidad.valor)) {
+                  <span>✓</span>
+                }
+              </div>
+
+              <div class="finalidad-content">
+                <span class="finalidad-title">
+                  {{ finalidad.valor }}
+                </span>
+
+                <span class="finalidad-description">
+                  {{ finalidad.nombre }}
+                </span>
+              </div>
+
+            </button>
+          }
+
+        </div>
+
+        @if (finalidadesInvalidas) {
+          <span class="field-error">
+            Debe seleccionar al menos una finalidad.
+          </span>
+        }
+
+      </div>
+
+      <!-- MODALIDAD SALARIO -->
+      <div class="form-section">
+
+        <div class="section-title">
+          <span class="number">2</span>
+
+          <div>
+            <h3>Información salarial</h3>
+            <p>
+              Seleccione cómo debe aparecer la información salarial en la constancia.
+            </p>
+          </div>
+        </div>
+
+        <div class="salary-options">
+
+          @for (
+            modalidad of modalidadesSalario;
+            track modalidad.valor
+          ) {
+            <label
+              class="salary-option"
+              [class.selected]="
+                formulario.controls.modalidadSalario.value === modalidad.valor
+              "
+            >
+
+              <input
+                type="radio"
+                formControlName="modalidadSalario"
+                [value]="modalidad.valor"
+              />
+
+              <span class="radio-custom"></span>
+
+              <span class="salary-content">
+                <strong>{{ modalidad.nombre }}</strong>
+
+                @if (
+                  modalidad.valor === 'CON_DEDUCCIONES'
+                ) {
+                  <small>
+                    La constancia podrá incluir las deducciones correspondientes.
+                  </small>
+                } @else {
+                  <small>
+                    La constancia podrá mostrar el salario sin deducciones.
+                  </small>
+                }
+              </span>
+
+            </label>
+          }
+
+        </div>
+
+        @if (modalidadSalarioInvalida) {
+          <span class="field-error">
+            Debe seleccionar una modalidad de salario.
+          </span>
+        }
+
+      </div>
+
+      <!-- OBSERVACIONES -->
+      <div class="form-section">
+
+        <div class="section-title">
+          <span class="number">3</span>
+
+          <div>
+            <h3>Observaciones</h3>
+            <p>
+              Indique cualquier información adicional que deba conocer Recursos Humanos.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-group">
+
+          <label for="observaciones">
+            Observaciones
+            <span class="optional">(opcional)</span>
+          </label>
+
+          <textarea
+            id="observaciones"
+            formControlName="observaciones"
+            rows="4"
+            maxlength="500"
+            placeholder="Escriba aquí alguna observación o indicación adicional..."
+          ></textarea>
+
+          <div class="textarea-footer">
+            <span>
+              La información será revisada por Recursos Humanos.
+            </span>
+
+            <span>
+              {{ formulario.controls.observaciones.value.length }}/500
+            </span>
+          </div>
+
+          @if (observacionesInvalidas) {
+            <span class="field-error">
+              Las observaciones no pueden superar los 500 caracteres.
+            </span>
+          }
+
+        </div>
+
+      </div>
+
+      <!-- RESUMEN -->
+      <div class="request-summary">
+
+        <div class="summary-header">
+          <h3>Resumen de solicitud</h3>
+        </div>
+
+        <div class="summary-grid">
+
+          <div class="summary-item">
+            <span class="summary-label">
+              Finalidades seleccionadas
+            </span>
+
+            <span class="summary-value">
+              @if (
+                formulario.controls.finalidades.value.length > 0
+              ) {
+                {{ formulario.controls.finalidades.value.length }}
+              } @else {
+                Ninguna
+              }
+            </span>
+          </div>
+
+          <div class="summary-item">
+            <span class="summary-label">
+              Información salarial
+            </span>
+
+            <span class="summary-value">
+              @if (
+                formulario.controls.modalidadSalario.value
+              ) {
+                {{
+                  obtenerNombreModalidadSalario(
+                    formulario.controls.modalidadSalario.value
+                  )
+                }}
+              } @else {
+                No seleccionada
+              }
+            </span>
+          </div>
+
+          <div class="summary-item">
+            <span class="summary-label">
+              Tiempo estimado
+            </span>
+
+            <span class="summary-value">
+              3 días hábiles
+            </span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BOTONES -->
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="formulario.reset({
+            finalidades: [],
+            modalidadSalario: '',
+            observaciones: ''
+          }); limpiarMensajes()"
+          [disabled]="guardando()"
+        >
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn-primary"
+          [disabled]="guardando()"
+        >
+
+          @if (guardando()) {
+            <span class="spinner"></span>
+            Enviando solicitud...
+          } @else {
+            <span>✓</span>
+            Enviar solicitud
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- HISTORIAL -->
+  <section class="card historial-card">
+
+    <div class="card-header">
+      <div>
+        <h2>Mis solicitudes</h2>
+        <p>
+          Consulte el estado de sus solicitudes de constancia.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="cargarSolicitudes()"
+        [disabled]="cargandoSolicitudes()"
+      >
+        ↻ Actualizar
+      </button>
+    </div>
+
+    <!-- CARGANDO -->
+    @if (cargandoSolicitudes()) {
+
+      <div class="loading-container">
+        <span class="loading-spinner"></span>
+
+        <p>
+          Cargando solicitudes...
+        </p>
+      </div>
+
+    } @else {
+
+      <!-- SIN SOLICITUDES -->
+      @if (!tieneSolicitudes()) {
+
+        <div class="empty-state">
+
+          <div class="empty-icon">
+            📄
+          </div>
+
+          <h3>No tiene solicitudes registradas</h3>
+
+          <p>
+            Cuando realice una solicitud de constancia,
+            aparecerá en esta sección.
+          </p>
+
+        </div>
+
+      } @else {
+
+        <!-- TABLA -->
+        <div class="table-wrapper">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Fecha de solicitud</th>
+                <th>Finalidad</th>
+                <th>Salario</th>
+                <th>Estado</th>
+                <th>Fecha de generación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              @for (
+                solicitud of solicitudes();
+                track solicitud.idConstancia
+              ) {
+
+                <tr>
+
+                  <!-- FECHA -->
+                  <td>
+                    <span class="date">
+                      {{ solicitud.fecSolicitud | date:'dd/MM/yyyy' }}
+                    </span>
+                  </td>
+
+                  <!-- FINALIDAD -->
+                  <td>
+                    <div class="finalidad-cell">
+
+                      @if (
+                        solicitud.finalidades &&
+                        solicitud.finalidades.length > 0
+                      ) {
+
+                        @for (
+                          finalidad of solicitud.finalidades;
+                          track finalidad.idConstanciaFinalidad
+                        ) {
+                          <span class="tag">
+                            {{ finalidad.finalidad }}
+                          </span>
+                        }
+
+                      } @else {
+                        <span class="muted">
+                          No especificada
+                        </span>
+                      }
+
+                    </div>
+                  </td>
+
+                  <!-- SALARIO -->
+                  <td>
+                    <span class="salary-badge">
+                      {{
+                        obtenerNombreModalidadSalario(
+                          solicitud.modalidadSalario
+                        )
+                      }}
+                    </span>
+                  </td>
+
+                  <!-- ESTADO -->
+                  <td>
+
+                    @if (esEnProceso(solicitud)) {
+
+                      <span class="status status-process">
+                        <span class="status-dot"></span>
+                        En proceso
+                      </span>
+
+                    } @else if (esAprobada(solicitud)) {
+
+                      <span class="status status-approved">
+                        <span class="status-dot"></span>
+                        Aprobada
+                      </span>
+
+                    } @else if (esRechazada(solicitud)) {
+
+                      <span class="status status-rejected">
+                        <span class="status-dot"></span>
+                        Rechazada
+                      </span>
+
+                    } @else {
+
+                      <span class="status status-process">
+                        <span class="status-dot"></span>
+                        {{ obtenerNombreEstado(solicitud) }}
+                      </span>
+
+                    }
+
+                  </td>
+
+                  <!-- FECHA GENERACIÓN -->
+                  <td>
+                    @if (solicitud.fechaGeneracion) {
+                      {{
+                        solicitud.fechaGeneracion
+                          | date:'dd/MM/yyyy HH:mm'
+                      }}
+                    } @else {
+                      <span class="muted">
+                        Pendiente
+                      </span>
+                    }
+                  </td>
+
+                  <!-- ACCIONES -->
+                  <td>
+
+                    @if (esAprobada(solicitud)) {
+
+                      <button
+                        type="button"
+                        class="btn-download"
+                        [disabled]="
+                          descargando() === solicitud.idConstancia
+                        "
+                        (click)="descargarConstancia(solicitud)"
+                      >
+
+                        @if (
+                          descargando() === solicitud.idConstancia
+                        ) {
+                          <span class="small-spinner"></span>
+                          Descargando...
+                        } @else {
+                          <span>↓</span>
+                          Descargar
+                        }
+
+                      </button>
+
+                    } @else if (esRechazada(solicitud)) {
+
+                      <span class="rejection-label">
+                        Rechazada
+                      </span>
+
+                    } @else {
+
+                      <span class="pending-label">
+                        En revisión
+                      </span>
+
+                    }
+
+                  </td>
+
+                </tr>
+
+                <!-- MOTIVO RECHAZO -->
+                @if (
+                  esRechazada(solicitud) &&
+                  solicitud.motRechazo
+                ) {
+
+                  <tr class="rejection-row">
+
+                    <td colspan="6">
+
+                      <div class="rejection-message">
+
+                        <strong>
+                          Motivo del rechazo:
+                        </strong>
+
+                        <span>
+                          {{ solicitud.motRechazo }}
+                        </span>
+
+                      </div>
+
+                    </td>
+
+                  </tr>
+
+                }
+
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      }
+
+    }
+
+  </section>
+
+</div>

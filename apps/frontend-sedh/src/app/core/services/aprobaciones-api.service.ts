@@ -18,31 +18,44 @@ export interface AprobacionPendiente {
   idPermisoPersonal: string;
   idPermisoOficial?: string | null;
   idPermisoVaca?: string | null;
+
   categoria:
     | 'PERMISO_PERSONAL'
     | 'PERMISO_OFICIAL'
     | 'VACACIONES';
+
   origen: OrigenSolicitud;
+
   emailInstitucional: string;
   fecSolicitud: string;
+
   motivo?: string | null;
   observaciones?: string | null;
+
   horSalida?: string | null;
   horRetorno?: string | null;
   horSolicitadas?: string | number | null;
   idHorasDisponibles?: string | number | null;
+
   catEmergencia: boolean;
   guardiaTurno?: string | null;
+
   tipoSolicitud: TipoSolicitud;
+
   estado?: string | null;
+
+  // Datos de vacaciones
   fecInicial?: string | null;
   fecFinal?: string | null;
   fecRetorno?: string | null;
   cantVacaciones?: number | null;
+
   perAnterior?: string | null;
   cantPerAnterior?: number | null;
+
   perActual?: string | null;
   cantPerActual?: number | null;
+
   totDiasPeriodos?: number | null;
   totDiasRestantes?: number | null;
 }
@@ -71,14 +84,50 @@ interface ApiResponse<T> {
   message?: string;
 }
 
+/**
+ * Respuesta utilizada por el endpoint
+ * de verificación de saldo de vacaciones.
+ */
+export interface VerificacionSaldoVacaciones {
+  idPermisoVaca?: string;
+  idUsuario?: string;
+  diasSolicitados?: number;
+  diasDisponibles?: number;
+  tieneSaldo?: boolean;
+  estado?: string;
+  message?: string;
+}
+
+/**
+ * Datos enviados al verificar el saldo.
+ */
+export interface VerificarSaldoRequest {
+  observacion?: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AprobacionesApiService {
+
   private readonly http = inject(HttpClient);
 
+  /**
+   * Endpoints de aprobaciones generales.
+   */
   private readonly apiUrl =
     `${environment.apiBaseUrl}/rrhh/aprobaciones`;
+
+  /**
+   * Endpoints específicos de vacaciones.
+   */
+  private readonly vacacionesUrl =
+    `${environment.apiBaseUrl}/rrhh/vacaciones`;
+
+
+  // ============================================================
+  // PERMISOS
+  // ============================================================
 
   listarPendientes(): Observable<AprobacionPendiente[]> {
     return this.http
@@ -90,6 +139,7 @@ export class AprobacionesApiService {
       );
   }
 
+
   listarHistorial(): Observable<AprobacionHistorial[]> {
     return this.http
       .get<ApiResponse<AprobacionHistorial[]>>(
@@ -100,6 +150,7 @@ export class AprobacionesApiService {
       );
   }
 
+
   aprobar(
     idPermisoPersonal: string,
   ): Observable<unknown> {
@@ -108,6 +159,7 @@ export class AprobacionesApiService {
       {},
     );
   }
+
 
   rechazar(
     idPermisoPersonal: string,
@@ -120,4 +172,48 @@ export class AprobacionesApiService {
       },
     );
   }
+
+
+  // ============================================================
+// VACACIONES - VERIFICACIÓN DE SALDO
+// ============================================================
+
+listarVacacionesPendientesVerificacion():
+  Observable<AprobacionPendiente[]> {
+
+  return this.http
+    .get<ApiResponse<AprobacionPendiente[]>>(
+      `${this.vacacionesUrl}/pendientes-verificacion`,
+    )
+    .pipe(
+      map((respuesta) => respuesta.data ?? []),
+    );
+}
+
+
+/**
+ * Verifica el saldo disponible de vacaciones.
+ *
+ * Si el empleado tiene suficientes días:
+ * - Se da visto bueno.
+ * - La solicitud continúa hacia Recursos Humanos.
+ *
+ * Si no tiene suficientes días:
+ * - La solicitud se rechaza.
+ *
+ * POST:
+ * /api/v1/rrhh/vacaciones/{id}/verificar-saldo
+ */
+verificarSaldoVacaciones(
+  idPermisoVaca: string,
+  observacion = 'Verificación de saldo de vacaciones.',
+): Observable<unknown> {
+
+  return this.http.post(
+    `${this.vacacionesUrl}/${idPermisoVaca}/verificar-saldo`,
+    {
+      observacion,
+    },
+  );
+}
 }

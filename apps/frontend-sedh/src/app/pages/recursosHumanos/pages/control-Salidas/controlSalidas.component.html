@@ -116,10 +116,12 @@
         </thead>
 
         <tbody>
+
           @for (
             solicitud of solicitudes();
             track solicitud.idpermiso
           ) {
+
             <tr>
 
               <td>
@@ -168,33 +170,128 @@
               <td>
 
                 @if (!solicitud.horaSalida) {
+
                   <button
                     type="button"
                     class="boton-salida"
+                    [disabled]="cargando()"
+                    (click)="abrirFormularioSalida(solicitud)"
                   >
                     Registrar salida
                   </button>
+
                 }
 
                 @else if (!solicitud.horaRetorno) {
+
                   <button
                     type="button"
                     class="boton-retorno"
+                    [disabled]="cargando()"
+                    (click)="abrirFormularioRetorno(solicitud)"
                   >
                     Registrar retorno
                   </button>
+
                 }
 
                 @else {
+
                   <span class="completado">
                     Completado
                   </span>
+
                 }
 
               </td>
 
             </tr>
+
+            @if (
+              solicitudFormulario() ===
+              solicitud.idpermiso
+            ) {
+
+              <tr class="fila-formulario">
+
+                <td colspan="8">
+
+                  <div class="formulario-hora">
+
+                    <div class="formulario-hora__contenido">
+
+                      <div>
+                        <span class="formulario-hora__titulo">
+                          {{
+                            tipoFormulario() === 'salida'
+                              ? 'Registrar salida'
+                              : 'Registrar retorno'
+                          }}
+                        </span>
+
+                        <p class="formulario-hora__empleado">
+                          {{ obtenerNombre(solicitud) }}
+                        </p>
+                      </div>
+
+                      <div class="campo-hora">
+
+  <span class="campo-hora__label">
+    {{
+      tipoFormulario() === 'salida'
+        ? 'Hora de salida'
+        : 'Hora de retorno'
+    }}
+  </span>
+
+  <input
+    type="time"
+    [value]="horaFormulario()"
+    (input)="actualizarHora($event)"
+    [disabled]="cargando()"
+  />
+
+</div>
+
+                      <div class="formulario-hora__acciones">
+
+                        <button
+                          type="button"
+                          class="boton-cancelar"
+                          [disabled]="cargando()"
+                          (click)="cancelarFormulario()"
+                        >
+                          Cancelar
+                        </button>
+
+                        <button
+                          type="button"
+                          [class.boton-salida]="tipoFormulario() === 'salida'"
+                          [class.boton-retorno]="tipoFormulario() === 'retorno'"
+                          [disabled]="cargando()"
+                          (click)="guardarRegistro(solicitud)"
+                        >
+                          {{
+                            tipoFormulario() === 'salida'
+                              ? 'Registrar salida'
+                              : 'Registrar retorno'
+                          }}
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </td>
+
+              </tr>
+
+            }
+
           }
+
         </tbody>
       </table>
 

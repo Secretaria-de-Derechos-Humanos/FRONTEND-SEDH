@@ -12,9 +12,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-
 import { finalize } from 'rxjs';
-
 import { UsuariosApiService } from '../../../app/core/services/usuarios-api';
 import { EncabezadosPaginaComponent } from '../../../app/components/encabezadosPagina/encabezadosPagina.component';
 import { AuthService } from '../../../app/services/auth.service';
@@ -61,6 +59,7 @@ export interface Dependencia {
 // COMPONENTE
 // =========================================================
 
+
 @Component({
   selector: 'app-gestion-usuarios',
 
@@ -90,21 +89,13 @@ export class GestionUsuariosComponent implements OnInit {
   // =========================================================
 
   cargando = false;
-
   cargandoDependencias = false;
-
   usuarios: Usuario[] = [];
-
   usuariosFiltrados: Usuario[] = [];
-
   dependencias: Dependencia[] = [];
-
   mostrarModal = false;
-
   mostrarCambioPassword = false;
-
   guardandoPassword = false;
-
   esAdministrador = false;
 
   // =========================================================
@@ -112,18 +103,15 @@ export class GestionUsuariosComponent implements OnInit {
   // =========================================================
 
   usuarioSeleccionado: Usuario | null = null;
-
   rolesTemporales: number[] = [];
-
   dependenciaTemporal: number | null = null;
-
   dependenciaActual: Dependencia | null = null;
-
   // =========================================================
   // BÚSQUEDA
   // =========================================================
 
   textoBusqueda = '';
+  tipoEstado: 'todos' | 'activos' | 'inactivos' = 'todos';
 
   // =========================================================
   // PASSWORD
@@ -261,21 +249,21 @@ export class GestionUsuariosComponent implements OnInit {
 
         next: (usuarios: Usuario[]) => {
 
-          console.log(
-            'Usuarios procesados:',
-            usuarios,
-          );
+  console.log(
+    'Usuarios procesados:',
+    usuarios,
+  );
 
-          console.log(
-            'Total:',
-            usuarios.length,
-          );
+  console.log(
+    'Total:',
+    usuarios.length,
+  );
 
-          this.usuarios = usuarios;
+  this.usuarios = usuarios;
 
-          this.usuariosFiltrados =
-            [...usuarios];
-        },
+  // Aplicar nuevamente el filtro actual
+  this.filtrarUsuarios();
+},
 
         error: (err) => {
 
@@ -381,49 +369,92 @@ export class GestionUsuariosComponent implements OnInit {
   }
 
   // =========================================================
-  // FILTRAR USUARIOS
+// FILTRAR USUARIOS
+// =========================================================
+
+filtrarUsuarios(): void {
+  const texto = this.textoBusqueda
+    .trim()
+    .toLowerCase();
+
+  let usuarios = [...this.usuarios];
+
+  // =========================================================
+  // FILTRO POR ESTADO
   // =========================================================
 
-  filtrarUsuarios(): void {
-
-    const texto =
-      this.textoBusqueda
-        .trim()
-        .toLowerCase();
-
-    if (!texto) {
-
-      this.usuariosFiltrados =
-        [...this.usuarios];
-
-      return;
-    }
-
-    this.usuariosFiltrados =
-      this.usuarios.filter(
-        (usuario) =>
-
-          usuario.emailInstitucional
-            ?.toLowerCase()
-            .includes(texto)
-
-          ||
-
-          usuario.idUsuario
-            ?.toLowerCase()
-            .includes(texto)
-
-          ||
-
-          usuario.roles?.some(
-            (r) =>
-              r.nomRol
-                .toLowerCase()
-                .includes(texto),
-          ),
-      );
+  if (this.tipoEstado === 'activos') {
+    usuarios = usuarios.filter(
+      (usuario) => usuario.activo === true
+    );
   }
 
+  if (this.tipoEstado === 'inactivos') {
+    usuarios = usuarios.filter(
+      (usuario) => usuario.activo === false
+    );
+  }
+
+  // =========================================================
+  // FILTRO POR TEXTO
+  // =========================================================
+
+  if (texto) {
+    usuarios = usuarios.filter(
+      (usuario) =>
+        usuario.emailInstitucional
+          ?.toLowerCase()
+          .includes(texto)
+
+        ||
+
+        usuario.idUsuario
+          ?.toLowerCase()
+          .includes(texto)
+
+        ||
+
+        usuario.roles?.some(
+          (r) =>
+            r.nomRol
+              .toLowerCase()
+              .includes(texto)
+        )
+    );
+  }
+
+  this.usuariosFiltrados = usuarios;
+}
+// =========================================================
+// CAMBIAR FILTRO DE ESTADO
+// =========================================================
+
+cambiarFiltroEstado(
+  estado: 'todos' | 'activos' | 'inactivos'
+): void {
+  this.tipoEstado = estado;
+
+  this.filtrarUsuarios();
+}
+// =========================================================
+// CONTADORES
+// =========================================================
+
+get cantidadUsuarios(): number {
+  return this.usuarios.length;
+}
+
+get cantidadActivos(): number {
+  return this.usuarios.filter(
+    (usuario) => usuario.activo === true
+  ).length;
+}
+
+get cantidadInactivos(): number {
+  return this.usuarios.filter(
+    (usuario) => usuario.activo === false
+  ).length;
+}
   // =========================================================
   // CREAR USUARIO
   // =========================================================
@@ -658,6 +689,22 @@ export class GestionUsuariosComponent implements OnInit {
     return this.rolesTemporales.includes(idRol);
   }
 
+  obtenerNombresRolesSeleccionados(): string {
+
+    const nombresRoles: Record<number, string> = {
+      1: 'Empleado Normal',
+      2: 'Jefe Inmediato',
+      3: 'Sub RRHH',
+      4: 'Agente Seg',
+      5: 'Administrador',
+    };
+
+    return this.rolesTemporales
+      .map((idRol) => nombresRoles[idRol])
+      .filter(Boolean)
+      .join(', ');
+  }
+
   cambiarRol(idRol: number, seleccionado: boolean): void {
     if (seleccionado) {
       if (!this.rolesTemporales.includes(idRol)) {
@@ -673,6 +720,18 @@ export class GestionUsuariosComponent implements OnInit {
       this.rolesTemporales.filter(
         (rol) => rol !== idRol,
       );
+  }
+
+  // =========================================================
+  // CAMBIAR ESTADO
+  // =========================================================
+
+  cambiarEstadoUsuario(activo: boolean): void {
+    if (!this.usuarioSeleccionado) {
+      return;
+    }
+
+    this.usuarioSeleccionado.activo = activo;
   }
 
   // =========================================================
@@ -832,24 +891,16 @@ export class GestionUsuariosComponent implements OnInit {
   // =========================================================
 
   abrirCambioPassword(): void {
-
     this.mostrarCambioPassword = true;
-
     this.nuevaPassword = '';
-
     this.confirmarPassword = '';
-
     this.mostrarNuevaPassword = false;
   }
 
   cancelarCambioPassword(): void {
-
     this.mostrarCambioPassword = false;
-
     this.nuevaPassword = '';
-
     this.confirmarPassword = '';
-
     this.mostrarNuevaPassword = false;
   }
 
@@ -916,7 +967,6 @@ export class GestionUsuariosComponent implements OnInit {
     }
 
     this.guardandoPassword = true;
-
     this.usuariosService
       .asignarPasswordTemporal(
         this.usuarioSeleccionado.idUsuario,
@@ -925,21 +975,16 @@ export class GestionUsuariosComponent implements OnInit {
       .subscribe({
 
         next: () => {
-
           this.guardandoPassword = false;
-
           this.toastService.mostrar(
             'exito',
             'La contraseña temporal fue asignada correctamente.',
           );
-
           this.cancelarCambioPassword();
         },
 
         error: (error) => {
-
           this.guardandoPassword = false;
-
           console.error(
             'Error al asignar contraseña:',
             error,

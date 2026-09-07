@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth.service';
 
@@ -121,7 +120,7 @@ interface ResponderPermisoResponse {
 }
 
 export interface RegistrarHoraSalidaParams {
-  idpermiso: string;
+  idPermiso: string;
   horaSalida: string;
 }
 
@@ -139,7 +138,7 @@ interface RegistrarHoraSalidaResponse {
 }
 
 export interface RegistrarHoraRetornoParams {
-  idpermiso: string;
+  idPermiso: string;
   horaRetorno: string;
 }
 
@@ -337,56 +336,56 @@ export class PendientesService {
 }
 
   registrarHoraSalida(
-    params: RegistrarHoraSalidaParams,
-  ): Observable<string> {
-    const acceso = this.obtenerAccesoPreferido([4, 5]);
+  params: RegistrarHoraSalidaParams,
+): Observable<string> {
+  const acceso = this.obtenerAccesoPreferido([4, 5]);
 
-    const body = {
-      idpermiso: params.idpermiso,
-      horaSalida: params.horaSalida,
-      idmodulo: this.obtenerIdModulo(acceso),
-    };
+  const body = {
+    idPermiso: params.idPermiso,
+    horaSalida: params.horaSalida,
+    idmodulo: this.obtenerIdModulo(acceso),
+  };
 
-    return this.http
-      .post<RegistrarHoraSalidaResponse>(
-        `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA}`,
-        body,
-      )
-      .pipe(
-        map(
-          (response) =>
-            response.data?.mensaje ??
-            response.message ??
-            'Hora de salida registrada correctamente.',
-        ),
-      );
-  }
+  return this.http
+    .post<RegistrarHoraSalidaResponse>(
+      `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.mensaje ??
+          response.message ??
+          'Hora de salida registrada correctamente.',
+      ),
+    );
+}
 
-  registrarHoraRetorno(
-    params: RegistrarHoraRetornoParams,
-  ): Observable<string> {
-    const acceso = this.obtenerAccesoPreferido([4, 5]);
+ registrarHoraRetorno(
+  params: RegistrarHoraRetornoParams,
+): Observable<string> {
+  const acceso = this.obtenerAccesoPreferido([4, 5]);
 
-    const body = {
-      idpermiso: params.idpermiso,
-      horaRetorno: params.horaRetorno,
-      idmodulo: this.obtenerIdModulo(acceso),
-    };
+  const body = {
+    idPermiso: params.idPermiso,
+    horaRetorno: params.horaRetorno,
+    idmodulo: this.obtenerIdModulo(acceso),
+  };
 
-    return this.http
-      .post<RegistrarHoraRetornoResponse>(
-        `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO}`,
-        body,
-      )
-      .pipe(
-        map(
-          (response) =>
-            response.data?.mensaje ??
-            response.message ??
-            'Hora de retorno registrada correctamente.',
-        ),
-      );
-  }
+  return this.http
+    .post<RegistrarHoraRetornoResponse>(
+      `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.mensaje ??
+          response.message ??
+          'Hora de retorno registrada correctamente.',
+      ),
+    );
+}
 
   private obtenerAccesoPreferido(
     rolesPermitidos: number[],

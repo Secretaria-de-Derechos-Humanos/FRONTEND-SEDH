@@ -361,3 +361,94 @@ tbody tr:last-child td {
     grid-column: auto;
   }
 }
+.fila-formulario td {
+  padding: 0;
+  border-top: none;
+}
+
+.formulario-hora {
+  padding: 16px 20px;
+  background: #f7f9fc;
+  border-top: 1px solid #dbe3ef;
+  border-bottom: 1px solid #dbe3ef;
+}
+
+.formulario-hora__contenido {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.formulario-hora__titulo {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #183b70;
+}
+
+.formulario-hora__empleado {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #667085;
+}
+
+.campo-hora {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-hora__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.campo-hora input {
+  min-width: 130px;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  font-size: 14px;
+  color: #1d2939;
+}
+
+.campo-hora input:focus {
+  outline: none;
+  border-color: #315ca8;
+  box-shadow: 0 0 0 3px rgba(49, 92, 168, 0.12);
+}
+
+.formulario-hora__acciones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.boton-cancelar {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #344054;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.boton-cancelar:hover:not(:disabled) {
+  background: #f2f4f7;
+}
+
+.boton-cancelar:disabled,
+.campo-hora input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.formulario-hora__acciones button {
+  height: 40px;
+}

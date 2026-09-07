@@ -419,6 +419,87 @@ export class GestionConstanciasComponent
         },
       });
   }
+    // =========================================================
+  // DESCARGAR CONSTANCIA
+  // =========================================================
+
+  descargarConstancia(
+    solicitud: Constancia,
+  ): void {
+    this.procesando.set(true);
+    this.limpiarMensajes();
+
+    this.constanciasApi
+      .descargarConstancia(solicitud.idConstancia)
+      .subscribe({
+        next: (respuesta) => {
+          this.procesando.set(false);
+
+          const blob = respuesta.body;
+
+          if (!blob) {
+            this.errorMessage.set(
+              'No se recibió el archivo de la constancia.',
+            );
+            return;
+          }
+
+          let nombreArchivo =
+            solicitud.nombreArchivo ||
+            'constancia-trabajo';
+
+          const contentDisposition =
+            respuesta.headers.get(
+              'Content-Disposition',
+            );
+
+          if (contentDisposition) {
+            const coincidencia =
+              contentDisposition.match(
+                /filename="([^"]+)"/i,
+              );
+
+            if (coincidencia?.[1]) {
+              try {
+                nombreArchivo =
+                  decodeURIComponent(
+                    coincidencia[1],
+                  );
+              } catch {
+                nombreArchivo =
+                  coincidencia[1];
+              }
+            }
+          }
+
+          const url =
+            window.URL.createObjectURL(blob);
+
+          const enlace =
+            document.createElement('a');
+
+          enlace.href = url;
+          enlace.download = nombreArchivo;
+
+          document.body.appendChild(enlace);
+          enlace.click();
+          enlace.remove();
+
+          window.URL.revokeObjectURL(url);
+        },
+
+        error: (error: HttpErrorResponse) => {
+          this.procesando.set(false);
+
+          this.errorMessage.set(
+            this.obtenerMensajeError(
+              error,
+              'No fue posible descargar la constancia.',
+            ),
+          );
+        },
+      });
+  }
 
   // =========================================================
   // ESTADOS

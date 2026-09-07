@@ -346,6 +346,25 @@
 
                     </div>
 
+                                   } @else if (esAprobada(solicitud)) {
+
+                    <div class="actions">
+
+                      <span class="processed">
+                        Procesada
+                      </span>
+
+                      <button
+                        type="button"
+                        class="btn-download"
+                        (click)="descargarConstancia(solicitud)"
+                        [disabled]="procesando()"
+                      >
+                        ↓ Descargar
+                      </button>
+
+                    </div>
+
                   } @else {
 
                     <span class="processed">

@@ -765,3 +765,25 @@ tbody tr:hover:not(.rejection-row) {
     padding: 10px;
   }
 }
+.btn-download {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 14px;
+  background: #1f6f43;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-download:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-download:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

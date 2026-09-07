@@ -13,13 +13,9 @@ import {
 
 import { filter } from 'rxjs/operators';
 
-import {
-  APP_CONFIG,
-} from '../../config/app.config.constants';
+import { APP_CONFIG } from '../../config/app.config.constants';
 
-import {
-  AuthService,
-} from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
 
 interface NavItem {
   label: string;
@@ -29,7 +25,9 @@ interface NavItem {
     | 'pending'
     | 'approval'
     | 'security'
-    | 'user';
+    | 'user'
+    | 'vacation'
+    | 'briefcase';
 
   route: string;
 
@@ -42,10 +40,10 @@ interface NavItem {
   imports: [],
   templateUrl: './sidebarLeft.component.html',
   styleUrl: './sidebarLeft.component.css',
-  changeDetection:
-    ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarLeftComponent {
+
   private readonly router =
     inject(Router);
 
@@ -61,25 +59,33 @@ export class SidebarLeftComponent {
   /*
    * ROLES
    *
-   * 1 = Empleado normal
+   * 1 = Empleado
    * 2 = Jefe inmediato
    * 3 = Subgerente RRHH
    * 4 = Agente de seguridad
-   * 5 = Administrador
+   * 5 = Admin RRHH
+   * 6 = Verificador de vacaciones
    */
+
   private readonly todosLosNavItems:
     NavItem[] = [
+
+      // ========================================================
+      // INICIO
+      // ========================================================
+
       {
         label: 'Inicio',
         icon: 'home',
         route: '/menu-principal',
       },
 
-      /*
-       * Solicitudes que necesitan revisión.
-       *
-       * El agente de seguridad NO entra aquí.
-       */
+
+      // ========================================================
+      // PENDIENTES
+      // ROLES: 2, 3, 5
+      // ========================================================
+
       {
         label: 'Pendientes',
         icon: 'pending',
@@ -91,9 +97,12 @@ export class SidebarLeftComponent {
         ],
       },
 
-      /*
-       * Aprobaciones de RRHH.
-       */
+
+      // ========================================================
+      // APROBACIONES
+      // ROLES: 2, 3, 5
+      // ========================================================
+
       {
         label: 'Aprobaciones',
         icon: 'approval',
@@ -105,13 +114,34 @@ export class SidebarLeftComponent {
         ],
       },
 
-      /*
-       * NUEVO:
-       * módulo independiente del agente.
-       *
-       * 4 = Agente de seguridad
-       * 5 = Administrador
-       */
+
+      // ========================================================
+      // VERIFICACIÓN DE VACACIONES
+      // ROLES: 5, 6
+      //
+      // 5 = Administrador RRHH
+      // 6 = Verificador de vacaciones
+      // ========================================================
+
+      {
+        label: 'Verificación de Vacaciones',
+        icon: 'vacation',
+        route: '/vacaciones/verificacion-saldo',
+        rolesPermitidos: [
+          5,
+          6,
+        ],
+      },
+
+
+      // ========================================================
+      // CONTROL DE SALIDAS
+      // ROLES: 4, 5
+      //
+      // 4 = Agente de seguridad
+      // 5 = Administrador RRHH
+      // ========================================================
+
       {
         label: 'Control de salidas',
         icon: 'security',
@@ -122,9 +152,31 @@ export class SidebarLeftComponent {
         ],
       },
 
-      /*
-       * Gestión de usuarios.
-       */
+
+      // ========================================================
+      // GESTIÓN DE CARGOS
+      // ROLES: 3, 5
+      //
+      // 3 = Subgerente RRHH
+      // 5 = Administrador RRHH
+      // ========================================================
+
+      {
+        label: 'Gestión de cargos',
+        icon: 'briefcase',
+        route: '/rrhh/gestion-cargos',
+        rolesPermitidos: [
+          3,
+          5,
+        ],
+      },
+
+
+      // ========================================================
+      // CREAR USUARIO
+      // SOLO ROL 5
+      // ========================================================
+
       {
         label: 'Crear Usuario',
         icon: 'user',
@@ -135,8 +187,14 @@ export class SidebarLeftComponent {
       },
     ];
 
+
+  // ============================================================
+  // FILTRAR MENÚ SEGÚN ROL
+  // ============================================================
+
   protected readonly navItems =
     computed<NavItem[]>(() => {
+
       const usuario =
         this.authService.currentUser();
 
@@ -152,12 +210,24 @@ export class SidebarLeftComponent {
 
       return this.todosLosNavItems
         .filter((item) => {
+
+          /*
+           * Si el elemento no tiene roles
+           * permitidos, cualquier usuario
+           * autenticado puede verlo.
+           */
+
           if (
-            !item.rolesPermitidos
-              ?.length
+            !item.rolesPermitidos?.length
           ) {
             return true;
           }
+
+          /*
+           * El usuario puede ver el elemento
+           * si posee alguno de los roles
+           * permitidos.
+           */
 
           return item.rolesPermitidos
             .some(
@@ -169,7 +239,13 @@ export class SidebarLeftComponent {
         });
     });
 
+
+  // ============================================================
+  // CAMBIO DE RUTA
+  // ============================================================
+
   constructor() {
+
     this.router.events
       .pipe(
         filter(
@@ -181,37 +257,58 @@ export class SidebarLeftComponent {
         ),
       )
       .subscribe((event) => {
+
         this.currentUrl.set(
           event.urlAfterRedirects,
         );
+
       });
   }
+
+
+  // ============================================================
+  // NAVEGAR
+  // ============================================================
 
   onNavigate(
     route: string,
   ): void {
+
     this.router
       .navigateByUrl(route)
       .then((success) => {
+
         if (success) {
+
           this.currentUrl.set(
             route,
           );
+
         } else {
+
           console.error(
             'Fallo en la navegación a:',
             route,
           );
+
         }
+
       });
   }
+
+
+  // ============================================================
+  // RUTA ACTIVA
+  // ============================================================
 
   isActiveRoute(
     route: string,
   ): boolean {
+
     return (
       this.currentUrl() ===
         route ||
+
       this.currentUrl()
         .startsWith(
           `${route}/`,

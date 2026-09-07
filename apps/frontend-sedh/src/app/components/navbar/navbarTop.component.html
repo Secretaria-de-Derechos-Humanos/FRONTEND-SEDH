@@ -1,65 +1,482 @@
 <header class="navbar">
+
+  <!-- ====================================================== -->
+  <!-- MARCA -->
+  <!-- ====================================================== -->
+
   <div class="navbar__brand">
-    <img src="/LogoOficialGobierno.png" alt="Logo SEDH" class="navbar__logo">
+
+    <img
+      src="/LogoOficialGobierno.png"
+      alt="Logo SEDH"
+      class="navbar__logo"
+    >
+
     <div class="navbar__brand-info">
-      <h1 class="navbar__brand-text">Secretaría de Estado de Derechos Humanos</h1>
-      <p class="navbar__brand-subtitle">Sistema Electrónico de Datos</p>
+
+      <h1 class="navbar__brand-text">
+        Secretaría de Estado de Derechos Humanos
+      </h1>
+
+      <p class="navbar__brand-subtitle">
+        Sistema Electrónico de Datos
+      </p>
+
     </div>
+
   </div>
 
+
+  <!-- ====================================================== -->
+  <!-- ACCIONES -->
+  <!-- ====================================================== -->
+
   <div class="navbar__actions">
-    <app-theme-toggle/>
+
+    <app-theme-toggle />
+
+
+    <!-- ==================================================== -->
+    <!-- NOTIFICACIONES -->
+    <!-- ==================================================== -->
+
+    <div class="navbar__notifications">
+
+      <button
+        type="button"
+        class="navbar__notification-button"
+        [class.navbar__notification-button--active]="
+          isNotificationsOpen()
+        "
+        (click)="toggleNotifications()"
+        aria-label="Notificaciones"
+        title="Notificaciones"
+      >
+
+        <!-- CAMPANA -->
+
+        <svg
+          class="navbar__notification-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+
+          <path
+            d="M18 8C18 4.686 15.314 2 12 2C8.686 2 6 4.686 6 8C6 15 3 15 3 17H21C21 15 18 15 18 8Z"
+          />
+
+          <path
+            d="M10 21H14"
+            stroke-linecap="round"
+          />
+
+        </svg>
+
+
+        <!-- CONTADOR -->
+
+        @if (cantidadNoLeidas() > 0) {
+
+          <span
+            class="navbar__notification-badge"
+          >
+            {{
+              cantidadNoLeidas() > 99
+                ? '99+'
+                : cantidadNoLeidas()
+            }}
+          </span>
+
+        }
+
+      </button>
+
+
+      <!-- ================================================== -->
+      <!-- DROPDOWN NOTIFICACIONES -->
+      <!-- ================================================== -->
+
+      @if (isNotificationsOpen()) {
+
+       <div
+  class="navbar__notifications-overlay"
+  (click)="closeNotifications()"
+  (keydown.escape)="closeNotifications()"
+  tabindex="0"
+  role="button"
+  aria-label="Cerrar notificaciones"
+></div>
+
+
+        <div
+          class="navbar__notifications-dropdown"
+        >
+
+          <!-- HEADER -->
+
+          <div
+            class="navbar__notifications-header"
+          >
+
+            <div>
+
+              <h2>
+                Notificaciones
+              </h2>
+
+              <span>
+                @if (cantidadNoLeidas() > 0) {
+                  {{ cantidadNoLeidas() }}
+                  sin leer
+                } @else {
+                  Todas al día
+                }
+              </span>
+
+            </div>
+
+
+            @if (cantidadNoLeidas() > 0) {
+
+              <button
+                type="button"
+                class="navbar__notifications-read-all"
+                (click)="marcarTodasComoLeidas()"
+              >
+                Marcar todas
+              </button>
+
+            }
+
+          </div>
+
+
+          <!-- CONTENIDO -->
+
+          <div
+            class="navbar__notifications-list"
+          >
+
+            @if (
+              notificaciones().length === 0
+            ) {
+
+              <div
+                class="navbar__notifications-empty"
+              >
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                >
+
+                  <path
+                    d="M18 8C18 4.686 15.314 2 12 2C8.686 2 6 4.686 6 8C6 15 3 15 3 17H21C21 15 18 15 18 8Z"
+                  />
+
+                  <path
+                    d="M10 21H14"
+                    stroke-linecap="round"
+                  />
+
+                </svg>
+
+                <p>
+                  No tienes notificaciones
+                </p>
+
+                <span>
+                  Aquí aparecerán las nuevas solicitudes.
+                </span>
+
+              </div>
+
+            } @else {
+
+              @for (
+                notificacion of notificaciones();
+                track notificacion.idNotificacion
+              ) {
+
+                <button
+                  type="button"
+                  class="navbar__notification-item"
+                  [class.navbar__notification-item--unread]="
+                    !notificacion.leida
+                  "
+                  (click)="abrirNotificacion(notificacion)"
+                >
+
+                  <div
+                    class="navbar__notification-item-icon"
+                  >
+
+                    @switch (notificacion.tipo) {
+
+                      @case ('VACACIONES') {
+
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+
+                          <path
+                            d="M5 4H19"
+                            stroke-linecap="round"
+                          />
+
+                          <path
+                            d="M6 4V20"
+                          />
+
+                          <path
+                            d="M18 4V20"
+                          />
+
+                          <path
+                            d="M6 8H18"
+                          />
+
+                          <path
+                            d="M6 16H18"
+                          />
+
+                        </svg>
+
+                      }
+
+                      @default {
+
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+
+                          <path
+                            d="M18 8C18 4.686 15.314 2 12 2C8.686 2 6 4.686 6 8C6 15 3 15 3 17H21C21 15 18 15 18 8Z"
+                          />
+
+                          <path
+                            d="M10 21H14"
+                            stroke-linecap="round"
+                          />
+
+                        </svg>
+
+                      }
+
+                    }
+
+                  </div>
+
+
+                  <div
+                    class="navbar__notification-content"
+                  >
+
+                    <strong>
+                      {{ notificacion.titulo }}
+                    </strong>
+
+                    <p>
+                      {{ notificacion.mensaje }}
+                    </p>
+
+                    <small>
+                      {{
+                        notificacion.fechaCreacion
+                        | date:'dd/MM/yyyy HH:mm'
+                      }}
+                    </small>
+
+                  </div>
+
+
+                  @if (!notificacion.leida) {
+
+                    <span
+                      class="navbar__notification-dot"
+                    ></span>
+
+                  }
+
+                </button>
+
+              }
+
+            }
+
+          </div>
+
+        </div>
+
+      }
+
+    </div>
+
+
+    <!-- ==================================================== -->
+    <!-- USUARIO -->
+    <!-- ==================================================== -->
 
     <div class="navbar__user-menu">
+
       <button
         class="navbar__user-avatar"
         type="button"
-        (click)="toggleMenu()">
-        <span class="navbar__user-initials">{{ userInitials() }}</span>
+        (click)="toggleMenu()"
+      >
+
+        <span
+          class="navbar__user-initials"
+        >
+          {{ userInitials() }}
+        </span>
+
       </button>
 
+
       @if (isMenuOpen()) {
+
         <div
           class="navbar__dropdown-overlay"
           (click)="closeMenu()"
           (keydown.escape)="closeMenu()"
           tabindex="0"
           role="button"
-          aria-label="Cerrar menú"></div>
-        <div class="navbar__dropdown">
-          <button
-            class="navbar__dropdown-item"
-            (click)="navigateTo('/perfil-usuario')">
-            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <span class="navbar__dropdown-text">Ver perfil</span>
-          </button>
+          aria-label="Cerrar menú"
+        ></div>
+
+
+        <div
+          class="navbar__dropdown"
+        >
+
+          <!-- PERFIL -->
 
           <button
             class="navbar__dropdown-item"
-            (click)="navigateTo('/perfil-usuario', 'seguridad')">
-            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            (click)="navigateTo('/perfil-usuario')"
+          >
+
+            <svg
+              class="navbar__dropdown-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+
+              <path
+                d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+              />
+
+              <circle
+                cx="12"
+                cy="7"
+                r="4"
+              />
+
             </svg>
-            <span class="navbar__dropdown-text">Seguridad</span>
+
+            <span
+              class="navbar__dropdown-text"
+            >
+              Ver perfil
+            </span>
+
           </button>
 
-          <div class="navbar__dropdown-separator"></div>
+
+          <!-- SEGURIDAD -->
+
+          <button
+            class="navbar__dropdown-item"
+            (click)="navigateTo('/perfil-usuario', 'seguridad')"
+          >
+
+            <svg
+              class="navbar__dropdown-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+
+              <path
+                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+              />
+
+            </svg>
+
+            <span
+              class="navbar__dropdown-text"
+            >
+              Seguridad
+            </span>
+
+          </button>
+
+
+          <div
+            class="navbar__dropdown-separator"
+          ></div>
+
+
+          <!-- CERRAR SESIÓN -->
 
           <button
             class="navbar__dropdown-item navbar__dropdown-item--logout"
-            (click)="onLogout()">
-            <svg class="navbar__dropdown-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
+            (click)="onLogout()"
+          >
+
+            <svg
+              class="navbar__dropdown-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+
+              <path
+                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+              />
+
+              <polyline
+                points="16 17 21 12 16 7"
+              />
+
+              <line
+                x1="21"
+                y1="12"
+                x2="9"
+                y2="12"
+              />
+
             </svg>
-            <span class="navbar__dropdown-text">Cerrar sesión</span>
+
+            <span
+              class="navbar__dropdown-text"
+            >
+              Cerrar sesión
+            </span>
+
           </button>
+
         </div>
+
       }
+
     </div>
+
   </div>
+
 </header>

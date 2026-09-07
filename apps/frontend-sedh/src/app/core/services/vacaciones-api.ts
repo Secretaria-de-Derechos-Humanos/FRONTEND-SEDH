@@ -69,27 +69,18 @@ export interface TipoSolicitudVacaciones {
 export interface SolicitudVacaciones {
   idVacaciones?: string;
   idVacacion?: string;
-
   fecSolicitud: string;
   fecInicial: string;
   fecFinal: string;
   fecRetorno?: string | null;
-
   cantVacaciones: number;
-
   observaciones?: string | null;
-
   idEstadoSolicitud: string;
-
   estadoSolicitud?: EstadoSolicitudVacaciones;
-
   idTipoSolicitud?: string;
-
   tipoSolicitud?: TipoSolicitudVacaciones;
-
   priAprobacion?: boolean | null;
   segAprobacion?: boolean | null;
-
   motRechazo?: string | null;
 
   // =======================================================
@@ -99,7 +90,6 @@ export interface SolicitudVacaciones {
   idUsuario?: string;
   emailInstitucional?: string;
   numIdentidad?: string;
-
   primerNombre?: string;
   segundoNombre?: string;
   primerApellido?: string;

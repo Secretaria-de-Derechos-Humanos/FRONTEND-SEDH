@@ -6,19 +6,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
-
 import { CommonModule, DatePipe } from '@angular/common';
-
 import {
   FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-
 import { Router } from '@angular/router';
-
 import { AuthService } from '../../../services/auth.service';
-
 import {
   AjusteSaldoVacaciones,
   CargaInicialSaldo,
@@ -92,46 +87,74 @@ export class SolicitarVacacionesComponent implements OnInit {
   // =========================================================
 
   readonly rolActual = computed(() => {
-    const roles =
-      this.authService.currentUser()?.roles ?? [];
+  const roles =
+    this.authService.currentUser()?.roles ?? [];
 
-    const tieneSubgerente = roles.some(
-      (acceso) => Number(acceso.r) === 3,
-    );
+  // 5 = Administrador
+  const tieneAdministrador = roles.some(
+    (acceso) => Number(acceso.r) === 5,
+  );
 
-    if (tieneSubgerente) {
-      return 3;
-    }
+  if (tieneAdministrador) {
+    return 5;
+  }
 
-    const tieneJefe = roles.some(
-      (acceso) => Number(acceso.r) === 2,
-    );
+  // 3 = Subgerente RRHH
+  const tieneSubgerente = roles.some(
+    (acceso) => Number(acceso.r) === 3,
+  );
 
-    if (tieneJefe) {
-      return 2;
-    }
+  if (tieneSubgerente) {
+    return 3;
+  }
 
-    const tieneAdministrador = roles.some(
-      (acceso) => Number(acceso.r) === 5,
-    );
+  // 6 = Verificador Vacaciones
+  const tieneVerificador = roles.some(
+    (acceso) => Number(acceso.r) === 6,
+  );
 
-    if (tieneAdministrador) {
-      return 5;
-    }
+  if (tieneVerificador) {
+    return 6;
+  }
 
-    return 0;
-  });
+  // 2 = Jefe
+  const tieneJefe = roles.some(
+    (acceso) => Number(acceso.r) === 2,
+  );
 
-  readonly puedeVerReporte = computed(() => {
-    const rol = this.rolActual();
-    return rol === 2 || rol === 3 || rol === 5;
-  });
+  if (tieneJefe) {
+    return 2;
+  }
 
-  readonly puedeAdministrarSaldos = computed(() => {
-    const rol = this.rolActual();
-    return rol === 3 || rol === 5;
-  });
+  // 1 = Empleado
+  const tieneEmpleado = roles.some(
+    (acceso) => Number(acceso.r) === 1,
+  );
 
+  if (tieneEmpleado) {
+    return 1;
+  }
+
+  return 0;
+});
+
+readonly puedeVerReporte = computed(() => {
+  const rol = this.rolActual();
+
+  return (
+    rol === 1 ||
+    rol === 2 ||
+    rol === 3 ||
+    rol === 5 ||
+    rol === 6
+  );
+});
+
+readonly puedeAdministrarSaldos = computed(() => {
+  const rol = this.rolActual();
+
+  return rol === 3 || rol === 5;
+});
   readonly empleados =
     signal<ReporteVacacionesEmpleado[]>([]);
 
@@ -358,6 +381,14 @@ export class SolicitarVacacionesComponent implements OnInit {
 
       return;
     }
+    if (!this.tieneAnticipacionMinima(fechaInicio)) {
+  this.errorMessage.set(
+    'Las vacaciones deben solicitarse con un mínimo de 5 días hábiles de anticipación.',
+  );
+
+  this.diasSolicitados.set(0);
+  return;
+}
 
     this.calcularDias(
       fechaInicio,
@@ -435,6 +466,16 @@ export class SolicitarVacacionesComponent implements OnInit {
 
       return;
     }
+    const fechaInicio =
+  this.formulario.controls.fechaInicio.value;
+
+if (!this.tieneAnticipacionMinima(fechaInicio)) {
+  this.errorMessage.set(
+    'Las vacaciones deben solicitarse con un mínimo de 5 días hábiles de anticipación.',
+  );
+
+  return;
+}
 
     if (!this.saldoSuficiente()) {
       this.errorMessage.set(
@@ -502,6 +543,37 @@ export class SolicitarVacacionesComponent implements OnInit {
         },
       });
   }
+  // =========================================================
+// VALIDAR ANTICIPACIÓN DE 5 DÍAS HÁBILES
+// =========================================================
+
+tieneAnticipacionMinima(fechaInicio: string): boolean {
+  if (!fechaInicio) {
+    return false;
+  }
+
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+
+  const fechaInicioVacaciones = new Date(`${fechaInicio}T00:00:00`);
+
+  let diasHabiles = 0;
+  const fechaAuxiliar = new Date(hoy);
+
+  while (fechaAuxiliar < fechaInicioVacaciones) {
+    fechaAuxiliar.setDate(fechaAuxiliar.getDate() + 1);
+
+    const diaSemana = fechaAuxiliar.getDay();
+
+    // 0 = domingo
+    // 6 = sábado
+    if (diaSemana !== 0 && diaSemana !== 6) {
+      diasHabiles++;
+    }
+  }
+
+  return diasHabiles >= 5;
+}
 
   // =========================================================
   // CARGAR MIS SOLICITUDES

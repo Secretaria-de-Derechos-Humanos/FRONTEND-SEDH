@@ -405,6 +405,33 @@ export const appRoutes: Route[] = [
               m.BuscarEditarEmpleadosComponent,
           ),
       },
+      // =======================================================
+// GESTIÓN DE CARGOS
+// ROLES: 3, 5
+// =======================================================
+
+{
+  path: 'rrhh/gestion-cargos',
+
+  canActivate: [
+    rolesGuard,
+  ],
+
+  data: {
+    roles: [
+      3,
+      5,
+    ],
+  },
+
+  loadComponent: () =>
+    import(
+      './pages/recursosHumanos/pages/gestion-cargos/gestion-cargos.component'
+    ).then(
+      (m) =>
+        m.GestionCargosComponent,
+    ),
+},
 
       // =======================================================
       // CREAR EMPLEADO
@@ -479,6 +506,61 @@ export const appRoutes: Route[] = [
       },
 
       // =======================================================
+// SOLICITAR CONSTANCIA
+// ROLES: 1 (EMPLEADO), 5 (ADMINISTRADOR)
+// =======================================================
+
+{
+  path: 'constancias/solicitar',
+
+  canActivate: [
+    rolesGuard,
+  ],
+
+  data: {
+    roles: [
+      1,
+      5,
+    ],
+  },
+
+  loadComponent: () =>
+    import(
+      './pages/constancias/solicitar-constancia/solicitar-constancia.component'
+    ).then(
+      (m) =>
+        m.SolicitarConstanciaComponent,
+    ),
+},
+
+// =======================================================
+// GESTIÓN DE CONSTANCIAS
+// ROLES: 3 (SUBGERENTE RRHH), 5 (ADMINISTRADOR)
+// =======================================================
+
+{
+  path: 'constancias/gestion',
+
+  canActivate: [
+    rolesGuard,
+  ],
+
+  data: {
+    roles: [
+      3,
+      5,
+    ],
+  },
+
+  loadComponent: () =>
+    import(
+      './pages/constancias/gestion-constancias/gestion-constancias.component'
+    ).then(
+      (m) =>
+        m.GestionConstanciasComponent,
+    ),
+},
+      // =======================================================
       // SOLICITAR VACACIONES
       // ROLES: 1, 2, 3, 4, 5
       // =======================================================
@@ -552,6 +634,35 @@ export const appRoutes: Route[] = [
           ).then(
             (m) =>
               m.PendientesJefeComponent,
+          ),
+      },
+
+
+      // =======================================================
+      // VERIFICACIÓN DE VACACIONES
+      // ROLES: 6 (VERIFICADOR DE VACACIONES), 5 (ADMINISTRADOR)
+      // =======================================================
+
+      {
+        path: 'vacaciones/verificacion-saldo',
+
+        canActivate: [
+          rolesGuard,
+        ],
+
+        data: {
+          roles: [
+            6,
+            5,
+          ],
+        },
+
+        loadComponent: () =>
+          import(
+            './pages/vacaciones/verificacion-vacaciones/verificacion-vacaciones.component'
+          ).then(
+            (m) =>
+              m.VerificacionVacacionesComponent,
           ),
       },
 

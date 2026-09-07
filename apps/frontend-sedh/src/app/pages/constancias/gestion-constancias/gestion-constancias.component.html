@@ -1,0 +1,515 @@
+<div class="gestion-container">
+
+  <!-- ENCABEZADO -->
+  <section class="page-header">
+    <div>
+      <span class="section-label">
+        RECURSOS HUMANOS
+      </span>
+
+      <h1>Gestión de Constancias</h1>
+
+      <p>
+        Revise, procese y genere las constancias de trabajo solicitadas por los empleados.
+      </p>
+    </div>
+  </section>
+
+  <!-- MENSAJES -->
+  @if (successMessage()) {
+    <div class="alert alert-success">
+      <span class="alert-icon">✓</span>
+
+      <div>
+        <strong>Operación realizada</strong>
+        <p>{{ successMessage() }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="limpiarMensajes()"
+      >
+        ×
+      </button>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="alert alert-error">
+      <span class="alert-icon">!</span>
+
+      <div>
+        <strong>Ocurrió un problema</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+
+      <button
+        type="button"
+        class="alert-close"
+        (click)="limpiarMensajes()"
+      >
+        ×
+      </button>
+    </div>
+  }
+
+  <!-- FILTROS -->
+  <section class="card filters-card">
+
+    <div class="filters">
+
+      <div class="search-group">
+        <label for="buscar">
+          Buscar solicitud
+        </label>
+
+        <input
+          id="buscar"
+          type="text"
+          placeholder="Correo institucional o ID de solicitud..."
+          [value]="busqueda()"
+          (input)="cambiarBusqueda($any($event.target).value)"
+        />
+      </div>
+
+      <div class="status-filter">
+        <span class="filter-label">
+          Estado
+        </span>
+
+        <div class="filter-buttons">
+
+          <button
+            type="button"
+            [class.active]="filtroEstado() === 'EN PROCESO'"
+            (click)="cambiarFiltro('EN PROCESO')"
+          >
+            Pendientes
+          </button>
+
+          <button
+            type="button"
+            [class.active]="filtroEstado() === 'TODAS'"
+            (click)="cambiarFiltro('TODAS')"
+          >
+            Todas
+          </button>
+
+          <button
+            type="button"
+            [class.active]="filtroEstado() === 'APROBADO'"
+            (click)="cambiarFiltro('APROBADO')"
+          >
+            Aprobadas
+          </button>
+
+          <button
+            type="button"
+            [class.active]="filtroEstado() === 'RECHAZADO'"
+            (click)="cambiarFiltro('RECHAZADO')"
+          >
+            Rechazadas
+          </button>
+
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="cargarSolicitudes()"
+        [disabled]="cargando()"
+      >
+        ↻ Actualizar
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- LISTADO -->
+  <section class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h2>
+          Solicitudes de constancia
+        </h2>
+
+        <p>
+          Solicitudes encontradas:
+          <strong>
+            {{ solicitudesFiltradas().length }}
+          </strong>
+        </p>
+      </div>
+
+    </div>
+
+    @if (cargando()) {
+
+      <div class="loading">
+        <span class="spinner"></span>
+        <p>Cargando solicitudes...</p>
+      </div>
+
+    } @else if (solicitudesFiltradas().length === 0) {
+
+      <div class="empty-state">
+
+        <div class="empty-icon">
+          📄
+        </div>
+
+        <h3>
+          No hay solicitudes
+        </h3>
+
+        <p>
+          No se encontraron solicitudes con los filtros seleccionados.
+        </p>
+
+      </div>
+
+    } @else {
+
+      <div class="table-wrapper">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Solicitante</th>
+              <th>Finalidad</th>
+              <th>Salario</th>
+              <th>Observaciones</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            @for (
+              solicitud of solicitudesFiltradas();
+              track solicitud.idConstancia
+            ) {
+
+              <tr>
+
+                <!-- FECHA -->
+                <td>
+                  <span class="date">
+                    {{
+                      solicitud.fecSolicitud
+                        | date:'dd/MM/yyyy'
+                    }}
+                  </span>
+                </td>
+
+                <!-- SOLICITANTE -->
+                <td>
+                  <div class="employee-info">
+                    <strong>
+                      {{ solicitud.emailInstitucional }}
+                    </strong>
+
+                    <small>
+                      ID:
+                      {{ solicitud.idConstancia }}
+                    </small>
+                  </div>
+                </td>
+
+                <!-- FINALIDAD -->
+                <td>
+                  <div class="tags">
+
+                    @if (
+                      solicitud.finalidades &&
+                      solicitud.finalidades.length > 0
+                    ) {
+
+                      @for (
+                        finalidad of solicitud.finalidades;
+                        track finalidad.idConstanciaFinalidad
+                      ) {
+                        <span class="tag">
+                          {{ finalidad.finalidad }}
+                        </span>
+                      }
+
+                    } @else {
+
+                      <span class="muted">
+                        No especificada
+                      </span>
+
+                    }
+
+                  </div>
+                </td>
+
+                <!-- SALARIO -->
+                <td>
+                  <span class="salary">
+                    {{
+                      obtenerNombreModalidadSalario(
+                        solicitud.modalidadSalario
+                      )
+                    }}
+                  </span>
+                </td>
+
+                <!-- OBSERVACIONES -->
+                <td>
+                  @if (solicitud.observaciones) {
+                    <span class="observation">
+                      {{ solicitud.observaciones }}
+                    </span>
+                  } @else {
+                    <span class="muted">
+                      Sin observaciones
+                    </span>
+                  }
+                </td>
+
+                <!-- ESTADO -->
+                <td>
+
+                  @if (esEnProceso(solicitud)) {
+
+                    <span class="status status-process">
+                      <span></span>
+                      En proceso
+                    </span>
+
+                  } @else if (esAprobada(solicitud)) {
+
+                    <span class="status status-approved">
+                      <span></span>
+                      Aprobada
+                    </span>
+
+                  } @else if (esRechazada(solicitud)) {
+
+                    <span class="status status-rejected">
+                      <span></span>
+                      Rechazada
+                    </span>
+
+                  } @else {
+
+                    <span class="status status-process">
+                      <span></span>
+                      {{ obtenerNombreEstado(solicitud) }}
+                    </span>
+
+                  }
+
+                </td>
+
+                <!-- ACCIONES -->
+                <td>
+
+                  @if (esEnProceso(solicitud)) {
+
+                    <div class="actions">
+
+                      <!-- SUBIR DOCUMENTO -->
+                      <label class="btn-upload">
+
+                        <span>↑</span>
+                        Generar
+
+                        <input
+                          type="file"
+                          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          (change)="seleccionarArchivo($event, solicitud)"
+                          [disabled]="procesando()"
+                        />
+
+                      </label>
+
+                      <!-- RECHAZAR -->
+                      <button
+                        type="button"
+                        class="btn-reject"
+                        (click)="abrirModalRechazo(solicitud)"
+                        [disabled]="procesando()"
+                      >
+                        Rechazar
+                      </button>
+
+                    </div>
+
+                  } @else {
+
+                    <span class="processed">
+                      Procesada
+                    </span>
+
+                  }
+
+                </td>
+
+              </tr>
+
+              <!-- MOTIVO RECHAZO -->
+              @if (
+                esRechazada(solicitud) &&
+                solicitud.motRechazo
+              ) {
+
+                <tr class="rejection-row">
+
+                  <td colspan="7">
+
+                    <div class="rejection-message">
+
+                      <strong>
+                        Motivo del rechazo:
+                      </strong>
+
+                      <span>
+                        {{ solicitud.motRechazo }}
+                      </span>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              }
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>
+
+<!-- =========================================================
+     MODAL RECHAZO
+     ========================================================= -->
+
+@if (mostrarModalRechazo()) {
+
+  <div class="modal-backdrop">
+
+    <div class="modal">
+
+      <!-- HEADER -->
+      <div class="modal-header">
+
+        <div>
+          <h2>Rechazar solicitud</h2>
+
+          <p>
+            Indique el motivo por el cual la solicitud será rechazada.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="cerrarModalRechazo()"
+          [disabled]="procesando()"
+          aria-label="Cerrar ventana"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <!-- BODY -->
+      <div class="modal-body">
+
+        @if (solicitudSeleccionada()) {
+
+          <div class="request-info">
+
+            <span>
+              Solicitud
+            </span>
+
+            <strong>
+              {{ solicitudSeleccionada()?.idConstancia }}
+            </strong>
+
+          </div>
+
+        }
+
+        <label for="motivoRechazo">
+          Motivo del rechazo
+        </label>
+
+        <textarea
+          id="motivoRechazo"
+          rows="5"
+          maxlength="200"
+          [(ngModel)]="motivoRechazo"
+          placeholder="Escriba el motivo del rechazo..."
+          [disabled]="procesando()"
+        ></textarea>
+
+        <div class="character-count">
+          {{ motivoRechazo.length }}/200
+        </div>
+
+      </div>
+
+      <!-- FOOTER -->
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="cerrarModalRechazo()"
+          [disabled]="procesando()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-reject-confirm"
+          (click)="confirmarRechazo()"
+          [disabled]="
+            procesando() ||
+            motivoRechazo.trim().length < 5
+          "
+        >
+
+          @if (procesando()) {
+
+            <span class="small-spinner"></span>
+            Procesando...
+
+          } @else {
+
+            Rechazar solicitud
+
+          }
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+}

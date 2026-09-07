@@ -64,8 +64,20 @@
       </div>
 
       @if (formulario.controls.fechaFin.value && formulario.controls.fechaInicio.value && formulario.controls.fechaFin.value < formulario.controls.fechaInicio.value) {
-        <span class="error-message">La fecha final no puede ser menor que la fecha inicial.</span>
-      }
+  <span class="error-message">
+    La fecha final no puede ser menor que la inicial.
+  </span>
+}
+
+@if (
+  formulario.controls.fechaInicio.value &&
+  !tieneAnticipacionMinima(formulario.controls.fechaInicio.value)
+) {
+  <span class="error-message">
+    Las vacaciones deben solicitarse con un mínimo de
+    5 días hábiles de anticipación.
+  </span>
+}
 
       <div class="vacaciones-dias">
         <span>Días solicitados</span>
@@ -113,7 +125,11 @@
         <button
           type="submit"
           class="boton-principal"
-          [disabled]="guardando() || calculandoDias() || !saldoSuficiente()"
+          [disabled]="
+          guardando() ||
+          calculandoDias() ||
+          !saldoSuficiente() ||
+          !tieneAnticipacionMinima(formulario.controls.fechaInicio.value)"
         >
           {{ guardando() ? 'Enviando...' : 'Enviar solicitud' }}
         </button>

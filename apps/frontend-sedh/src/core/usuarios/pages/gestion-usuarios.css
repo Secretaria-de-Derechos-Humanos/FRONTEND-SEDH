@@ -32,15 +32,10 @@
 ============================ */
 
 .table-card{
-
     background:white;
-
     border-radius:14px;
-
     box-shadow:0 8px 25px rgba(0,0,0,.08);
-
     overflow:hidden;
-
 }
 
 /* ============================
@@ -48,63 +43,38 @@
 ============================ */
 
 .table{
-
     width:100%;
-
     border-collapse:collapse;
-
 }
 
 .table thead{
-
     background:#0f2b63;
-
     color:white;
-
 }
 
 .table th{
-
     padding:18px;
-
     text-align:left;
-
     font-size:15px;
-
     letter-spacing:.5px;
-
 }
 
 .table td{
-
     padding:16px;
-
     border-bottom:1px solid #ececec;
-
     font-size:14px;
-
 }
 
-/* Hover */
-
 .table tbody tr{
-
     transition:.25s;
-
 }
 
 .table tbody tr:hover{
-
     background:#f5f9ff;
-
 }
 
-/* Zebra */
-
 .table tbody tr:nth-child(even){
-
     background:#fafafa;
-
 }
 
 /* ============================
@@ -112,31 +82,19 @@
 ============================ */
 
 .btn-edit{
-
     background:#0f2b63;
-
     color:white;
-
     border:none;
-
     padding:9px 18px;
-
     border-radius:8px;
-
     cursor:pointer;
-
     transition:.3s;
-
     font-weight:600;
-
 }
 
 .btn-edit:hover{
-
     background:#184aa3;
-
     transform:translateY(-2px);
-
 }
 
 /* ============================
@@ -144,19 +102,13 @@
 ============================ */
 
 .estado-activo{
-
     color:#198754;
-
     font-weight:bold;
-
 }
 
 .estado-inactivo{
-
     color:#dc3545;
-
     font-weight:bold;
-
 }
 
 /* ============================
@@ -164,17 +116,11 @@
 ============================ */
 
 .loading-spinner{
-
     padding:40px;
-
     text-align:center;
-
     font-size:18px;
-
     color:#0f2b63;
-
     font-weight:bold;
-
 }
 
 /* ============================
@@ -182,171 +128,108 @@
 ============================ */
 
 .modal-overlay{
-
     position:fixed;
-
     inset:0;
-
     background:rgba(0,0,0,.45);
-
     display:flex;
-
     justify-content:center;
-
     align-items:center;
-
     z-index:1000;
-
 }
 
 .modal-container{
-
     width:650px;
-
+    max-width:calc(100vw - 30px);
+    max-height:90vh;
     background:white;
-
     border-radius:15px;
-
     overflow:hidden;
-
     box-shadow:0 15px 45px rgba(0,0,0,.25);
-
 }
 
-/* Header */
-
 .modal-header{
-
     background:#0f2b63;
-
     color:white;
-
     padding:18px 25px;
-
     display:flex;
-
     justify-content:space-between;
-
     align-items:center;
-
 }
 
 .modal-header h3{
-
     margin:0;
-
 }
 
 .modal-close-btn{
-
     background:none;
-
     color:white;
-
     border:none;
-
     font-size:28px;
-
     cursor:pointer;
-
 }
 
 /* Body */
 
 .modal-body{
-
     padding:25px;
-
+    max-height:calc(90vh - 135px);
+    overflow-y:auto;
 }
 
 .modal-inner-divider{
-
     margin:20px 0;
-
 }
 
 .form-group{
-
     margin-bottom:20px;
-
 }
 
 .form-group label{
-
     display:block;
-
     margin-bottom:8px;
-
     font-weight:600;
-
 }
 
 .form-control{
-
     width:100%;
-
     padding:12px;
-
     border-radius:8px;
-
     border:1px solid #ccc;
-
     font-size:15px;
-
+    box-sizing:border-box;
 }
 
 /* Footer */
 
 .modal-footer{
-
     display:flex;
-
     justify-content:flex-end;
-
     gap:15px;
-
     padding:20px;
-
     border-top:1px solid #eee;
-
 }
 
 /* Botones */
 
 .btn-primary-save{
-
     background:#0f2b63;
-
     color:white;
-
     border:none;
-
     padding:12px 20px;
-
     border-radius:8px;
-
     cursor:pointer;
-
 }
 
 .btn-primary-save:hover{
-
     background:#184aa3;
-
 }
 
 .btn-secondary{
-
     background:#eee;
-
     border:none;
-
     padding:12px 20px;
-
     border-radius:8px;
-
     cursor:pointer;
-
 }
 
 .btn-reset-password{
@@ -357,55 +240,15 @@
     border-radius:8px;
     cursor:pointer;
 }
+
 .btn-reset-password:hover{
     background:#b45309;
 }
 
-/* Responsive */
-@media(max-width:900px){
-.table{
-display:block;
-overflow:auto;
-white-space:nowrap;
-}
-}
-.toolbar{
-display:flex;
-justify-content:flex-end;
-margin-bottom:20px;
-}
-.buscar{
-width:320px;
-padding:12px;
-border-radius:8px;
-border:1px solid #ccc;
-font-size:15px;
-}
-.estado-switch{
-display:flex;
-gap:15px;
-margin-top:10px;
-}
-.estado-btn{
-padding:12px 20px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-weight:bold;
-background:#ddd;
-transition:.3s;
+/* ============================
+   Toolbar
+============================ */
 
-}
-.estado-btn.activo{
-background:#28a745;
-color:white;
-
-}
-.estado-btn.inactivo{
-background:#dc3545;
-color:white;
-
-}
 .toolbar{
     display:flex;
     justify-content:space-between;
@@ -420,77 +263,447 @@ color:white;
     border-radius:8px;
     font-size:15px;
     transition:.3s;
+    box-sizing:border-box;
 }
 
 .buscar:focus{
     outline:none;
     border-color:#0f2b63;
     box-shadow:0 0 8px rgba(15,43,99,.2);
-
-}
-.security-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
 }
 
-.password-panel {
-  margin-top: 20px;
-  padding: 20px;
-  background: #f7f9fc;
-  border: 1px solid #d9e0ea;
-  border-radius: 10px;
+/* ============================
+   Estado
+============================ */
+
+.estado-switch{
+    display:flex;
+    gap:15px;
+    margin-top:10px;
 }
 
-.password-input-wrapper {
-  display: flex;
-  align-items: stretch;
+.estado-btn{
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#ddd;
+    transition:.3s;
 }
 
-.password-input-wrapper .form-control {
-  border-radius: 8px 0 0 8px;
+.estado-btn.activo{
+    background:#28a745;
+    color:white;
 }
 
-.btn-show-password {
-  border: 1px solid #ccc;
-  border-left: none;
-  padding: 0 15px;
-  background: #edf1f6;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
+.estado-btn.inactivo{
+    background:#dc3545;
+    color:white;
 }
 
-.password-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
+/* ============================
+   Seguridad / Password
+============================ */
+
+.security-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
 }
 
-.btn-save-password {
-  padding: 11px 18px;
-  color: white;
-  background: #143775;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
+.password-panel{
+    margin-top:20px;
+    padding:20px;
+    background:#f7f9fc;
+    border:1px solid #d9e0ea;
+    border-radius:10px;
 }
 
-.btn-save-password:hover {
-  background: #1d4d9b;
+.password-input-wrapper{
+    display:flex;
+    align-items:stretch;
+}
+
+.password-input-wrapper .form-control{
+    border-radius:8px 0 0 8px;
+}
+
+.btn-show-password{
+    border:1px solid #ccc;
+    border-left:none;
+    padding:0 15px;
+    background:#edf1f6;
+    border-radius:0 8px 8px 0;
+    cursor:pointer;
+}
+
+.password-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:20px;
+}
+
+.btn-save-password{
+    padding:11px 18px;
+    color:white;
+    background:#143775;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.btn-save-password:hover{
+    background:#1d4d9b;
 }
 
 .btn-save-password:disabled,
-.btn-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.btn-secondary:disabled{
+    opacity:0.6;
+    cursor:not-allowed;
 }
 
-.password-error {
-  margin: 8px 0 0;
-  color: #c62828;
-  font-size: 14px;
-  font-weight: 600;
+.password-error{
+    margin:8px 0 0;
+    color:#c62828;
+    font-size:14px;
+    font-weight:600;
+}
+
+/* =========================================================
+   ROLES DEL SISTEMA
+   Selector desplegable tipo Dependencia
+   ========================================================= */
+
+.roles-select-group{
+    position:relative;
+}
+
+.roles-select{
+    position:relative;
+    width:100%;
+}
+
+.roles-select summary{
+    width:100%;
+    min-height:46px;
+    box-sizing:border-box;
+    padding:12px 42px 12px 15px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    background:#fff;
+    color:#222;
+    font-size:15px;
+    cursor:pointer;
+    list-style:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:relative;
+    user-select:none;
+}
+
+.roles-select summary::-webkit-details-marker{
+    display:none;
+}
+
+.roles-select summary::marker{
+    display:none;
+}
+
+.roles-select summary:hover{
+    border-color:#aaa;
+}
+
+.roles-select[open] summary{
+    border-color:#0f2b63;
+    box-shadow:0 0 0 2px rgba(15,43,99,.08);
+    border-bottom-left-radius:0;
+    border-bottom-right-radius:0;
+}
+
+.roles-select summary .placeholder{
+    color:#777;
+}
+
+.select-arrow{
+    position:absolute;
+    right:15px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:12px;
+    color:#333;
+    transition:transform .2s ease;
+}
+
+.roles-select[open] .select-arrow{
+    transform:translateY(-50%) rotate(180deg);
+}
+
+.roles-dropdown{
+    position:absolute;
+    left:0;
+    right:0;
+    top:100%;
+    z-index:1100;
+    background:#fff;
+    border:1px solid #0f2b63;
+    border-top:none;
+    border-radius:0 0 8px 8px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+    padding:7px;
+}
+
+.rol-option{
+    display:flex !important;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    box-sizing:border-box;
+    margin:0 !important;
+    padding:10px 11px;
+    border-radius:6px;
+    font-size:15px;
+    font-weight:500 !important;
+    color:#1f2937;
+    cursor:pointer;
+    transition:background .15s ease;
+}
+
+.rol-option:hover{
+    background:#f3f6fb;
+}
+
+.rol-option input[type="checkbox"]{
+    width:18px !important;
+    height:18px;
+    margin:0;
+    flex:0 0 auto;
+    cursor:pointer;
+    accent-color:#1d4ed8;
+}
+
+.rol-option span{
+    line-height:1.4;
+}
+
+.roles-lista{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+}
+
+.rol-badge{
+    display:inline-flex;
+    align-items:center;
+    padding:4px 9px;
+    border-radius:999px;
+    background:#e8eefc;
+    color:#173b7a;
+    font-size:12px;
+    font-weight:600;
+}
+
+/* ============================
+   Dependencia
+============================ */
+
+.dependencia-group{
+    margin-top:4px;
+}
+
+.dependencia-info{
+    margin-top:-8px;
+    margin-bottom:20px;
+    line-height:1.5;
+}
+
+/* ============================
+   Responsive
+============================ */
+
+@media(max-width:900px){
+
+    .table{
+        display:block;
+        overflow:auto;
+        white-space:nowrap;
+    }
+
+    .modal-container{
+        width:calc(100vw - 30px);
+    }
+
+}
+
+@media(max-width:600px){
+
+    .gestion-container{
+        padding:15px;
+    }
+
+    .toolbar{
+        flex-direction:column;
+        align-items:stretch;
+        gap:12px;
+    }
+
+    .buscar{
+        width:100%;
+    }
+
+    .modal-body{
+        padding:18px;
+    }
+
+    .security-header{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .password-actions{
+        flex-direction:column;
+    }
+
+    .password-actions button{
+        width:100%;
+    }
+
+    .estado-switch{
+        flex-wrap:wrap;
+    }
+
+    .modal-footer{
+        flex-direction:column-reverse;
+    }
+
+    .modal-footer button{
+        width:100%;
+    }
+}
+/* ============================
+   Etiquetas de secciones
+============================ */
+
+.form-label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#222;
+}
+
+/* El selector de roles debe ocupar todo el ancho disponible */
+.roles-select-group{
+    width:100%;
+}
+
+.roles-select{
+    width:100%;
+}
+
+.roles-select summary{
+    min-height:46px;
+    box-sizing:border-box;
+}
+
+/* Mantener el desplegable por encima del resto del modal */
+.roles-dropdown{
+    max-height:240px;
+    overflow-y:auto;
+}
+/* =========================================================
+   FILTROS DE ESTADO DE USUARIOS
+   ========================================================= */
+
+.filtros-estado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filtro-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    border: 1px solid #d5dbe5;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #374151;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all .2s ease;
+}
+
+.filtro-btn:hover {
+    background: #f3f6fb;
+    border-color: #0f2b63;
+    transform: translateY(-1px);
+}
+
+.filtro-btn.seleccionado {
+    background: #0f2b63;
+    color: #ffffff;
+    border-color: #0f2b63;
+}
+
+.filtro-contador {
+    min-width: 24px;
+    height: 24px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 6px;
+
+    border-radius: 999px;
+
+    background: #e9eef7;
+    color: #0f2b63;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.filtro-btn.seleccionado .filtro-contador {
+    background: rgba(255, 255, 255, .2);
+    color: #ffffff;
+}
+
+/* =========================================================
+   BOTÓN ACTIVOS
+   ========================================================= */
+
+.filtro-activos:hover {
+    border-color: #198754;
+}
+
+.filtro-activos.seleccionado {
+    background: #198754;
+    border-color: #198754;
+}
+
+/* =========================================================
+   BOTÓN INACTIVOS
+   ========================================================= */
+
+.filtro-inactivos:hover {
+    border-color: #dc3545;
+}
+
+.filtro-inactivos.seleccionado {
+    background: #dc3545;
+    border-color: #dc3545;
 }

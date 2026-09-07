@@ -1,0 +1,329 @@
+<div class="gestion-cargos">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="encabezado">
+
+    <div>
+      <h1>Gestión de cargos</h1>
+
+      <p>
+        Administre los cargos pertenecientes a cada dependencia.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  @if (mensaje()) {
+
+    <div class="mensaje mensaje-exito">
+      {{ mensaje() }}
+    </div>
+
+  }
+
+  @if (error()) {
+
+    <div class="mensaje mensaje-error">
+      {{ error() }}
+    </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- FORMULARIO -->
+  <!-- ===================================================== -->
+
+  <section class="tarjeta">
+
+    <div class="titulo-seccion">
+
+      <div>
+        <h2>
+          {{
+            cargoEditando() !== null
+              ? 'Editar cargo'
+              : 'Crear cargo'
+          }}
+        </h2>
+
+        <p>
+          Seleccione la dependencia y escriba el nombre del cargo.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="formulario">
+
+      <!-- DEPENDENCIA -->
+
+      <div class="campo">
+
+        <label for="dependencia">
+          Dependencia
+        </label>
+
+        <select
+          id="dependencia"
+          [value]="dependenciaSeleccionada() ?? ''"
+          (change)="cambiarDependencia($event)"
+          [disabled]="cargandoDependencias() || guardando()"
+        >
+
+          <option value="">
+            Seleccione una dependencia
+          </option>
+
+          @for (
+            dependencia of dependencias();
+            track dependencia.idDependencia
+          ) {
+
+            <option
+              [value]="dependencia.idDependencia"
+            >
+              {{ dependencia.nomDependencia }}
+            </option>
+
+          }
+
+        </select>
+
+        @if (cargandoDependencias()) {
+
+          <small>
+            Cargando dependencias...
+          </small>
+
+        }
+
+      </div>
+
+
+      <!-- NOMBRE DEL CARGO -->
+
+      <div class="campo">
+
+        <label for="nombreCargo">
+          Nombre del cargo
+        </label>
+
+        <input
+          id="nombreCargo"
+          type="text"
+          maxlength="100"
+          placeholder="Ej. Analista de Recursos Humanos"
+          [value]="nombreCargo()"
+          (input)="nombreCargo.set($any($event.target).value)"
+          [disabled]="guardando()"
+        />
+
+      </div>
+
+
+      <!-- BOTONES -->
+
+      <div class="acciones-formulario">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="guardarCargo()"
+          [disabled]="guardando()"
+        >
+
+          @if (guardando()) {
+            Guardando...
+          } @else if (cargoEditando() !== null) {
+            Actualizar cargo
+          } @else {
+            Crear cargo
+          }
+
+        </button>
+
+
+        @if (cargoEditando() !== null) {
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelarEdicion()"
+            [disabled]="guardando()"
+          >
+            Cancelar
+          </button>
+
+        }
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- LISTADO -->
+  <!-- ===================================================== -->
+
+  <section class="tarjeta">
+
+    <div class="titulo-seccion">
+
+      <div>
+        <h2>
+          Cargos
+        </h2>
+
+        @if (dependenciaSeleccionada() !== null) {
+
+          <p>
+            Cargos de la dependencia seleccionada.
+          </p>
+
+        } @else {
+
+          <p>
+            Seleccione una dependencia para consultar sus cargos.
+          </p>
+
+        }
+
+      </div>
+
+      @if (dependenciaSeleccionada() !== null) {
+
+        <button
+          type="button"
+          class="btn btn-primary btn-nuevo"
+          (click)="nuevoCargo()"
+        >
+          + Nuevo cargo
+        </button>
+
+      }
+
+    </div>
+
+
+    @if (cargandoCargos()) {
+
+      <div class="estado">
+        Cargando cargos...
+      </div>
+
+    } @else if (dependenciaSeleccionada() === null) {
+
+      <div class="estado estado-vacio">
+        Seleccione una dependencia para ver los cargos.
+      </div>
+
+    } @else if (cargos().length === 0) {
+
+      <div class="estado estado-vacio">
+
+        <div class="icono-vacio">
+          📋
+        </div>
+
+        <strong>
+          No hay cargos registrados
+        </strong>
+
+        <span>
+          Esta dependencia todavía no tiene cargos registrados.
+        </span>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="nuevoCargo()"
+        >
+          Crear primer cargo
+        </button>
+
+      </div>
+
+    } @else {
+
+      <div class="tabla-contenedor">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>ID</th>
+              <th>Cargo</th>
+              <th class="columna-acciones">
+                Acciones
+              </th>
+            </tr>
+
+          </thead>
+
+          <tbody>
+
+            @for (
+              cargo of cargos();
+              track cargo.idCargo
+            ) {
+
+              <tr>
+
+                <td>
+                  {{ cargo.idCargo }}
+                </td>
+
+                <td class="nombre-cargo">
+                  {{ cargo.nomCargo }}
+                </td>
+
+                <td class="acciones">
+
+                  <button
+                    type="button"
+                    class="btn-icon editar"
+                    title="Editar cargo"
+                    (click)="editarCargo(cargo)"
+                  >
+                    ✎
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-icon eliminar"
+                    title="Eliminar cargo"
+                    (click)="eliminarCargo(cargo)"
+                  >
+                    🗑
+                  </button>
+
+                </td>
+
+              </tr>
+
+            }
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

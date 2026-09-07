@@ -5,6 +5,7 @@ import { AprobacionHistorial, AprobacionPendiente, AprobacionesApiService } from
 
 type PestanaAprobaciones =
   | 'pendientes'
+  | 'verificacion-vacaciones'
   | 'historial';
 
 type OrigenAprobacion =
@@ -58,6 +59,15 @@ export class AprobacionesComponent
     signal<AprobacionPendiente[]>([]);
   readonly historial =
     signal<AprobacionHistorial[]>([]);
+
+  /**
+   * Solicitudes de vacaciones que ya fueron aprobadas
+   * por el Jefe Inmediato y están pendientes de
+   * verificación de saldo.
+   */
+  readonly vacacionesPendientesVerificacion =
+    signal<AprobacionPendiente[]>([]);
+
   /*
    * Estado de la pantalla
    */
@@ -218,6 +228,40 @@ export class AprobacionesComponent
     });
 
   /*
+   * Filtro de vacaciones pendientes de verificación.
+   */
+  readonly vacacionesVerificacionFiltradas =
+    computed<AprobacionPendiente[]>(() => {
+      const texto =
+        this.busqueda()
+          .trim()
+          .toLowerCase();
+
+      return this.vacacionesPendientesVerificacion()
+        .filter((solicitud) => {
+          if (!texto) {
+            return true;
+          }
+
+          const correo =
+            solicitud.emailInstitucional
+              ?.toLowerCase() ?? '';
+
+          const motivo =
+            solicitud.motivo
+              ?.toLowerCase() ??
+            solicitud.observaciones
+              ?.toLowerCase() ??
+            '';
+
+          return (
+            correo.includes(texto) ||
+            motivo.includes(texto)
+          );
+        });
+    });
+
+  /*
    * Filtro del historial.
    */
   readonly historialFiltrado =
@@ -288,6 +332,13 @@ export class AprobacionesComponent
     computed(
       () =>
         this.aprobacionesFiltradas()
+          .length,
+    );
+
+  readonly solicitudesVacacionesVerificacion =
+    computed(
+      () =>
+        this.vacacionesVerificacionFiltradas()
           .length,
     );
 
@@ -403,9 +454,153 @@ export class AprobacionesComponent
       pestana === 'pendientes'
     ) {
       this.cargarAprobaciones();
+    } else if (
+      pestana === 'verificacion-vacaciones'
+    ) {
+      this.cargarVacacionesPendientesVerificacion();
     } else {
       this.cargarHistorial();
     }
+  }
+
+  /*
+   * Cargar solicitudes de vacaciones pendientes
+   * de verificación de saldo.
+   */
+  cargarVacacionesPendientesVerificacion(): void {
+    this.cargando.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.aprobacionesApi
+      .listarVacacionesPendientesVerificacion()
+      .subscribe({
+        next: (
+          datos: AprobacionPendiente[],
+        ) => {
+          this.vacacionesPendientesVerificacion.set(
+            datos ?? [],
+          );
+
+          this.cargando.set(false);
+        },
+
+        error: (error: unknown) => {
+          console.error(
+            'Error al cargar vacaciones pendientes de verificación:',
+            error,
+          );
+
+          this.vacacionesPendientesVerificacion.set([]);
+
+          this.errorMessage.set(
+            this.obtenerMensajeError(
+              error,
+              'No se pudieron cargar las vacaciones pendientes de verificación.',
+            ),
+          );
+
+          this.cargando.set(false);
+        },
+      });
+  }
+
+  /*
+   * Verificar el saldo de una solicitud de vacaciones.
+   *
+   * El backend realiza la validación:
+   * - Si hay días disponibles, da el visto bueno.
+   * - Si no hay días suficientes, rechaza la solicitud.
+   *
+   * Después de procesar la solicitud se vuelve a cargar
+   * la lista para que desaparezca de pendientes.
+   */
+  verificarSaldoVacaciones(
+    solicitud: AprobacionPendiente,
+  ): void {
+    const idPermisoVaca =
+      solicitud.idPermisoVaca ??
+      solicitud.id;
+
+    if (!idPermisoVaca) {
+      this.errorMessage.set(
+        'La solicitud de vacaciones no tiene un identificador válido.',
+      );
+      return;
+    }
+
+    const confirmar =
+      window.confirm(
+        `¿Desea verificar el saldo de vacaciones de ${solicitud.emailInstitucional}?`,
+      );
+
+    if (!confirmar) {
+      return;
+    }
+
+    this.procesandoId.set(
+      idPermisoVaca,
+    );
+
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.aprobacionesApi
+      .verificarSaldoVacaciones(
+        idPermisoVaca,
+        'Verificación de saldo de vacaciones.',
+      )
+      .subscribe({
+        next: (respuesta: unknown) => {
+          let mensaje =
+            'Verificación de saldo realizada correctamente.';
+
+          if (
+            typeof respuesta === 'object' &&
+            respuesta !== null
+          ) {
+            const respuestaApi =
+              respuesta as {
+                message?: string;
+              };
+
+            if (respuestaApi.message) {
+              mensaje =
+                respuestaApi.message;
+            }
+          }
+
+          this.successMessage.set(
+            mensaje,
+          );
+
+          this.procesandoId.set(
+            null,
+          );
+
+          this.cerrarDetalle();
+
+          this.cargarVacacionesPendientesVerificacion();
+        },
+
+        error: (error: unknown) => {
+          console.error(
+            'Error al verificar saldo de vacaciones:',
+            error,
+          );
+
+          this.errorMessage.set(
+            this.obtenerMensajeError(
+              error,
+              'No se pudo verificar el saldo de vacaciones.',
+            ),
+          );
+
+          this.procesandoId.set(
+            null,
+          );
+        },
+      });
   }
 
   /*
@@ -457,6 +652,11 @@ export class AprobacionesComponent
       'pendientes'
     ) {
       this.cargarAprobaciones();
+    } else if (
+      this.pestanaActiva() ===
+      'verificacion-vacaciones'
+    ) {
+      this.cargarVacacionesPendientesVerificacion();
     } else {
       this.cargarHistorial();
     }

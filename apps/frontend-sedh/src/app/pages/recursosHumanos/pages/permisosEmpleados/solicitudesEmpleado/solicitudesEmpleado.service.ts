@@ -186,7 +186,6 @@ export class SolicitudesEmpleadoService {
       );
   }
 
-
   insertarPermisoOficial(
     body: InsertarPermisoOficialBody
   ): Observable<InsertarPermisoOficialResponse> {
@@ -204,10 +203,7 @@ export class SolicitudesEmpleadoService {
   ): Observable<InsertarPermisoPersonalResponse> {
     return this.http.post<InsertarPermisoPersonalResponse>(
       `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
-      {
-        ...this.emailBody,
-        ...body
-      }
+      body
     );
   }
 

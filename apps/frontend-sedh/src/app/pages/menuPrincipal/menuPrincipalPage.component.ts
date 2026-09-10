@@ -48,7 +48,7 @@ export class MenuPrincipalPageComponent {
 
   navigateTo(route: string): void {
     if (route.startsWith('http://') || route.startsWith('https://')) {
-      window.location.href = route;
+      window.location.assign(route);
       return;
     }
 

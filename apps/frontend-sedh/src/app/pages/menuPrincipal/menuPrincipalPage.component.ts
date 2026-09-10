@@ -47,11 +47,11 @@ export class MenuPrincipalPageComponent {
   ];
 
   navigateTo(route: string): void {
-    if (route.startsWith('http://') || route.startsWith('https://')) {
-      window.location.assign(route);
-      return;
-    }
-
-    this.router.navigate([route]);
+  if (route.startsWith('http://') || route.startsWith('https://')) {
+    window.open(route, '_blank', 'noopener,noreferrer');
+    return;
   }
+
+  this.router.navigate([route]);
+}
 }

@@ -346,32 +346,32 @@
 
                     </div>
 
-                                   } @else if (esAprobada(solicitud)) {
+                   } @else if (esAprobada(solicitud)) {
 
-                    <div class="actions">
+  <div class="actions">
 
-                      <span class="processed">
-                        Procesada
-                      </span>
+    <span class="processed">
+      Procesada
+    </span>
 
-                      <button
-                        type="button"
-                        class="btn-download"
-                        (click)="descargarConstancia(solicitud)"
-                        [disabled]="procesando()"
-                      >
-                        ↓ Descargar
-                      </button>
+    <button
+      type="button"
+      class="btn-download"
+      (click)="descargarConstancia(solicitud)"
+      [disabled]="procesando()"
+    >
+      ↓ Descargar
+    </button>
 
-                    </div>
+  </div>
 
-                  } @else {
+} @else {
 
-                    <span class="processed">
-                      Procesada
-                    </span>
+  <span class="processed">
+    Procesada
+  </span>
 
-                  }
+}
 
                 </td>
 

@@ -697,6 +697,7 @@ get cantidadInactivos(): number {
       3: 'Sub RRHH',
       4: 'Agente Seg',
       5: 'Administrador',
+      6: 'Verificador de Vacaciones',
     };
 
     return this.rolesTemporales

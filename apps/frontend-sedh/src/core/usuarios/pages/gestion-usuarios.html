@@ -643,7 +643,23 @@
                   </label>
 
                   <!-- ADMINISTRADOR -->
+<!-- VERIFICADOR DE VACACIONES -->
+<label class="rol-option">
+  <input
+    type="checkbox"
+    [checked]="tieneRol(6)"
+    (change)="
+      cambiarRol(
+        6,
+        $any($event.target).checked
+      )
+    "
+  />
 
+  <span>
+    Verificador de Vacaciones
+  </span>
+</label>
                   <label class="rol-option">
 
                     <input

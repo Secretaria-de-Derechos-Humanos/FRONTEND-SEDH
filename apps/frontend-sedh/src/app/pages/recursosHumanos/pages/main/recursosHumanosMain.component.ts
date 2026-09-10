@@ -68,7 +68,7 @@ export class RecursosHumanosMainComponent {
       // =====================================================
 
       {
-        label: 'Solicitar algo a RRHH',
+        label: 'Solicitar  Permisos',
 
         imageUrl: 'LogoSolicitarAlgo-RRHH.png',
 
@@ -154,6 +154,27 @@ export class RecursosHumanosMainComponent {
         5,
       ],
     },
+
+    // =====================================================
+// SOLICITAR VACACIONES
+// ROLES: 1, 2, 3, 4, 5
+// =====================================================
+
+{
+  label: 'Vacaciones',
+
+  imageUrl: 'Solicitar_Vacaciones.png',
+
+  route: '/vacaciones/solicitar',
+
+  rolesPermitidos: [
+    1,
+    2,
+    3,
+    4,
+    5,
+  ],
+},
       // =====================================================
       // GESTIÓN DE EMPLEADOS
       // ROLES: 3, 5

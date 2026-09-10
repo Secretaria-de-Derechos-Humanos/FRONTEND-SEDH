@@ -45,13 +45,7 @@ export class MenuPrincipalPageComponent {
       route: 'gestion-usuarios',
       color: 'primary'
     },
-    {
-     title: 'Vacaciones',
-      description: 'Consultar saldo y solicitar vacaciones',
-      route: '/vacaciones/solicitar',
-      imageLight: 'https://www.shutterstock.com/image-vector/illustration-black-summer-graphic-sun-260nw-2751396719.jpg',
-      color: 'primary'
-    },
+
 ];
 
   navigateTo(route: string): void {

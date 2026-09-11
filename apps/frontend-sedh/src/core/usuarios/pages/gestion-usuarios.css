@@ -707,3 +707,10 @@
     background: #dc3545;
     border-color: #dc3545;
 }
+.user-email {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.9;
+}

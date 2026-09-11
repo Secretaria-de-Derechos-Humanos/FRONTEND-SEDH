@@ -247,20 +247,16 @@
 
         <div class="modal-header">
 
-          <h3>
+ <h3>
+  Editar:
+  <span class="highlight-user">
+    {{ usuarioSeleccionado.nombre || 'Sin nombre' }}
+  </span>
 
-            Editar:
-
-            <span class="highlight-user">
-
-              {{
-                usuarioSeleccionado.nombre ||
-                usuarioSeleccionado.emailInstitucional
-              }}
-
-            </span>
-
-          </h3>
+  <small class="user-email">
+    {{ usuarioSeleccionado.emailInstitucional }}
+  </small>
+</h3>
 
           <button
             type="button"

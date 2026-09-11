@@ -63,12 +63,18 @@ interface RolBackend {
 interface UsuarioBackend {
   idUsuario?: string;
   idusuario?: string;
-
   emailInstitucional?: string;
   emailinstitucional?: string;
-
+  priNombre?: string;
+  prinombre?: string;
+  segNombre?: string;
+  segnombre?: string;
+  priApellido?: string;
+  priapellido?: string;
+  segApellido?: string;
+  segapellido?: string;
+  nombre?: string;
   activo?: boolean | string | null;
-
   roles?: RolBackend[];
 }
 
@@ -155,7 +161,18 @@ export class UsuariosApiService {
                 usuario.emailinstitucional ??
                 '',
 
-              nombre: null,
+             nombre:
+              (
+                usuario.nombre ??
+                [
+                  usuario.priNombre ?? usuario.prinombre,
+                  usuario.segNombre ?? usuario.segnombre,
+                  usuario.priApellido ?? usuario.priapellido,
+                  usuario.segApellido ?? usuario.segapellido,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              ).trim() || null,
 
               activo:
                 usuario.activo === true ||

@@ -172,7 +172,27 @@ export class AprobacionesApiService {
       },
     );
   }
+aprobarOficial(
+  idPermisoOficial: string,
+): Observable<unknown> {
+  return this.http.patch(
+    `${this.apiUrl}/oficial/${idPermisoOficial}/aprobar`,
+    {},
+  );
+}
 
+
+rechazarOficial(
+  idPermisoOficial: string,
+  motivoRechazo: string,
+): Observable<unknown> {
+  return this.http.patch(
+    `${this.apiUrl}/oficial/${idPermisoOficial}/rechazar`,
+    {
+      motivoRechazo,
+    },
+  );
+}
 
   // ============================================================
 // VACACIONES - VERIFICACIÓN DE SALDO

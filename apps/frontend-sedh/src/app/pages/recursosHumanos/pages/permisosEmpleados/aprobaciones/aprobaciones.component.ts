@@ -763,114 +763,125 @@ export class AprobacionesComponent
     );
   }
 
-  /*
-   * Aprobar permiso personal.
-   *
-   * Por ahora no se intenta aprobar un
-   * permiso oficial porque todavía no
-   * tienes endpoint PATCH para oficiales.
-   */
-  aprobar(
-    aprobacion:
-      AprobacionTabla,
-  ): void {
-    if (
-      aprobacion.origen !==
-      'PERSONAL'
-    ) {
-      this.errorMessage.set(
-        `La solicitud de ${this.obtenerNombreTipo(aprobacion.origen)} puede visualizarse, pero todavía no tiene un endpoint de aprobación.`,
-      );
 
-      return;
-    }
-
-    const confirmar =
-      window.confirm(
-        `¿Desea aprobar el permiso de ${aprobacion.emailInstitucional}?`,
-      );
-
-    if (!confirmar) {
-      return;
-    }
-
-    this.procesandoId.set(
-      aprobacion.idPermisoPersonal,
+  /**
+ * Aprobar permiso personal u oficial.
+ */
+aprobar(
+  aprobacion: AprobacionTabla,
+): void {
+  if (aprobacion.origen === 'VACACIONES') {
+    this.errorMessage.set(
+      'Las solicitudes de vacaciones se procesan desde su módulo correspondiente.',
     );
 
-    this.errorMessage.set('');
-    this.successMessage.set('');
-
-    this.aprobacionesApi
-      .aprobar(
-        aprobacion
-          .idPermisoPersonal,
-      )
-      .subscribe({
-        next: () => {
-          this.successMessage.set(
-            'Permiso aprobado correctamente.',
-          );
-
-          this.procesandoId.set(
-            null,
-          );
-          this.historial.set([]);
-          this.cerrarDetalle();
-          this.cargarAprobaciones();
-        },
-
-        error: (error: unknown) => {
-          console.error(
-            'Error al aprobar:',
-            error,
-          );
-
-          this.errorMessage.set(
-            this.obtenerMensajeError(
-              error,
-              'No se pudo aprobar el permiso.',
-            ),
-          );
-
-          this.procesandoId.set(
-            null,
-          );
-        },
-      });
+    return;
   }
+
+  const id =
+    aprobacion.origen === 'OFICIAL'
+      ? aprobacion.idPermisoOficial
+      : aprobacion.idPermisoPersonal;
+
+  if (!id) {
+    this.errorMessage.set(
+      'La solicitud no tiene un identificador válido.',
+    );
+
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `¿Desea aprobar el permiso de ${aprobacion.emailInstitucional}?`,
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  this.procesandoId.set(id);
+  this.errorMessage.set('');
+  this.successMessage.set('');
+
+  const solicitud =
+    aprobacion.origen === 'OFICIAL'
+      ? this.aprobacionesApi.aprobarOficial(id)
+      : this.aprobacionesApi.aprobar(id);
+
+  solicitud.subscribe({
+    next: () => {
+      this.successMessage.set(
+        'Permiso aprobado correctamente.',
+      );
+
+      this.procesandoId.set(null);
+      this.historial.set([]);
+      this.cerrarDetalle();
+      this.cargarAprobaciones();
+    },
+
+    error: (error: unknown) => {
+      console.error(
+        'Error al aprobar:',
+        error,
+      );
+
+      this.errorMessage.set(
+        this.obtenerMensajeError(
+          error,
+          'No se pudo aprobar el permiso.',
+        ),
+      );
+
+      this.procesandoId.set(null);
+    },
+  });
+}
 
   /*
    * Abrir modal para rechazo.
    */
-  abrirModalRechazo(
-    aprobacion:
-      AprobacionTabla,
-  ): void {
-    if (
-      aprobacion.origen !==
-      'PERSONAL'
-    ) {
-      this.errorMessage.set(
-        `La solicitud de ${this.obtenerNombreTipo(aprobacion.origen)} puede visualizarse, pero todavía no tiene un endpoint de rechazo.`,
-      );
-
-      return;
-    }
-
-    this.aprobacionSeleccionada.set(
-      aprobacion,
+  /**
+ * Abrir modal para rechazo de permiso personal u oficial.
+ */
+abrirModalRechazo(
+  aprobacion: AprobacionTabla,
+): void {
+  if (aprobacion.origen === 'VACACIONES') {
+    this.errorMessage.set(
+      'Las solicitudes de vacaciones se procesan desde su módulo correspondiente.',
     );
 
-    this.motivoRechazo = '';
-    this.mostrarModalDetalle.set(
-      false,
-    );
-
-    this.mostrarModalRechazo.set(
-      true,
-    );
+    return;
   }
+
+  const id =
+    aprobacion.origen === 'OFICIAL'
+      ? aprobacion.idPermisoOficial
+      : aprobacion.idPermisoPersonal;
+
+  if (!id) {
+    this.errorMessage.set(
+      'La solicitud no tiene un identificador válido.',
+    );
+
+    return;
+  }
+
+  this.aprobacionSeleccionada.set(
+    aprobacion,
+  );
+
+  this.motivoRechazo = '';
+
+  this.mostrarModalDetalle.set(
+    false,
+  );
+
+  this.mostrarModalRechazo.set(
+    true,
+  );
+}
 
   cerrarModalRechazo(): void {
     this.mostrarModalRechazo.set(
@@ -884,83 +895,94 @@ export class AprobacionesComponent
     this.motivoRechazo = '';
   }
 
-  confirmarRechazo(): void {
-    const aprobacion =
-      this.aprobacionSeleccionada();
+ /**
+ * Confirmar rechazo de permiso personal u oficial.
+ */
+confirmarRechazo(): void {
+  const aprobacion =
+    this.aprobacionSeleccionada();
 
-    const motivo =
-      this.motivoRechazo.trim();
+  const motivo =
+    this.motivoRechazo.trim();
 
-    if (!aprobacion) {
-      return;
-    }
+  if (!aprobacion) {
+    return;
+  }
 
-    if (
-      aprobacion.origen !==
-      'PERSONAL'
-    ) {
-      this.errorMessage.set(
-        `Todavía no existe un endpoint para rechazar ${this.obtenerNombreTipo(aprobacion.origen)}.`,
-      );
-
-      return;
-    }
-
-    if (!motivo) {
-      this.errorMessage.set(
-        'Debe escribir el motivo del rechazo.',
-      );
-
-      return;
-    }
-
-    this.procesandoId.set(
-      aprobacion.idPermisoPersonal,
+  if (aprobacion.origen === 'VACACIONES') {
+    this.errorMessage.set(
+      'Las solicitudes de vacaciones se procesan desde su módulo correspondiente.',
     );
 
-    this.errorMessage.set('');
-    this.successMessage.set('');
-
-    this.aprobacionesApi
-      .rechazar(
-        aprobacion
-          .idPermisoPersonal,
-        motivo,
-      )
-      .subscribe({
-        next: () => {
-          this.successMessage.set(
-            'Permiso rechazado correctamente.',
-          );
-
-          this.procesandoId.set(
-            null,
-          );
-
-          this.cerrarModalRechazo();
-
-          this.cargarAprobaciones();
-        },
-
-        error: (error: unknown) => {
-          console.error(
-            'Error al rechazar:',
-            error,
-          );
-
-          this.errorMessage.set(
-            this.obtenerMensajeError(
-              error,
-              'No se pudo rechazar el permiso.',
-            ),
-          );
-
-          this.procesandoId.set(
-            null,
-          );
-        },
-      });
+    return;
   }
+
+  if (!motivo) {
+    this.errorMessage.set(
+      'Debe escribir el motivo del rechazo.',
+    );
+
+    return;
+  }
+
+  const id =
+    aprobacion.origen === 'OFICIAL'
+      ? aprobacion.idPermisoOficial
+      : aprobacion.idPermisoPersonal;
+
+  if (!id) {
+    this.errorMessage.set(
+      'La solicitud no tiene un identificador válido.',
+    );
+
+    return;
+  }
+
+  this.procesandoId.set(id);
+  this.errorMessage.set('');
+  this.successMessage.set('');
+
+  const solicitud =
+    aprobacion.origen === 'OFICIAL'
+      ? this.aprobacionesApi.rechazarOficial(
+          id,
+          motivo,
+        )
+      : this.aprobacionesApi.rechazar(
+          id,
+          motivo,
+        );
+
+  solicitud.subscribe({
+    next: () => {
+      this.successMessage.set(
+        'Permiso rechazado correctamente.',
+      );
+
+      this.procesandoId.set(null);
+
+      this.cerrarModalRechazo();
+
+      this.cargarAprobaciones();
+    },
+
+    error: (error: unknown) => {
+      console.error(
+        'Error al rechazar:',
+        error,
+      );
+
+      this.errorMessage.set(
+        this.obtenerMensajeError(
+          error,
+          'No se pudo rechazar el permiso.',
+        ),
+      );
+
+      this.procesandoId.set(null);
+    },
+  });
+}
 
   /*
    * Exportar pendientes a Excel.

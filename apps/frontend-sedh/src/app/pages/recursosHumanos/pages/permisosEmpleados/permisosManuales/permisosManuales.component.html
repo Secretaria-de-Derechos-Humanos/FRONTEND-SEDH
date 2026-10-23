@@ -1,0 +1,439 @@
+<div class="permisos-page">
+  <header class="page-header">
+    <div class="header-icon"><span aria-hidden="true">📋</span></div>
+    <div>
+      <h1>Registro de permisos manuales</h1>
+      <p>Registre permisos previamente autorizados por Recursos Humanos y documentados en papel.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Tipo de permiso" role="tablist">
+    <button type="button" class="tab" [class.active]="pestana() === 'personal'"
+      [attr.aria-selected]="pestana() === 'personal'" [disabled]="enviando()" role="tab"
+      (click)="cambiarPestana('personal')">
+      <span aria-hidden="true">◷</span> Permisos personales
+    </button>
+    <button type="button" class="tab" [class.active]="pestana() === 'oficial'"
+      [attr.aria-selected]="pestana() === 'oficial'" [disabled]="enviando()" role="tab"
+      (click)="cambiarPestana('oficial')">
+      <span aria-hidden="true">▤</span> Permisos oficiales
+    </button>
+    <button type="button" class="tab" [class.active]="pestana() === 'tardia'"
+      [attr.aria-selected]="pestana() === 'tardia'" [disabled]="enviando()" role="tab"
+      (click)="cambiarPestana('tardia')">
+      <span aria-hidden="true">◷</span> Llegadas tardías
+    </button>
+  </nav>
+
+  <div class="notice">
+    <span class="notice-icon" aria-hidden="true">ℹ</span>
+    <p>Esta pantalla es para registrar permisos que ya cuentan con autorización física. Al guardarlos, se registrarán como aprobados.</p>
+  </div>
+
+  @if (mensajeExito()) {
+    <div class="alert alert-success" role="status">
+      <span aria-hidden="true">✓</span><span>{{ mensajeExito() }}</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" (click)="mensajeExito.set('')">×</button>
+    </div>
+  }
+  @if (mensajeError()) {
+    <div class="alert alert-error" role="alert">
+      <span aria-hidden="true">!</span><span>{{ mensajeError() }}</span>
+      <button type="button" class="alert-close" aria-label="Cerrar mensaje" (click)="mensajeError.set('')">×</button>
+    </div>
+  }
+
+  @if (pestana() === 'personal') {
+    <section class="form-card" role="tabpanel">
+      <div class="form-heading">
+        <div><h2>Permiso personal</h2><p>Registre las horas autorizadas para el empleado.</p></div>
+        <span class="status-label">Se registrará como aprobado</span>
+      </div>
+      <form #formPersonal="ngForm" (ngSubmit)="registrarPersonal(formPersonal)" novalidate>
+        <div class="form-grid">
+          <div class="field full-width autocomplete-field">
+            <label for="personal-email">Buscar empleado por nombre o correo <span class="required">*</span></label>
+            <input id="personal-email" name="emailEmpleado" type="text" [(ngModel)]="personal.emailEmpleado"
+              (ngModelChange)="buscarEmpleado('personal', $event)" placeholder="Escriba al menos 2 caracteres..." maxlength="100" autocomplete="off" required />
+            @if (buscandoPersonal()) { <small class="field-hint">Buscando empleados...</small> }
+            @if (errorBusquedaPersonal()) { <small class="field-error">{{ errorBusquedaPersonal() }}</small> }
+            @if (empleadosPersonal().length > 0) {
+              <div class="autocomplete-list" role="listbox">
+                @for (empleado of empleadosPersonal(); track empleado.emailInstitucional) {
+                  <button type="button" class="autocomplete-option" roles="option" (click)="seleccionarEmpleado('personal', empleado)">
+                    <strong>{{ empleado.nombreCompleto || empleado.emailInstitucional }}</strong>
+                    <small>{{ empleado.emailInstitucional }}</small>
+                  </button>
+                }
+              </div>
+            }
+            @if (empleadoPersonalSeleccionado()) { <small class="field-hint selected-employee">Empleado seleccionado: {{ empleadoPersonalSeleccionado()?.nombreCompleto || empleadoPersonalSeleccionado()?.emailInstitucional }}</small> }
+          </div>
+          <div class="field full-width balance-panel" aria-live="polite">
+            <strong>Saldo de permisos personales</strong>
+            @if (consultandoDisponibilidad()) { <span>Consultando saldo...</span> }
+            @else { <span>{{ saldoPersonalTexto() }}</span> }
+            @if (errorDisponibilidad()) { <small class="field-error">{{ errorDisponibilidad() }}</small> }
+          </div>
+          <div class="field">
+            <label for="personal-fecha">Fecha del permiso <span class="required">*</span></label>
+            <input id="personal-fecha" name="fecha" type="date" [(ngModel)]="personal.fecha" (ngModelChange)="consultarDisponibilidadPersonal()" required />
+          </div>
+          <div class="field">
+            <label for="personal-horas">Horas autorizadas <span class="required">*</span></label>
+            <input id="personal-horas" name="horas" type="time" [(ngModel)]="personal.horas" min="00:01" max="03:00" step="60" required />
+            <small class="field-hint">Máximo 3 horas por día y 9 horas por mes.</small>
+          </div>
+          <div class="field full-width">
+            <label for="personal-motivo">Motivo <span class="required">*</span></label>
+            <textarea id="personal-motivo" name="motivo" [(ngModel)]="personal.motivo" placeholder="Describa el motivo del permiso" rows="3" maxlength="200" required></textarea>
+            <small class="field-hint">Máximo 200 caracteres.</small>
+          </div>
+          <div class="field full-width">
+            <label for="personal-referencia">Referencia del documento <span class="optional">(opcional)</span></label>
+            <input id="personal-referencia" name="referenciaDocumento" type="text" [(ngModel)]="personal.referenciaDocumento" placeholder="Ej. PER-RRHH-2026-015" maxlength="100" />
+          </div>
+          <div class="field">
+  <label for="personal-horaSalida">
+    Hora de salida <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="personal-horaSalida"
+    name="personalHoraSalida"
+    type="time"
+    [(ngModel)]="personal.horaSalida"
+  />
+</div>
+
+<div class="field">
+  <label for="personal-horaRegreso">
+    Hora de regreso <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="personal-horaRegreso"
+    name="personalHoraRegreso"
+    type="time"
+    [(ngModel)]="personal.horaRegreso"
+  />
+</div>
+
+<div class="field full-width">
+  <label for="personal-observacion">
+    Observación <span class="optional">(opcional)</span>
+  </label>
+  <textarea
+    id="personal-observacion"
+    name="personalObservacion"
+    [(ngModel)]="personal.observacion"
+    placeholder="Ej. No regresó a la oficina"
+    rows="2"
+    maxlength="500"
+  ></textarea>
+</div>
+          <div class="field full-width">
+            <label class="checkbox-field" for="personal-emergencia">
+              <input id="personal-emergencia" name="emergencia" type="checkbox" [(ngModel)]="personal.emergencia" />
+              <span><strong>Permiso por emergencia</strong><small>Marque esta opción si corresponde.</small></span>
+            </label>
+          </div>
+        </div>
+        <div class="form-footer">
+          <p><span class="required">*</span> Campos obligatorios.</p>
+          <button type="submit" class="submit-button" [disabled]="enviando() || formPersonal.invalid || !puedeRegistrarPersonal()">
+            {{ enviando() ? 'Registrando...' : 'Registrar permiso personal' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (pestana() === 'oficial') {
+    <section class="form-card" role="tabpanel">
+      <div class="form-heading">
+        <div><h2>Permiso oficial</h2><p>Registre el período autorizado para una comisión oficial.</p></div>
+        <span class="status-label">Se registrará como aprobado</span>
+      </div>
+      <form #formOficial="ngForm" (ngSubmit)="registrarOficial(formOficial)" novalidate>
+        <div class="form-grid">
+          <div class="field full-width autocomplete-field">
+            <label for="oficial-email">Buscar empleado por nombre o correo <span class="required">*</span></label>
+            <input id="oficial-email" name="emailEmpleado" type="text" [(ngModel)]="oficial.emailEmpleado"
+              (ngModelChange)="buscarEmpleado('oficial', $event)" placeholder="Escriba al menos 2 caracteres..." maxlength="100" autocomplete="off" required />
+            @if (buscandoOficial()) { <small class="field-hint">Buscando empleados...</small> }
+            @if (errorBusquedaOficial()) { <small class="field-error">{{ errorBusquedaOficial() }}</small> }
+            @if (empleadosOficial().length > 0) {
+              <div class="autocomplete-list" role="listbox">
+                @for (empleado of empleadosOficial(); track empleado.emailInstitucional) {
+                  <button type="button" class="autocomplete-option" roles="option" (click)="seleccionarEmpleado('oficial', empleado)">
+                    <strong>{{ empleado.nombreCompleto || empleado.emailInstitucional }}</strong>
+                    <small>{{ empleado.emailInstitucional }}</small>
+                  </button>
+                }
+              </div>
+            }
+            @if (empleadoOficialSeleccionado()) { <small class="field-hint selected-employee">Empleado seleccionado: {{ empleadoOficialSeleccionado()?.nombreCompleto || empleadoOficialSeleccionado()?.emailInstitucional }}</small> }
+          </div>
+          <div class="field">
+            <label for="oficial-inicio">Fecha inicial <span class="required">*</span></label>
+            <input id="oficial-inicio" name="fechaInicio" type="date" [(ngModel)]="oficial.fechaInicio" required />
+          </div>
+          <div class="field">
+            <label for="oficial-final">Fecha final <span class="required">*</span></label>
+            <input id="oficial-final" name="fechaFinal" type="date" [(ngModel)]="oficial.fechaFinal" [min]="oficial.fechaInicio" required />
+          </div>
+          <div class="field full-width">
+            <label for="oficial-motivo">Motivo <span class="required">*</span></label>
+            <textarea id="oficial-motivo" name="motivo" [(ngModel)]="oficial.motivo" placeholder="Describa la comisión o actividad oficial" rows="3" maxlength="200" required></textarea>
+            <small class="field-hint">Máximo 200 caracteres.</small>
+          </div>
+           <div class="field">
+  <label for="oficial-horaSalida">
+    Hora de salida <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="oficial-horaSalida"
+    name="oficialHoraSalida"
+    type="time"
+    [(ngModel)]="oficial.horaSalida"
+  />
+</div>
+
+<div class="field">
+  <label for="oficial-horaRegreso">
+    Hora de regreso <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="oficial-horaRegreso"
+    name="oficialHoraRegreso"
+    type="time"
+    [(ngModel)]="oficial.horaRegreso"
+  />
+</div>
+
+<div class="field full-width">
+  <label for="oficial-observacion">
+    Observación <span class="optional">(opcional)</span>
+  </label>
+  <textarea
+    id="oficial-observacion"
+    name="oficialObservacion"
+    [(ngModel)]="oficial.observacion"
+    placeholder="Ej. No regresó a la oficina"
+    rows="2"
+    maxlength="500"
+  ></textarea>
+</div>
+          <div class="field full-width">
+            <label for="oficial-referencia">Referencia del documento <span class="optional">(opcional)</span></label>
+            <input id="oficial-referencia" name="referenciaDocumento" type="text" [(ngModel)]="oficial.referenciaDocumento" placeholder="Ej. PO-RRHH-2026-010" maxlength="100" />
+          </div>
+        </div>
+        <div class="official-info">Los días laborables se calculan en el backend de lunes a viernes, incluyendo las fechas inicial y final y sin excluir feriados.</div>
+        <div class="form-footer">
+          <p><span class="required">*</span> Campos obligatorios.</p>
+          <button type="submit" class="submit-button" [disabled]="enviando() || formOficial.invalid">
+            {{ enviando() ? 'Registrando...' : 'Registrar permiso oficial' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (pestana() === 'tardia') {
+    <section class="form-card" role="tabpanel">
+      <div class="form-heading">
+        <div><h2>Justificación de llegada tardía</h2><p>Registre las llegadas posteriores a la hora de entrada establecida.</p></div>
+        <span class="status-label">Aprobación directa de RR. HH.</span>
+      </div>
+      <div class="notice">
+        <span class="notice-icon" aria-hidden="true">ℹ</span>
+        <p>La hora de entrada es 8:00 a. m. El retraso se calculará en el servidor y los minutos se descontarán del saldo de horas personales disponibles del empleado.</p>
+      </div>
+      <form #formTardia="ngForm" (ngSubmit)="registrarLlegadaTardia(formTardia)" novalidate>
+        <div class="form-grid">
+          <div class="field full-width autocomplete-field">
+            <label for="tardia-email">Buscar empleado por nombre o correo <span class="required">*</span></label>
+            <input id="tardia-email" name="emailEmpleadoTardia" type="text" [(ngModel)]="tardia.emailEmpleado"
+              (ngModelChange)="buscarEmpleadoTardia($event)" placeholder="Escriba al menos 2 caracteres..."
+              maxlength="100" autocomplete="off" required />
+            @if (buscandoTardia()) { <small class="field-hint">Buscando empleados...</small> }
+            @if (errorBusquedaTardia()) { <small class="field-error">{{ errorBusquedaTardia() }}</small> }
+            @if (empleadosTardia().length > 0) {
+              <div class="autocomplete-list" role="listbox">
+                @for (empleado of empleadosTardia(); track empleado.emailInstitucional) {
+                  <button type="button" class="autocomplete-option" roles="option" (click)="seleccionarEmpleadoTardia(empleado)">
+                    <strong>{{ empleado.nombreCompleto || empleado.emailInstitucional }}</strong>
+                    <small>{{ empleado.emailInstitucional }}</small>
+                  </button>
+                }
+              </div>
+            }
+            @if (empleadoTardiaSeleccionado()) {
+              <small class="field-hint selected-employee">Empleado seleccionado: {{ empleadoTardiaSeleccionado()?.nombreCompleto || empleadoTardiaSeleccionado()?.emailInstitucional }}</small>
+            }
+          </div>
+          <div class="field">
+            <label for="tardia-fecha">Fecha de llegada <span class="required">*</span></label>
+            <input id="tardia-fecha" name="fechaLlegada" type="date" [(ngModel)]="tardia.fechaLlegada" required />
+          </div>
+          <div class="field">
+            <label for="tardia-hora">Hora real de llegada <span class="required">*</span></label>
+            <input id="tardia-hora" name="horaLlegadaReal" type="time" [(ngModel)]="tardia.horaLlegadaReal" min="08:01" step="60" required />
+            <small class="field-hint">La entrada establecida es a las 8:00 a. m.</small>
+          </div>
+          <div class="field full-width">
+            <label for="tardia-motivo">Motivo <span class="required">*</span></label>
+            <textarea id="tardia-motivo" name="motivoTardia" [(ngModel)]="tardia.motivo" placeholder="Describa el motivo de la llegada tardía" rows="3" maxlength="1000" required></textarea>
+            <small class="field-hint">Máximo 1000 caracteres.</small>
+          </div>
+          <div class="field full-width">
+            <label for="tardia-referencia">Referencia del documento <span class="optional">(opcional)</span></label>
+            <input id="tardia-referencia" name="referenciaDocumentoTardia" type="text" [(ngModel)]="tardia.referenciaDocumento" placeholder="Ej. JUST-RRHH-2026-015" maxlength="255" />
+          </div>
+          <div class="field">
+  <label for="tardia-horaSalida">
+    Hora de salida <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="tardia-horaSalida"
+    name="tardiaHoraSalida"
+    type="time"
+    [(ngModel)]="tardia.horaSalida"
+  />
+</div>
+
+<div class="field">
+  <label for="tardia-horaRegreso">
+    Hora de regreso <span class="optional">(opcional)</span>
+  </label>
+  <input
+    id="tardia-horaRegreso"
+    name="tardiaHoraRegreso"
+    type="time"
+    [(ngModel)]="tardia.horaRegreso"
+  />
+</div>
+
+<div class="field full-width">
+  <label for="tardia-observacion">
+    Observación <span class="optional">(opcional)</span>
+  </label>
+  <textarea
+    id="tardia-observacion"
+    name="tardiaObservacion"
+    [(ngModel)]="tardia.observacion"
+    placeholder="Ej. No regresó a la oficina"
+    rows="2"
+    maxlength="500"
+  ></textarea>
+</div>
+        </div>
+        <div class="form-footer">
+          <p><span class="required">*</span> Campos obligatorios.</p>
+          <button type="submit" class="submit-button" [disabled]="enviando() || formTardia.invalid || !empleadoTardiaSeleccionado()">
+            {{ enviando() ? 'Registrando...' : 'Registrar llegada tardía' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="reportes-card">
+      <div class="reportes-heading">
+        <div><h2>Historial de llegadas tardías</h2><p>Consulte y revise las justificaciones registradas.</p></div>
+      </div>
+      <div class="reportes-filtros">
+        <div class="field"><label for="tardia-fecha-inicio-reporte">Fecha inicial</label>
+          <input id="tardia-fecha-inicio-reporte" type="date" [value]="fechaInicioReporte()" (change)="fechaInicioReporte.set($any($event.target).value)" />
+        </div>
+        <div class="field"><label for="tardia-fecha-final-reporte">Fecha final</label>
+          <input id="tardia-fecha-final-reporte" type="date" [value]="fechaFinalReporte()" (change)="fechaFinalReporte.set($any($event.target).value)" />
+        </div>
+        <button type="button" class="submit-button" [disabled]="consultandoLlegadasTardias()" (click)="consultarReporteLlegadasTardias()">
+          {{ consultandoLlegadasTardias() ? 'Consultando...' : 'Consultar historial' }}
+        </button>
+      </div>
+      @if (errorReporte()) { <div class="alert alert-error" role="alert">{{ errorReporte() }}</div> }
+      @if (mensajeReporte()) { <div class="alert alert-success" role="status">{{ mensajeReporte() }}</div> }
+      <div class="tabla-heading"><h3>Justificaciones registradas</h3><span class="total-badge">Total: {{ totalLlegadasTardias() }}</span></div>
+      <div class="tabla-reportes">
+        <table>
+          <thead><tr><th>Empleado</th><th>Correo</th><th>Fecha</th><th>Entrada</th><th>Llegada real</th><th>Retraso (min)</th><th>Motivo</th><th>Referencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            @for (p of llegadasTardias(); track p.idJustificacion) {
+              <tr>
+                <td>{{ p.empleado || '—' }}</td><td>{{ p.emailInstitucional }}</td><td>{{ formatearFecha(p.fechaLlegada) }}</td>
+                <td>{{ p.horaEntradaEstablecida }}</td><td>{{ p.horaLlegadaReal }}</td><td>{{ p.minutosRetraso }}</td>
+                <td>{{ p.motivo }}</td><td>{{ p.referenciaDocumento || '—' }}</td><td><span class="estado-chip">{{ p.estado }}</span></td>
+                <td>@if (p.estado === 'APROBADO') {
+                  <button type="button" class="action-button" [disabled]="anulandoLlegadaTardia() !== null" (click)="anularLlegadaTardia(p)">
+                    {{ anulandoLlegadaTardia() === p.idJustificacion ? 'Anulando...' : 'Anular' }}
+                  </button>
+                } @else { — }</td>
+              </tr>
+            } @empty { <tr><td class="tabla-vacia" colspan="10">No hay llegadas tardías en el rango consultado.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+  @if (pestana() !== 'tardia') {
+  <!-- REPORTES POR RANGO DE FECHAS -->
+  <section class="reportes-card">
+    <div class="reportes-heading">
+      <div><h2>Reportes de permisos manuales</h2><p>Consulte y exporte todos los registros manuales del período seleccionado.</p></div>
+    </div>
+
+    <div class="reportes-filtros">
+      <div class="field">
+        <label for="fechaInicioReporte">Fecha inicial</label>
+        <input id="fechaInicioReporte" type="date" [value]="fechaInicioReporte()"
+          (change)="fechaInicioReporte.set($any($event.target).value)" />
+      </div>
+      <div class="field">
+        <label for="fechaFinalReporte">Fecha final</label>
+        <input id="fechaFinalReporte" type="date" [value]="fechaFinalReporte()"
+          (change)="fechaFinalReporte.set($any($event.target).value)" />
+      </div>
+      <button type="button" class="submit-button" [disabled]="consultandoReportes()" (click)="consultarReportes()">
+        {{ consultandoReportes() ? 'Consultando...' : 'Consultar reportes' }}
+      </button>
+    </div>
+
+    @if (errorReporte()) { <div class="alert alert-error" role="alert">{{ errorReporte() }}</div> }
+    @if (mensajeReporte()) { <div class="alert alert-success" role="status">{{ mensajeReporte() }}</div> }
+
+    <div class="reportes-exportar">
+      <button type="button" [disabled]="consultandoReportes()" (click)="exportarExcel()">Exportar Excel (.xlsx)</button>
+      <button type="button" [disabled]="consultandoReportes()" (click)="exportarPDF()">Exportar PDF</button>
+    </div>
+
+    @if (pestana() === 'personal') {
+      <div class="tabla-heading"><h3>Permisos personales</h3><span class="total-badge">Total: {{ totalPersonal() }}</span></div>
+      <div class="tabla-reportes">
+        <table>
+          <thead><tr><th>Empleado</th><th>Correo</th><th>Fecha</th><th>Horas</th><th>Motivo</th><th>Emergencia</th><th>Referencia</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (p of reportePersonal(); track p.idPermiso) {
+              <tr><td>{{ p.empleado }}</td><td>{{ p.emailInstitucional }}</td><td>{{ p.fecha | date:'dd/MM/yyyy' }}</td><td>{{ p.horas }}</td><td>{{ p.motivo }}</td><td>{{ p.emergencia ? 'Sí' : 'No' }}</td><td>{{ p.referenciaDocumento || '—' }}</td><td><span class="estado-chip">{{ p.estado }}</span></td></tr>
+            } @empty { <tr><td class="tabla-vacia" colspan="8">No hay permisos personales para mostrar en el rango consultado.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="tabla-heading"><h3>Permisos oficiales</h3><span class="total-badge">Total: {{ totalOficial() }}</span></div>
+      <div class="tabla-reportes">
+        <table>
+          <thead><tr><th>Empleado</th><th>Correo</th><th>Fecha inicial</th><th>Fecha final</th><th>Días laborables</th><th>Motivo</th><th>Referencia</th><th>Estado</th></tr></thead>
+          <tbody>
+            @for (p of reporteOficial(); track p.idPermiso) {
+              <tr><td>{{ p.empleado }}</td><td>{{ p.emailInstitucional }}</td><td>{{ p.fechaInicio | date:'dd/MM/yyyy' }}</td><td>{{ p.fechaFinal | date:'dd/MM/yyyy' }}</td><td>{{ p.diasLaborables }}</td><td>{{ p.motivo }}</td><td>{{ p.referenciaDocumento || '—' }}</td><td><span class="estado-chip">{{ p.estado }}</span></td></tr>
+            } @empty { <tr><td class="tabla-vacia" colspan="8">No hay permisos oficiales para mostrar en el rango consultado.</td></tr> }
+          </tbody>
+        </table>
+      </div>
+    }
+    <p class="reportes-nota">La exportación Excel incluye dos hojas: Personales y Oficiales. La exportación PDF incluye ambos tipos de permiso.</p>
+  </section>
+  }
+</div>

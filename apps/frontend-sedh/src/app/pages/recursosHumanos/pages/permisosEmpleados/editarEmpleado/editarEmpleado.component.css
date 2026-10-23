@@ -80,7 +80,7 @@
   color: #344054;
 }
 
-.grupo input,
+.grupo input:not([type='checkbox']),
 .grupo select,
 .grupo textarea {
   padding: 12px;
@@ -91,31 +91,42 @@
   background: white;
 }
 
-.grupo input:focus,
+.grupo input:not([type='checkbox']):focus,
 .grupo select:focus,
 .grupo textarea:focus {
   outline: none;
   border-color: #1d4ed8;
   box-shadow:
-      0 0 0 4px
-      rgba(29,78,216,.12);
-
+    0 0 0 4px
+    rgba(29,78,216,.12);
 }
 
-.grupo-checkbox{
-    display:flex;
-    align-items:center;
-    justify-content:center;
+.grupo-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
-.grupo-checkbox label{
-    display:flex;
-    align-items:center;
-    gap:10px;
 
+.grupo-checkbox label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  margin: 0;
+  cursor: pointer;
 }
-.grupo-checkbox input{
-    width:18px;
-    height:18px;
+
+.grupo-checkbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  flex: 0 0 18px;
 }
 
 /* ===========================

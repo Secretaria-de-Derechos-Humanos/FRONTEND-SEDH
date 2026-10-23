@@ -350,6 +350,30 @@ export const appRoutes: Route[] = [
           ),
       },
 
+
+      // =======================================================
+      // REGISTRO DE PERMISOS MANUALES
+      // ROLES: 3, 5
+      // =======================================================
+
+      {
+        path: 'rrhh/permisos-manuales',
+
+        canActivate: [rolesGuard],
+
+        data: {
+          roles: [3, 5],
+        },
+
+        loadComponent: () =>
+          import(
+            './pages/recursosHumanos/pages/permisosEmpleados/permisosManuales/permisosManuales.component'
+          ).then(
+            (m) => m.PermisosManualesComponent,
+          ),
+      },
+
+
       // =======================================================
       // CONTROL DE SALIDAS
       // ROLES: 4, 5

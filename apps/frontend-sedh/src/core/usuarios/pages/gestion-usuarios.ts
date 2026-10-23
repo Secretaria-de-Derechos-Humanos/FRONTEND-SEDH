@@ -247,8 +247,7 @@ export class GestionUsuariosComponent implements OnInit {
       )
       .subscribe({
 
-        next: (usuarios: Usuario[]) => {
-
+ next: (usuarios: Usuario[]) => {
   console.log(
     'Usuarios procesados:',
     usuarios,
@@ -261,10 +260,8 @@ export class GestionUsuariosComponent implements OnInit {
 
   this.usuarios = usuarios;
 
-  // Aplicar nuevamente el filtro actual
   this.filtrarUsuarios();
 },
-
         error: (err) => {
 
           console.error(
@@ -675,7 +672,6 @@ get cantidadInactivos(): number {
     this.mostrarCambioPassword = false;
 
     this.nuevaPassword = '';
-
     this.confirmarPassword = '';
 
     this.mostrarNuevaPassword = false;

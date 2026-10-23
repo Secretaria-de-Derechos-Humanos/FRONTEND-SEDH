@@ -136,6 +136,25 @@ export class RecursosHumanosMainComponent {
           5,
         ],
       },
+
+      // =====================================================
+      // REGISTRO DE PERMISOS MANUALES
+      // ROLES: 3, 5
+      // =====================================================
+
+      {
+        label: 'Registro de permisos manuales',
+
+        imageUrl: 'Registro_permisos.png',
+
+        route: '/rrhh/permisos-manuales',
+
+        rolesPermitidos: [
+          3,
+          5,
+        ],
+      },
+
       // =====================================================
      // REPORTE DE VACACIONES
       // ROLES: 2, 3, 5

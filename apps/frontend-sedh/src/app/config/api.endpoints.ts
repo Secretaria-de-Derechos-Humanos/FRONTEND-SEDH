@@ -42,7 +42,7 @@ export const EP_RRHH_SUBGERENTE_RESPONDER      = '/rrhh/subgerente/responder';
 export const EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES = '/rrhh/agente-seguridad/solicitudes';
 export const EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA  = '/rrhh/agente-seguridad/hora-salida';
 export const EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO = '/rrhh/agente-seguridad/hora-retorno';
-
+export const EP_RRHH_AGENTE_SEGURIDAD_NO_RETORNO = '/rrhh/agente-seguridad/no-retorno';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MÓDULO: Recursos Humanos — Reportes

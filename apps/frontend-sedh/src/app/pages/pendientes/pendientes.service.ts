@@ -12,6 +12,7 @@ import {
   EP_RRHH_AGENTE_SEGURIDAD_SOLICITUDES,
   EP_RRHH_AGENTE_SEGURIDAD_HORA_SALIDA,
   EP_RRHH_AGENTE_SEGURIDAD_HORA_RETORNO,
+  EP_RRHH_AGENTE_SEGURIDAD_NO_RETORNO,
 } from '../../config/api.endpoints';
 
 interface RolUsuario {
@@ -79,6 +80,7 @@ export interface SolicitudAgenteApi {
   horasSolicitadas: string | null;
   horaSalida: string | null;
   horaRetorno: string | null;
+  estadoRetorno: string | null;
   email: string;
   empleado: SolicitudAgenteEmpleadoApi;
   cargo: string;
@@ -383,6 +385,28 @@ export class PendientesService {
           response.data?.mensaje ??
           response.message ??
           'Hora de retorno registrada correctamente.',
+      ),
+    );
+}
+marcarNoRetorno(idPermiso: string): Observable<string> {
+  const acceso = this.obtenerAccesoPreferido([4, 5]);
+
+  const body = {
+    idPermiso,
+    idmodulo: this.obtenerIdModulo(acceso),
+  };
+
+  return this.http
+    .post<RegistrarHoraRetornoResponse>(
+      `${this.base}${EP_RRHH_AGENTE_SEGURIDAD_NO_RETORNO}`,
+      body,
+    )
+    .pipe(
+      map(
+        (response) =>
+          response.data?.mensaje ??
+          response.message ??
+          'Permiso marcado como no retornado.',
       ),
     );
 }

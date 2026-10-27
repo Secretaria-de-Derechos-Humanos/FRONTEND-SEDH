@@ -168,41 +168,45 @@
               </td>
 
               <td>
+            @if (solicitud.estadoRetorno === 'NO_RETORNO') {
+              <span class="completado">
+                No retornó
+              </span>
+            }
+            @else if (solicitud.horaRetorno || solicitud.estadoRetorno === 'RETORNADO') {
+              <span class="completado">
+                Completado
+              </span>
+            }
+            @else if (solicitud.horaSalida) {
+              <button
+                type="button"
+                class="boton-retorno"
+                [disabled]="cargando()"
+                (click)="abrirFormularioRetorno(solicitud)"
+              >
+                Registrar retorno
+              </button>
 
-                @if (!solicitud.horaSalida) {
-
-                  <button
-                    type="button"
-                    class="boton-salida"
-                    [disabled]="cargando()"
-                    (click)="abrirFormularioSalida(solicitud)"
-                  >
-                    Registrar salida
-                  </button>
-
-                }
-
-                @else if (!solicitud.horaRetorno) {
-
-                  <button
-                    type="button"
-                    class="boton-retorno"
-                    [disabled]="cargando()"
-                    (click)="abrirFormularioRetorno(solicitud)"
-                  >
-                    Registrar retorno
-                  </button>
-
-                }
-
-                @else {
-
-                  <span class="completado">
-                    Completado
-                  </span>
-
-                }
-
+              <button
+                type="button"
+                class="boton-no-retorno"
+                [disabled]="cargando()"
+                (click)="marcarNoRetorno(solicitud)"
+              >
+                Marcar como no retornó
+              </button>
+            }
+            @else {
+              <button
+                type="button"
+                class="boton-salida"
+                [disabled]="cargando()"
+                (click)="abrirFormularioSalida(solicitud)"
+              >
+                Registrar salida
+              </button>
+            }
               </td>
 
             </tr>

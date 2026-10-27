@@ -58,28 +58,37 @@ export class ControlSalidasComponent implements OnInit {
     signal('');
 
   readonly pendientesSalida = computed(() =>
-    this.solicitudes().filter(
-      (solicitud) =>
-        !solicitud.horaSalida &&
-        !solicitud.horaRetorno,
-    ).length,
-  );
+  this.solicitudes().filter(
+    (solicitud) =>
+      !solicitud.horaSalida &&
+      !solicitud.horaRetorno &&
+      solicitud.estadoRetorno !== 'NO_RETORNO',
+  ).length,
+);
 
-  readonly empleadosFuera = computed(() =>
-    this.solicitudes().filter(
-      (solicitud) =>
-        !!solicitud.horaSalida &&
-        !solicitud.horaRetorno,
-    ).length,
-  );
+readonly empleadosFuera = computed(() =>
+  this.solicitudes().filter(
+    (solicitud) =>
+      !!solicitud.horaSalida &&
+      !solicitud.horaRetorno &&
+      solicitud.estadoRetorno !== 'NO_RETORNO',
+  ).length,
+);
 
-  readonly retornosRegistrados = computed(() =>
-    this.solicitudes().filter(
-      (solicitud) =>
-        !!solicitud.horaSalida &&
-        !!solicitud.horaRetorno,
-    ).length,
-  );
+readonly retornosRegistrados = computed(() =>
+  this.solicitudes().filter(
+    (solicitud) =>
+      !!solicitud.horaSalida &&
+      !!solicitud.horaRetorno,
+  ).length,
+);
+
+readonly empleadosNoRetornaron = computed(() =>
+  this.solicitudes().filter(
+    (solicitud) =>
+      solicitud.estadoRetorno === 'NO_RETORNO',
+  ).length,
+);
 
   ngOnInit(): void {
     this.cargarSolicitudes();
@@ -288,6 +297,52 @@ export class ControlSalidasComponent implements OnInit {
       });
   }
 
+marcarNoRetorno(solicitud: SolicitudAgenteApi): void {
+  if (
+    this.cargando() ||
+    !solicitud.horaSalida ||
+    solicitud.horaRetorno ||
+    solicitud.estadoRetorno === 'NO_RETORNO'
+  ) {
+    return;
+  }
+
+  const confirmar = window.confirm(
+    `¿Confirmas que el empleado ${this.obtenerNombre(solicitud)} no retornó?`,
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  this.cargando.set(true);
+  this.errorMessage.set('');
+
+  this.pendientesService
+    .marcarNoRetorno(solicitud.idpermiso)
+    .subscribe({
+      next: () => {
+        this.cargando.set(false);
+        this.cargarSolicitudes();
+      },
+      error: (error) => {
+        console.error(
+          'Error al marcar que el empleado no retornó:',
+          error,
+        );
+
+        this.errorMessage.set(
+          error?.error?.error?.message ??
+          error?.error?.message ??
+          'No fue posible marcar al empleado como no retornado.',
+        );
+
+        this.cargando.set(false);
+      },
+    });
+}
+
+
   obtenerHoraActual(): string {
     const ahora = new Date();
 
@@ -331,24 +386,26 @@ export class ControlSalidasComponent implements OnInit {
   }
 
   obtenerSituacion(
-    solicitud: SolicitudAgenteApi,
-  ): string {
-    if (
-      solicitud.horaSalida &&
-      solicitud.horaRetorno
-    ) {
-      return 'Retorno registrado';
-    }
-
-    if (
-      solicitud.horaSalida &&
-      !solicitud.horaRetorno
-    ) {
-      return 'Empleado fuera';
-    }
-
-    return 'Pendiente de salida';
+  solicitud: SolicitudAgenteApi,
+): string {
+  if (solicitud.estadoRetorno === 'NO_RETORNO') {
+    return 'No retornó';
   }
+
+  if (
+    solicitud.horaSalida &&
+    (solicitud.horaRetorno ||
+      solicitud.estadoRetorno === 'RETORNADO')
+  ) {
+    return 'Retorno registrado';
+  }
+
+  if (solicitud.horaSalida) {
+    return 'Empleado fuera';
+  }
+
+  return 'Pendiente de salida';
+}
 
   formatearHora(
     hora: string | null,

@@ -258,31 +258,25 @@ export class CrearUsuarioComponent implements OnInit {
 
           const queryParams = {
             idUsuario,
-
             email,
-
             priNombre:
               datos.priNombre ??
               datos.prinombre ??
               payload.priNombre,
-
             segNombre:
               datos.segNombre ??
               datos.segnombre ??
               payload.segNombre ??
               '',
-
             priApellido:
               datos.priApellido ??
               datos.priapellido ??
               payload.priApellido,
-
             segApellido:
               datos.segApellido ??
               datos.segapellido ??
               payload.segApellido ??
               '',
-
             idRol:
               datos.idRol ??
               datos.idrol ??

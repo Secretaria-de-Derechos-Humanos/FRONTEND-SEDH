@@ -368,28 +368,37 @@ export class UsuariosApiService {
   // =========================================================
 
   crearUsuario(
-    usuario: CrearUsuarioPayload,
-  ): Observable<CrearUsuarioResultado> {
+  usuario: CrearUsuarioPayload,
+): Observable<CrearUsuarioResultado> {
 
-    return this.http
+  return this.http
+    .post<
+      ApiResponse<CrearUsuarioResultado> | CrearUsuarioResultado
+    >(
+      `${this.apiUrl}/crear`,
+      usuario,
+    )
+    .pipe(
+      map((respuesta) => {
+        const respuestaApi = respuesta as
+          | ApiResponse<CrearUsuarioResultado>
+          | CrearUsuarioResultado;
 
-      .post<
-        ApiResponse<
-          CrearUsuarioResultado
-        >
-      >(
-        `${this.apiUrl}/crear`,
-        usuario,
-      )
+        const datos =
+          (respuestaApi as ApiResponse<CrearUsuarioResultado>)?.data
+          ?? respuestaApi;
 
-      .pipe(
+        const resultado = datos as CrearUsuarioResultado;
 
-        map(
-          (respuesta) =>
-            respuesta.data,
-        ),
-      );
-  }
+        console.log(
+          'Resultado normalizado de crear usuario:',
+          resultado,
+        );
+
+        return resultado;
+      }),
+    );
+}
 
   // =========================================================
   // REGISTRAR USUARIO

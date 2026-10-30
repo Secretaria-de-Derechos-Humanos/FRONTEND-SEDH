@@ -407,36 +407,19 @@ export class CrearEmpleadoComponent implements OnInit {
     ]);
   }
 
-  private cargarDatosUsuarioRecibido(): void {
-    const parametros =
-      this.route.snapshot.queryParamMap;
 
-    const idUsuario =
-      parametros.get('idUsuario') ?? '';
-
-    const email =
-      parametros.get('email') ?? '';
-
-    const priNombre =
-      parametros.get('priNombre') ?? '';
-
-    const segNombre =
-      parametros.get('segNombre') ?? '';
-
-    const priApellido =
-      parametros.get('priApellido') ?? '';
-
-    const segApellido =
-      parametros.get('segApellido') ?? '';
-
-    const idRol = Number(
-      parametros.get('idRol') ?? 0,
-    );
+private cargarDatosUsuarioRecibido(): void {
+  this.route.queryParamMap.subscribe((parametros) => {
+    const idUsuario = parametros.get('idUsuario') ?? '';
+    const email = parametros.get('email') ?? '';
+    const priNombre = parametros.get('priNombre') ?? '';
+    const segNombre = parametros.get('segNombre') ?? '';
+    const priApellido = parametros.get('priApellido') ?? '';
+    const segApellido = parametros.get('segApellido') ?? '';
+    const idRol = Number(parametros.get('idRol') ?? 0);
 
     this.idUsuario.set(idUsuario);
-    this.idRolUsuario.set(
-      idRol > 0 ? idRol : null,
-    );
+    this.idRolUsuario.set(idRol > 0 ? idRol : null);
 
     this.formulario.patchValue({
       priNombre,
@@ -453,7 +436,9 @@ export class CrearEmpleadoComponent implements OnInit {
       this.formulario.controls.segApellido.disable();
       this.formulario.controls.emailInstitucional.disable();
     }
-  }
+  });
+}
+
 
   private normalizarCatalogo(
     elementos: unknown[],

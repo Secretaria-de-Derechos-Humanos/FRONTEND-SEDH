@@ -91,7 +91,7 @@ export interface InsertarPermisoPersonalBody {
   fecha: string;
   horas: string;
   motivo: string;
-  emergencia: boolean;
+ emergencia : boolean;
 }
 
 export interface InsertarPermisoPersonalResponse {

@@ -904,22 +904,12 @@ export class SolicitudesEmpleadoComponent
       'permiso-personal'
     ) {
 
-      const body:
-        InsertarPermisoPersonalBody = {
-
-        fecha:
-          this.ppFecha(),
-
-        horas:
-          this.ppFormatHM(),
-
-        motivo:
-          this.ppMotivo(),
-
-        emergencia:
-          this.ppCitaMedica() === 1
-
-      };
+     const body: InsertarPermisoPersonalBody = {
+  fecha: this.ppFecha(),
+  horas: this.ppFormatHM(),
+  motivo: this.ppMotivo(),
+  emergencia: this.ppCitaMedica() === 1
+};
 
 
       this.isEnviando.set(true);

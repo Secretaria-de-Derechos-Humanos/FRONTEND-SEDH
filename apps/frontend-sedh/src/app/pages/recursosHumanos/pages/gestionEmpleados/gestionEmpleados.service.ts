@@ -1,3 +1,4 @@
+
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -12,7 +13,6 @@ import { AuthService } from '../../../../services/auth.service';
 
 import {
   EP_RRHH_EMPLEADOS_ACTUALIZAR,
-  EP_RRHH_EMPLEADOS_ACTUALIZAR_HORAS,
   EP_RRHH_EMPLEADOS_BUSCAR,
   EP_RRHH_EMPLEADOS_CREAR,
   EP_RRHH_EMPLEADOS_DATOS_SEDH,
@@ -150,15 +150,6 @@ export interface ActualizarEmpleadoRespuesta {
   email: string;
 }
 
-export interface ActualizarHorasRespuesta {
-  status: string;
-  mensaje: string;
-  empleado?: {
-    email: string;
-    horasDisponibles: string;
-  };
-}
-
 export interface NuevoEmpleadoPayload {
   email: string;
   primerNombre: string;
@@ -192,7 +183,9 @@ export class GestionEmpleadosService {
   ): Record<string, unknown> {
     const user =
       this.authService.currentUser();
+
     const rol = user?.roles?.[0];
+
     const modulos = Array.isArray(rol?.m)
       ? rol.m
       : [rol?.m];
@@ -214,44 +207,44 @@ export class GestionEmpleadosService {
     };
   }
 
- buscarEmpleado(
-  emailEmpleado: string,
-): Observable<ResultadoBusquedaEmpleado> {
-  return this.http
-    .post<ApiResponse<BuscarEmpleadoData>>(
-      `${this.base}${EP_RRHH_EMPLEADOS_BUSCAR}`,
-      {
-        emailEmpleado:
-          emailEmpleado.trim().toLowerCase(),
-      },
-    )
-    .pipe(
-      switchMap((respuesta) => {
-        if (
-          respuesta.data?.status === 'ERROR'
-        ) {
-          return throwError(
-            () =>
-              new Error(
-                respuesta.data.mensaje ??
-                  'Empleado no encontrado',
-              ),
-          );
-        }
+  buscarEmpleado(
+    emailEmpleado: string,
+  ): Observable<ResultadoBusquedaEmpleado> {
+    return this.http
+      .post<ApiResponse<BuscarEmpleadoData>>(
+        `${this.base}${EP_RRHH_EMPLEADOS_BUSCAR}`,
+        {
+          emailEmpleado:
+            emailEmpleado.trim().toLowerCase(),
+        },
+      )
+      .pipe(
+        switchMap((respuesta) => {
+          if (
+            respuesta.data?.status === 'ERROR'
+          ) {
+            return throwError(
+              () =>
+                new Error(
+                  respuesta.data.mensaje ??
+                    'Empleado no encontrado',
+                ),
+            );
+          }
 
-        return [
-          {
-            empleado:
-              respuesta.data.empleado,
-            accesosSistema:
-              respuesta.data.accesosSistema ?? [],
-            historialCargos:
-              respuesta.data.historialCargos ?? [],
-          },
-        ];
-      }),
-    );
-}
+          return [
+            {
+              empleado:
+                respuesta.data.empleado,
+              accesosSistema:
+                respuesta.data.accesosSistema ?? [],
+              historialCargos:
+                respuesta.data.historialCargos ?? [],
+            },
+          ];
+        }),
+      );
+  }
 
   cargarDatosSedh(): Observable<DatosSedh> {
     return this.http
@@ -269,37 +262,36 @@ export class GestionEmpleadosService {
     edicion: EmpleadoDetalle,
     accesos: AccesoSistema[],
   ): Observable<ActualizarEmpleadoRespuesta> {
-    const empleado:
-      ActualizarEmpleadoPayload = {
-        fechaIngreso:
-          edicion.fechaIngreso,
+    const empleado: ActualizarEmpleadoPayload = {
+      fechaIngreso:
+        edicion.fechaIngreso,
 
-        activo:
-          edicion.activo,
+      activo:
+        edicion.activo,
 
-        telefono:
-          edicion.telefono ?? '',
+      telefono:
+        edicion.telefono ?? '',
 
-        idTipoContratacion:
-          String(edicion.idTipoContratacion),
+      idTipoContratacion:
+        String(edicion.idTipoContratacion),
 
-        idCargo:
-          Number(edicion.idCargo),
+      idCargo:
+        Number(edicion.idCargo),
 
-        idSexo:
-          String(edicion.idSexo),
+      idSexo:
+        String(edicion.idSexo),
 
-        idEstadoCivil:
-          String(edicion.idEstadoCivil),
+      idEstadoCivil:
+        String(edicion.idEstadoCivil),
 
-        idMunicipio:
-          Number(edicion.idMunicipio),
+      idMunicipio:
+        Number(edicion.idMunicipio),
 
-        jefeInmediato: {
-          identidad:
-            edicion.jefeInmediato.identidad,
-        },
-      };
+      jefeInmediato: {
+        identidad:
+          edicion.jefeInmediato.identidad,
+      },
+    };
 
     const accesosSistema =
       accesos.map((acceso) => ({
@@ -323,41 +315,6 @@ export class GestionEmpleadosService {
       )
       .pipe(
         map((respuesta) => respuesta.data),
-      );
-  }
-
-  actualizarHorasDisponibles(
-    emailEmpleado: string,
-    horasDisponibles: string,
-  ): Observable<ActualizarHorasRespuesta> {
-    return this.http
-      .post<
-        ApiResponse<ActualizarHorasRespuesta>
-      >(
-        `${this.base}${EP_RRHH_EMPLEADOS_ACTUALIZAR_HORAS}`,
-        this.buildBody({
-          emailEmpleado,
-          horasDisponibles,
-        }),
-      )
-      .pipe(
-        map((respuesta) => respuesta.data),
-
-        switchMap((resultado) => {
-          if (
-            resultado.status ===
-            'ERROR'
-          ) {
-            return throwError(
-              () =>
-                new Error(
-                  resultado.mensaje,
-                ),
-            );
-          }
-
-          return [resultado];
-        }),
       );
   }
 

@@ -251,9 +251,14 @@ export class PermisosManualesComponent {
         next: (respuesta) => {
           const d = respuesta?.data ?? respuesta;
           this.disponibilidadPersonal.set(d as DisponibilidadManual);
-          if (this.minutosSaldoDisponible(d) <= 0) {
-            this.errorDisponibilidad.set('El empleado no tiene horas disponibles para solicitar un permiso personal.');
-          }
+          if (
+  this.minutosSaldoDisponible(d) <= 0 &&
+  !this.personal.emergencia
+) {
+  this.errorDisponibilidad.set(
+    'El empleado no tiene horas disponibles para solicitar un permiso personal.',
+  );
+}
         },
         error: (error) => {
           this.disponibilidadPersonal.set(null);
@@ -294,20 +299,30 @@ saldoPersonalTexto(): string {
 puedeRegistrarPersonal(): boolean {
   const seleccionado = this.empleadoPersonalSeleccionado();
   const d = this.disponibilidadPersonal();
+
   if (
     !seleccionado ||
     !d ||
-    this.consultandoDisponibilidad() ||
-    this.minutosSaldoDisponible(d) <= 0
+    this.consultandoDisponibilidad()
   ) {
     return false;
   }
-  // El registro debe respetar el máximo solicit able
-  // calculado por el backend para ese día y ese mes.
+
+  // Las emergencias no requieren saldo ni consumen el límite diario.
+  if (this.personal.emergencia) {
+    return true;
+  }
+
+  // Los permisos normales deben respetar el saldo y los límites.
+  if (this.minutosSaldoDisponible(d) <= 0) {
+    return false;
+  }
+
   const maximoSolicitable =
     typeof d.disponibleSolicitarMinutos === 'number'
       ? d.disponibleSolicitarMinutos
       : this.minutosSaldoDisponible(d);
+
   return this.minutosDesdeHora(this.personal.horas) <= maximoSolicitable;
 }
   cambiarPestana(tipo: TipoPestana): void {
@@ -629,41 +644,80 @@ puedeRegistrarPersonal(): boolean {
     });
   }
 
+
   consultarReportes(): void {
     this.errorReporte.set('');
     this.mensajeReporte.set('');
+
     const fechaInicio = this.fechaInicioReporte();
     const fechaFinal = this.fechaFinalReporte();
+
     if (!fechaInicio || !fechaFinal) {
       this.errorReporte.set('Seleccione la fecha inicial y la fecha final.');
       return;
     }
+
     if (fechaInicio > fechaFinal) {
       this.errorReporte.set('La fecha inicial no puede ser posterior a la fecha final.');
       return;
     }
+
     const params = new HttpParams()
       .set('fechaInicio', fechaInicio)
       .set('fechaFinal', fechaFinal);
-    const urlPersonal = `${this.base}/rrhh/permisos-personales/reporte-manual`;
-    const urlOficial = `${this.base}/rrhh/permisos-oficiales/reporte-manual`;
+
+    const urlPersonal =
+      `${this.base}/rrhh/permisos-personales/reporte-manual`;
+    const urlOficial =
+      `${this.base}/rrhh/permisos-oficiales/reporte-manual`;
+
     this.consultandoReportes.set(true);
+
     forkJoin({
-      personal: this.http.get<RespuestaReporte<ReportePersonal>>(urlPersonal, { params }),
-      oficial: this.http.get<RespuestaReporte<ReporteOficial>>(urlOficial, { params }),
-    }).pipe(finalize(() => this.consultandoReportes.set(false))).subscribe({
-      next: ({ personal, oficial }) => {
-        this.reportePersonal.set(personal?.data ?? []);
-        this.totalPersonal.set(personal?.total ?? personal?.data?.length ?? 0);
-        this.reporteOficial.set(oficial?.data ?? []);
-        this.totalOficial.set(oficial?.total ?? oficial?.data?.length ?? 0);
-        this.mensajeReporte.set('Reportes consultados correctamente.');
-      },
-      error: (error) => {
-        this.errorReporte.set(this.obtenerMensajeError(error));
-      },
-    });
+      personal: this.http.get<any>(urlPersonal, { params }),
+      oficial: this.http.get<any>(urlOficial, { params }),
+    })
+      .pipe(finalize(() => this.consultandoReportes.set(false)))
+      .subscribe({
+        next: ({ personal, oficial }) => {
+          const normalizar = (respuesta: any) => {
+            const contenido = respuesta?.data ?? respuesta;
+
+            const registros = Array.isArray(contenido)
+              ? contenido
+              : Array.isArray(contenido?.data)
+                ? contenido.data
+                : [];
+
+            const total = Number(contenido?.total);
+
+            return {
+              registros,
+              total: Number.isFinite(total) ? total : registros.length,
+            };
+          };
+
+          const resultadoPersonal = normalizar(personal);
+          const resultadoOficial = normalizar(oficial);
+
+          this.reportePersonal.set(resultadoPersonal.registros);
+          this.totalPersonal.set(resultadoPersonal.total);
+
+          this.reporteOficial.set(resultadoOficial.registros);
+          this.totalOficial.set(resultadoOficial.total);
+
+          this.mensajeReporte.set('Reportes consultados correctamente.');
+        },
+        error: (error) => {
+          this.reportePersonal.set([]);
+          this.totalPersonal.set(0);
+          this.reporteOficial.set([]);
+          this.totalOficial.set(0);
+          this.errorReporte.set(this.obtenerMensajeError(error));
+        },
+      });
   }
+
   exportarExcel(): void {
     if (this.reportePersonal().length === 0 && this.reporteOficial().length === 0) {
       this.errorReporte.set('No hay registros para exportar. Consulte primero un rango de fechas.');

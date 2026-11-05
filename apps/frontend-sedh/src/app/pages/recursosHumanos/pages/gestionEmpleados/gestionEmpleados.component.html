@@ -331,7 +331,7 @@
                     <select class="campo-input-edicion campo-select-edicion"
                             [disabled]="cargandoDatos()"
                             [ngModel]="empleadoEdicion()!.idDependencia"
-                            (ngModelChange)="seleccionarCatalogo($event, 'idDependencia', 'dependencia', datosSedh()?.dependencias ?? [])">
+                            (ngModelChange)="seleccionarDependencia($event)">
                       <option [ngValue]="0">-- Seleccione --</option>
                       @for (item of datosSedh()?.dependencias ?? []; track item.id) {
                         <option [ngValue]="item.id">{{ item.nombre }}</option>
@@ -346,12 +346,12 @@
                     <span class="campo-valor">{{ resultado()!.empleado.cargo | titlecase }}</span>
                   } @else {
                     <select class="campo-input-edicion campo-select-edicion"
-                            [disabled]="cargandoDatos()"
+                            [disabled]="cargandoDatos() || !empleadoEdicion()!.idDependencia"
                             [ngModel]="empleadoEdicion()!.idCargo"
                             (ngModelChange)="seleccionarCatalogo($event, 'idCargo', 'cargo', datosSedh()?.cargos ?? [])">
                       <option [ngValue]="0">-- Seleccione --</option>
-                      @for (item of datosSedh()?.cargos ?? []; track item.id) {
-                        <option [ngValue]="item.id">{{ item.nombre }} — {{ item.dependencia }}</option>
+                      @for (item of cargosPorDependencia(); track item.id) {
+                        <option [ngValue]="item.id">{{ item.nombre }}</option>
                       }
                     </select>
                   }

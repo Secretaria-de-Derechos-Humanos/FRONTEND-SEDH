@@ -753,6 +753,7 @@
                   id="user-dependencia"
                   class="form-control"
                   [(ngModel)]="dependenciaTemporal"
+                  (ngModelChange)="cargarCargosPorDependencia($event)"
                 >
 
                   <option [ngValue]="null">

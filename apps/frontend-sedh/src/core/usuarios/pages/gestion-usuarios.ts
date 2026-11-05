@@ -17,6 +17,10 @@ import { UsuariosApiService } from '../../../app/core/services/usuarios-api';
 import { EncabezadosPaginaComponent } from '../../../app/components/encabezadosPagina/encabezadosPagina.component';
 import { AuthService } from '../../../app/services/auth.service';
 import { ToastService } from '../../../app/services/toast.service';
+import {
+  CatalogosService,
+  Cargo,
+} from '../../../app/services/catalogos.service';
 
 // =========================================================
 // ROL
@@ -93,6 +97,10 @@ export class GestionUsuariosComponent implements OnInit {
   usuarios: Usuario[] = [];
   usuariosFiltrados: Usuario[] = [];
   dependencias: Dependencia[] = [];
+  cargos: Cargo[] = [];
+cargandoCargos = false;
+cargoTemporal: number | null = null;
+cargoActual: Cargo | null = null;
   mostrarModal = false;
   mostrarCambioPassword = false;
   guardandoPassword = false;
@@ -146,6 +154,8 @@ export class GestionUsuariosComponent implements OnInit {
   private readonly toastService =
     inject(ToastService);
 
+    private readonly catalogosService =
+  inject(CatalogosService);
   // =========================================================
   // CONSTRUCTOR
   // =========================================================
@@ -622,6 +632,15 @@ get cantidadInactivos(): number {
                 dependencia.idDependencia,
               );
 
+            this.cargoTemporal =
+               dependencia.idCargo != null
+          ? Number(dependencia.idCargo)
+          : null;
+
+      this.cargarCargosPorDependencia(
+        this.dependenciaTemporal,
+      );
+
           } else {
 
             this.dependenciaActual = null;
@@ -652,6 +671,66 @@ get cantidadInactivos(): number {
         },
       });
   }
+
+  cargarCargosPorDependencia(
+  idDependencia: number | null,
+): void {
+  this.cargos = [];
+  this.cargoActual = null;
+
+  if (idDependencia == null) {
+    this.cargoTemporal = null;
+    return;
+  }
+
+  this.cargandoCargos = true;
+
+  this.catalogosService
+    .listarCargosPorDependencia(idDependencia)
+    .pipe(
+      finalize(() => {
+        this.cargandoCargos = false;
+        this.cdr.detectChanges();
+      }),
+    )
+    .subscribe({
+      next: (cargos) => {
+        this.cargos = cargos;
+
+        if (
+          this.cargoTemporal != null &&
+          !cargos.some(
+            (cargo) =>
+              Number(cargo.idCargo) ===
+              Number(this.cargoTemporal),
+          )
+        ) {
+          this.cargoTemporal = null;
+        }
+
+        this.cargoActual =
+          cargos.find(
+            (cargo) =>
+              Number(cargo.idCargo) ===
+              Number(this.cargoTemporal),
+          ) ?? null;
+      },
+      error: (err) => {
+        console.error(
+          'Error al cargar cargos por dependencia:',
+          err,
+        );
+
+        this.cargos = [];
+        this.cargoTemporal = null;
+
+        this.toastService.mostrar(
+          'error',
+          'No se pudieron cargar los cargos de la dependencia.',
+        );
+      },
+    });
+}
 
   // =========================================================
   // CERRAR MODAL

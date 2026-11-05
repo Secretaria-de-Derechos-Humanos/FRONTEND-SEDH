@@ -1,4 +1,3 @@
-
 import {
   Component,
   ChangeDetectionStrategy,
@@ -15,6 +14,7 @@ import {
   AccesoSistema,
   DatosSedh,
   MunicipioCatalogo,
+  CargoCatalogo,
 } from './gestionEmpleados.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ModalAgregarEmpleadoComponent } from '../../../../components/modalAgregarEmpleado/modalAgregarEmpleado.component';
@@ -87,6 +87,20 @@ export class GestionEmpleadosComponent {
     return depId
       ? todos.filter(m => m.idDepartamento === depId)
       : todos;
+  });
+
+  /** Devuelve únicamente los cargos de la dependencia seleccionada. */
+  cargosPorDependencia = computed((): CargoCatalogo[] => {
+    const idDependencia = this.empleadoEdicion()?.idDependencia;
+    const cargos = this.datosSedh()?.cargos ?? [];
+
+    if (idDependencia === null || idDependencia === undefined || idDependencia === 0) {
+      return [];
+    }
+
+    return cargos.filter(
+      cargo => Number(cargo.idDependencia) === Number(idDependencia)
+    );
   });
 
   // ── Acciones ────────────────────────────────────────────────────────────────
@@ -172,7 +186,7 @@ export class GestionEmpleadosComponent {
     );
   }
 
-  /** Actualiza un campo de catálogo sincronizando id + nombre */
+  /** Actualiza un campo de catálogo sincronizando id + nombre. */
   seleccionarCatalogo(
     id: unknown,
     campoId: keyof EmpleadoDetalle,
@@ -189,7 +203,7 @@ export class GestionEmpleadosComponent {
     );
   }
 
-  /** Selecciona departamento y resetea municipio */
+  /** Selecciona departamento y resetea municipio. */
   seleccionarDepartamento(id: unknown): void {
     this.seleccionarCatalogo(
       id,
@@ -203,7 +217,40 @@ export class GestionEmpleadosComponent {
     );
   }
 
-  /** Selecciona jefe inmediato por identidad */
+  /**
+   * Selecciona una dependencia y conserva el cargo actual únicamente
+   * cuando ese cargo pertenece a la dependencia seleccionada.
+   */
+  seleccionarDependencia(id: unknown): void {
+    const dependencia = this.datosSedh()?.dependencias.find(
+      d => String(d.id) === String(id)
+    );
+
+    if (!dependencia) return;
+
+    const cargosDependencia = (this.datosSedh()?.cargos ?? []).filter(
+      cargo => Number(cargo.idDependencia) === Number(dependencia.id)
+    );
+
+    this.empleadoEdicion.update(e => {
+      if (!e) return e;
+
+      const cargoActualPertenece = cargosDependencia.some(
+        cargo => Number(cargo.id) === Number(e.idCargo)
+      );
+
+      return {
+        ...e,
+        idDependencia: Number(dependencia.id),
+        dependencia: dependencia.nombre,
+        ...(!cargoActualPertenece
+          ? { idCargo: 0, cargo: '' }
+          : {}),
+      };
+    });
+  }
+
+  /** Selecciona jefe inmediato por identidad. */
   seleccionarJefe(identidad: string): void {
     const jefe = this.datosSedh()?.jefesInmediatos.find(
       j => j.identidad === identidad
@@ -265,6 +312,14 @@ export class GestionEmpleadosComponent {
   guardarCambios(): void {
     const edicion = this.empleadoEdicion();
     if (!edicion) return;
+
+    if (!edicion.idCargo || Number(edicion.idCargo) <= 0) {
+      this.toastService.mostrar(
+        'error',
+        'Seleccione un cargo válido para la dependencia seleccionada.'
+      );
+      return;
+    }
 
     this.guardando.set(true);
 

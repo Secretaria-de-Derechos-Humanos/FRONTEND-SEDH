@@ -1,14 +1,12 @@
+
 <section class="pagina-control">
 
+  <!-- ENCABEZADO -->
   <header class="encabezado">
     <div>
-      <h1>
-        Control de salidas y retornos
-      </h1>
-
+      <h1>Control de salidas y retornos</h1>
       <p>
-        Registre la salida y el retorno de empleados
-        con permisos personales aprobados.
+        Gestión de permisos personales aprobados y control de movimientos del personal.
       </p>
     </div>
 
@@ -16,87 +14,136 @@
       type="button"
       class="boton-actualizar"
       [disabled]="cargando()"
-      (click)="cargarSolicitudes()"
-    >
-      Actualizar
+      (click)="cargarSolicitudes()">
+      ↻ Actualizar
     </button>
   </header>
 
+  <!-- TARJETAS RESUMEN -->
   <section class="resumen-agente">
 
     <article class="resumen-card resumen-card--pendiente">
-      <div class="resumen-card__icon">
-        →
-      </div>
-
+      <div class="resumen-card__icon">→</div>
       <div>
-        <span class="resumen-card__label">
-          Pendientes de salida
-        </span>
-
-        <strong class="resumen-card__value">
-          {{ pendientesSalida() }}
-        </strong>
+        <span class="resumen-card__label">Pendientes de salida</span>
+        <strong class="resumen-card__value">{{ pendientesSalida() }}</strong>
       </div>
     </article>
 
     <article class="resumen-card resumen-card--fuera">
-      <div class="resumen-card__icon">
-        ◷
-      </div>
-
+      <div class="resumen-card__icon">◷</div>
       <div>
-        <span class="resumen-card__label">
-          Empleados fuera
-        </span>
-
-        <strong class="resumen-card__value">
-          {{ empleadosFuera() }}
-        </strong>
+        <span class="resumen-card__label">Empleados fuera</span>
+        <strong class="resumen-card__value">{{ empleadosFuera() }}</strong>
       </div>
     </article>
 
     <article class="resumen-card resumen-card--completado">
-      <div class="resumen-card__icon">
-        ✓
-      </div>
-
+      <div class="resumen-card__icon">✓</div>
       <div>
-        <span class="resumen-card__label">
-          Retornos registrados
-        </span>
+        <span class="resumen-card__label">Retornos registrados</span>
+        <strong class="resumen-card__value">{{ retornosRegistrados() }}</strong>
+      </div>
+    </article>
 
-        <strong class="resumen-card__value">
-          {{ retornosRegistrados() }}
-        </strong>
+    <article class="resumen-card resumen-card--no-retorno">
+      <div class="resumen-card__icon">!</div>
+      <div>
+        <span class="resumen-card__label">No retornaron</span>
+        <strong class="resumen-card__value">{{ empleadosNoRetornaron() }}</strong>
       </div>
     </article>
 
   </section>
 
-  @if (errorMessage()) {
+  <!-- MENSAJE DE ERROR -->
+  @if (errorMessage() && !solicitudFormulario()) {
     <div class="mensaje-error">
       {{ errorMessage() }}
     </div>
   }
 
-  @if (cargando()) {
+  <!-- FILTROS -->
+  <section class="panel-filtros">
+
+    <div class="panel-filtros__encabezado">
+      <div>
+        <h2>Registros de permisos</h2>
+        <p>Busca y filtra los movimientos del personal.</p>
+      </div>
+
+      <span class="contador-registros">
+        {{ solicitudesFiltradas().length }} registros
+      </span>
+    </div>
+
+    <div class="filtros-grid">
+
+      <div class="campo-filtro campo-busqueda">
+        <label for="buscarEmpleado">Buscar empleado</label>
+        <input
+          id="buscarEmpleado"
+          type="text"
+          placeholder="Nombre, correo o dependencia..."
+          [value]="busqueda()"
+          (input)="actualizarBusqueda($event)">
+      </div>
+
+      <div class="campo-filtro">
+        <label for="fechaRegistro">Fecha de solicitud</label>
+        <input
+          id="fechaRegistro"
+          type="date"
+          [value]="filtroFecha()"
+          (change)="actualizarFiltroFecha($event)">
+      </div>
+
+      <div class="campo-filtro">
+        <label for="estadoRegistro">Estado del movimiento</label>
+        <select
+          id="estadoRegistro"
+          [value]="filtroEstado()"
+          (change)="actualizarFiltroEstado($event)">
+
+          <option value="TODOS">Todos los estados</option>
+          <option value="PENDIENTE_SALIDA">Pendiente de salida</option>
+          <option value="FUERA">Empleado fuera</option>
+          <option value="RETORNADO">Retorno registrado</option>
+          <option value="NO_RETORNO">No retornó</option>
+        </select>
+      </div>
+
+     <div class="campo-filtro filtro-limpiar">
+  <span class="label-espaciador" aria-hidden="true"></span>
+  <button
+    type="button"
+    class="boton-limpiar"
+    (click)="limpiarFiltros()">
+    Limpiar filtros
+  </button>
+</div>
+
+    </div>
+  </section>
+
+  <!-- TABLA DE REGISTROS -->
+  @if (cargando() && solicitudes().length === 0) {
+
     <div class="estado-vacio">
       Cargando permisos...
     </div>
-  } @else if (solicitudes().length === 0) {
+
+  } @else if (solicitudesFiltradas().length === 0) {
+
     <div class="estado-vacio">
       <div>
-        <h2>
-          No hay permisos para controlar
-        </h2>
-
+        <h2>No se encontraron registros</h2>
         <p>
-          Cuando existan permisos personales aprobados
-          aparecerán en esta pantalla.
+          No existen permisos que coincidan con los filtros seleccionados.
         </p>
       </div>
     </div>
+
   } @else {
 
     <div class="contenedor-tabla">
@@ -111,24 +158,24 @@
             <th>Hora salida</th>
             <th>Hora retorno</th>
             <th>Situación</th>
-            <th>Acción</th>
+            <th>Acciones</th>
           </tr>
         </thead>
 
         <tbody>
 
           @for (
-            solicitud of solicitudes();
+            solicitud of solicitudesFiltradas();
             track solicitud.idpermiso
           ) {
 
             <tr>
 
               <td>
-                {{ solicitud.fecha }}
+                {{ solicitud.fecha | date:'dd/MM/yyyy' }}
               </td>
 
-              <td>
+              <td class="empleado-celda">
                 {{ obtenerNombre(solicitud) }}
               </td>
 
@@ -137,162 +184,80 @@
               </td>
 
               <td>
-                {{
-                  solicitud.horasSolicitadas ??
-                  '—'
-                }}
+                {{ solicitud.horasSolicitadas ?? '—' }}
               </td>
 
               <td>
-                {{
-                  formatearHora(
-                    solicitud.horaSalida
-                  )
-                }}
+                {{ formatearHora(solicitud.horaSalida) }}
               </td>
 
               <td>
-                {{
-                  formatearHora(
-                    solicitud.horaRetorno
-                  )
-                }}
+                {{ formatearHora(solicitud.horaRetorno) }}
               </td>
 
               <td>
-                {{
-                  obtenerSituacion(
-                    solicitud
-                  )
-                }}
+                <span
+                  class="estado-movimiento"
+                  [class.estado-pendiente]="obtenerSituacion(solicitud) === 'Pendiente de salida'"
+                  [class.estado-fuera]="obtenerSituacion(solicitud) === 'Empleado fuera'"
+                  [class.estado-retornado]="obtenerSituacion(solicitud) === 'Retorno registrado'"
+                  [class.estado-no-retorno]="obtenerSituacion(solicitud) === 'No retornó'">
+
+                  {{ obtenerSituacion(solicitud) }}
+
+                </span>
               </td>
 
-              <td>
-            @if (solicitud.estadoRetorno === 'NO_RETORNO') {
-              <span class="completado">
-                No retornó
-              </span>
-            }
-            @else if (solicitud.horaRetorno || solicitud.estadoRetorno === 'RETORNADO') {
-              <span class="completado">
-                Completado
-              </span>
-            }
-            @else if (solicitud.horaSalida) {
-              <button
-                type="button"
-                class="boton-retorno"
-                [disabled]="cargando()"
-                (click)="abrirFormularioRetorno(solicitud)"
-              >
-                Registrar retorno
-              </button>
+              <td class="acciones-celda">
 
-              <button
-                type="button"
-                class="boton-no-retorno"
-                [disabled]="cargando()"
-                (click)="marcarNoRetorno(solicitud)"
-              >
-                Marcar como no retornó
-              </button>
-            }
-            @else {
-              <button
-                type="button"
-                class="boton-salida"
-                [disabled]="cargando()"
-                (click)="abrirFormularioSalida(solicitud)"
-              >
-                Registrar salida
-              </button>
-            }
+                @if (solicitud.estadoRetorno === 'NO_RETORNO') {
+
+                  <span class="completado">
+                    No retornó
+                  </span>
+
+                } @else if (
+                  solicitud.horaRetorno ||
+                  solicitud.estadoRetorno === 'RETORNADO'
+                ) {
+
+                  <span class="completado">
+                    Completado
+                  </span>
+
+                } @else if (solicitud.horaSalida) {
+
+                  <button
+                    type="button"
+                    class="boton-retorno"
+                    [disabled]="cargando()"
+                    (click)="abrirFormularioRetorno(solicitud)">
+                    Registrar retorno
+                  </button>
+
+                  <button
+                    type="button"
+                    class="boton-no-retorno"
+                    [disabled]="cargando()"
+                    (click)="marcarNoRetorno(solicitud)">
+                    No retornó
+                  </button>
+
+                } @else {
+
+                  <button
+                    type="button"
+                    class="boton-salida"
+                    [disabled]="cargando()"
+                    (click)="abrirFormularioSalida(solicitud)">
+                    Registrar salida
+                  </button>
+
+                }
+
               </td>
 
             </tr>
-
-            @if (
-              solicitudFormulario() ===
-              solicitud.idpermiso
-            ) {
-
-              <tr class="fila-formulario">
-
-                <td colspan="8">
-
-                  <div class="formulario-hora">
-
-                    <div class="formulario-hora__contenido">
-
-                      <div>
-                        <span class="formulario-hora__titulo">
-                          {{
-                            tipoFormulario() === 'salida'
-                              ? 'Registrar salida'
-                              : 'Registrar retorno'
-                          }}
-                        </span>
-
-                        <p class="formulario-hora__empleado">
-                          {{ obtenerNombre(solicitud) }}
-                        </p>
-                      </div>
-
-                      <div class="campo-hora">
-
-  <span class="campo-hora__label">
-    {{
-      tipoFormulario() === 'salida'
-        ? 'Hora de salida'
-        : 'Hora de retorno'
-    }}
-  </span>
-
-  <input
-    type="time"
-    [value]="horaFormulario()"
-    (input)="actualizarHora($event)"
-    [disabled]="cargando()"
-  />
-
-</div>
-
-                      <div class="formulario-hora__acciones">
-
-                        <button
-                          type="button"
-                          class="boton-cancelar"
-                          [disabled]="cargando()"
-                          (click)="cancelarFormulario()"
-                        >
-                          Cancelar
-                        </button>
-
-                        <button
-                          type="button"
-                          [class.boton-salida]="tipoFormulario() === 'salida'"
-                          [class.boton-retorno]="tipoFormulario() === 'retorno'"
-                          [disabled]="cargando()"
-                          (click)="guardarRegistro(solicitud)"
-                        >
-                          {{
-                            tipoFormulario() === 'salida'
-                              ? 'Registrar salida'
-                              : 'Registrar retorno'
-                          }}
-                        </button>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </td>
-
-              </tr>
-
-            }
 
           }
 
@@ -300,6 +265,129 @@
       </table>
 
     </div>
+
   }
 
 </section>
+
+<!-- =====================================
+     MODAL REGISTRAR SALIDA / RETORNO
+===================================== -->
+
+@if (solicitudSeleccionada(); as solicitudModal) {
+
+  <div class="modal-overlay">
+
+    <section
+      class="modal-registro"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloModal">
+
+      <!-- ENCABEZADO DEL MODAL -->
+      <header class="modal-header">
+
+        <div>
+          <span class="modal-etiqueta">
+            CONTROL DE SEGURIDAD
+          </span>
+
+          <h2 id="tituloModal">
+            {{
+              tipoFormulario() === 'salida'
+                ? 'Registrar salida'
+                : 'Registrar retorno'
+            }}
+          </h2>
+        </div>
+
+        <button
+          type="button"
+          class="modal-cerrar"
+          aria-label="Cerrar ventana"
+          [disabled]="cargando()"
+          (click)="cancelarFormulario()">
+          ×
+        </button>
+
+      </header>
+
+      <!-- INFORMACIÓN DEL EMPLEADO -->
+      <div class="modal-body">
+
+        <div class="datos-empleado">
+
+          <span>EMPLEADO</span>
+          <strong>{{ obtenerNombre(solicitudModal) }}</strong>
+
+          <span>DEPENDENCIA</span>
+          <strong>{{ solicitudModal.dependencia }}</strong>
+
+          <span>HORAS AUTORIZADAS</span>
+          <strong>{{ solicitudModal.horasSolicitadas }}</strong>
+
+        </div>
+
+        <!-- CAMPO DE HORA -->
+        <div class="campo-modal">
+
+          <label for="horaMovimiento">
+            {{
+              tipoFormulario() === 'salida'
+                ? 'Hora real de salida'
+                : 'Hora real de retorno'
+            }}
+          </label>
+
+          <input
+            id="horaMovimiento"
+            type="time"
+            [value]="horaFormulario()"
+            (input)="actualizarHora($event)"
+            [disabled]="cargando()">
+
+        </div>
+
+        @if (errorMessage()) {
+          <div class="mensaje-error">
+            {{ errorMessage() }}
+          </div>
+        }
+
+      </div>
+
+      <!-- BOTONES -->
+      <footer class="modal-footer">
+
+        <button
+          type="button"
+          class="boton-cancelar-modal"
+          [disabled]="cargando()"
+          (click)="cancelarFormulario()">
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          [class.boton-salida]="tipoFormulario() === 'salida'"
+          [class.boton-retorno]="tipoFormulario() === 'retorno'"
+          [disabled]="cargando()"
+          (click)="guardarRegistro(solicitudModal)">
+
+          {{
+            cargando()
+              ? 'Procesando...'
+              : tipoFormulario() === 'salida'
+                ? 'Confirmar salida'
+                : 'Confirmar retorno'
+          }}
+
+        </button>
+
+      </footer>
+
+    </section>
+
+  </div>
+
+}

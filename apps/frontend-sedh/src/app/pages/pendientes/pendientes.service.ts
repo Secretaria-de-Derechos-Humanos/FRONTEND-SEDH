@@ -124,6 +124,7 @@ interface ResponderPermisoResponse {
 export interface RegistrarHoraSalidaParams {
   idPermiso: string;
   horaSalida: string;
+  tipoPermiso: 'PERSONAL' | 'OFICIAL';
 }
 
 interface RegistrarHoraSalidaResponse {
@@ -142,6 +143,7 @@ interface RegistrarHoraSalidaResponse {
 export interface RegistrarHoraRetornoParams {
   idPermiso: string;
   horaRetorno: string;
+  tipoPermiso: 'PERSONAL' | 'OFICIAL';
 }
 
 interface RegistrarHoraRetornoResponse {
@@ -337,7 +339,7 @@ export class PendientesService {
     );
 }
 
-  registrarHoraSalida(
+ registrarHoraSalida(
   params: RegistrarHoraSalidaParams,
 ): Observable<string> {
   const acceso = this.obtenerAccesoPreferido([4, 5]);
@@ -345,6 +347,7 @@ export class PendientesService {
   const body = {
     idPermiso: params.idPermiso,
     horaSalida: params.horaSalida,
+    tipoPermiso: params.tipoPermiso,
     idmodulo: this.obtenerIdModulo(acceso),
   };
 
@@ -371,6 +374,7 @@ export class PendientesService {
   const body = {
     idPermiso: params.idPermiso,
     horaRetorno: params.horaRetorno,
+    tipoPermiso: params.tipoPermiso,
     idmodulo: this.obtenerIdModulo(acceso),
   };
 
@@ -388,11 +392,15 @@ export class PendientesService {
       ),
     );
 }
-marcarNoRetorno(idPermiso: string): Observable<string> {
+marcarNoRetorno(
+  idPermiso: string,
+  tipoPermiso: 'PERSONAL' | 'OFICIAL',
+): Observable<string> {
   const acceso = this.obtenerAccesoPreferido([4, 5]);
 
   const body = {
     idPermiso,
+    tipoPermiso,
     idmodulo: this.obtenerIdModulo(acceso),
   };
 
@@ -410,7 +418,6 @@ marcarNoRetorno(idPermiso: string): Observable<string> {
       ),
     );
 }
-
   private obtenerAccesoPreferido(
     rolesPermitidos: number[],
   ): RolUsuario | null {

@@ -36,7 +36,7 @@ export interface AprobacionPendiente {
   horRetorno?: string | null;
   horSolicitadas?: string | number | null;
   idHorasDisponibles?: string | number | null;
-
+  horasDisponibles?: string | number | null;
   catEmergencia: boolean;
   guardiaTurno?: string | null;
 
@@ -49,13 +49,10 @@ export interface AprobacionPendiente {
   fecFinal?: string | null;
   fecRetorno?: string | null;
   cantVacaciones?: number | null;
-
   perAnterior?: string | null;
   cantPerAnterior?: number | null;
-
   perActual?: string | null;
   cantPerActual?: number | null;
-
   totDiasPeriodos?: number | null;
   totDiasRestantes?: number | null;
 }
@@ -69,7 +66,7 @@ export interface AprobacionHistorial {
   horaSalida: string | null;
   horaRetorno: string | null;
   horasSolicitadas: string | null;
-  horasDisponibles: number | null;
+ horasDisponibles: number | null;
   motivo: string;
   emergencia: boolean;
   estado: string;

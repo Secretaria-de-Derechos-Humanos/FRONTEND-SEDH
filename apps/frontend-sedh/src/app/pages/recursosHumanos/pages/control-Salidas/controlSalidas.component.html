@@ -6,7 +6,7 @@
     <div>
       <h1>Control de salidas y retornos</h1>
       <p>
-        Gestión de permisos personales aprobados y control de movimientos del personal.
+        Gestión de permisos personales y oficiales aprobados y control de movimientos del personal.
       </p>
     </div>
 
@@ -153,6 +153,7 @@
           <tr>
             <th>Fecha</th>
             <th>Empleado</th>
+            <th>Tipo de permiso</th>
             <th>Dependencia</th>
             <th>Tiempo solicitado</th>
             <th>Hora salida</th>
@@ -177,6 +178,9 @@
 
               <td class="empleado-celda">
                 {{ obtenerNombre(solicitud) }}
+              </td>
+              <td>
+                 {{ solicitud.tipoPermiso === 'OFICIAL' ? 'Oficial' : 'Personal' }}
               </td>
 
               <td>

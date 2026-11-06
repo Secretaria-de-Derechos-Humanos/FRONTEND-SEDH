@@ -261,9 +261,10 @@ export class ControlSalidasComponent implements OnInit {
 
     if (tipo === 'salida') {
       this.pendientesService.registrarHoraSalida({
-        idPermiso: solicitud.idpermiso,
-        horaSalida: hora,
-      }).subscribe({
+  idPermiso: solicitud.idpermiso,
+  horaSalida: hora,
+  tipoPermiso: solicitud.tipoPermiso as 'PERSONAL' | 'OFICIAL',
+}).subscribe({
         next: () => {
           this.finalizarRegistro();
         },
@@ -283,10 +284,11 @@ export class ControlSalidasComponent implements OnInit {
       return;
     }
 
-    this.pendientesService.registrarHoraRetorno({
-      idPermiso: solicitud.idpermiso,
-      horaRetorno: hora,
-    }).subscribe({
+   this.pendientesService.registrarHoraRetorno({
+  idPermiso: solicitud.idpermiso,
+  horaRetorno: hora,
+  tipoPermiso: solicitud.tipoPermiso as 'PERSONAL' | 'OFICIAL',
+}).subscribe({
       next: () => {
         this.finalizarRegistro();
       },
@@ -340,7 +342,10 @@ export class ControlSalidasComponent implements OnInit {
     this.errorMessage.set('');
 
     this.pendientesService
-      .marcarNoRetorno(solicitud.idpermiso)
+      .marcarNoRetorno(
+  solicitud.idpermiso,
+  solicitud.tipoPermiso as 'PERSONAL' | 'OFICIAL',
+)
       .subscribe({
         next: () => {
           this.cargando.set(false);

@@ -25,6 +25,7 @@ interface AprobacionTabla {
   horRetorno: string | null;
   horSolicitadas: string | number | null;
   idHorasDisponibles: string | number | null;
+  horasDisponibles?: string | number | null;
   catEmergencia: boolean;
   tipoSolicitud: {
     nomTipo: string;
@@ -125,28 +126,29 @@ export class AprobacionesComponent
    * Une permisos personales y oficiales
    * para mostrarlos en una sola tabla.
    */
-  readonly aprobacionesCombinadas =
-    computed<AprobacionTabla[]>(() =>
-      this.aprobaciones().map(
-        (solicitud): AprobacionTabla => ({
-          id: solicitud.id,
-          idPermisoPersonal: solicitud.idPermisoPersonal,
-          idPermisoOficial: solicitud.idPermisoOficial ?? null,
-          idPermisoVaca: solicitud.idPermisoVaca ?? null,
-          emailInstitucional: solicitud.emailInstitucional,
-          fecSolicitud: solicitud.fecSolicitud,
-          motivo: solicitud.motivo ?? solicitud.observaciones ?? null,
-          horSalida: solicitud.horSalida ?? null,
-          horRetorno: solicitud.horRetorno ?? null,
-          horSolicitadas:
-            solicitud.horSolicitadas ?? solicitud.cantVacaciones ?? null,
-          idHorasDisponibles:
-            solicitud.idHorasDisponibles ?? solicitud.totDiasRestantes ?? null,
-          catEmergencia: Boolean(solicitud.catEmergencia),
-          tipoSolicitud: {
-            nomTipo:
-              solicitud.tipoSolicitud?.nomTipo ??
-              this.obtenerNombreTipo(solicitud.origen),
+ readonly aprobacionesCombinadas =
+  computed<AprobacionTabla[]>(() =>
+    this.aprobaciones().map(
+      (solicitud): AprobacionTabla => ({
+        id: solicitud.id,
+        idPermisoPersonal: solicitud.idPermisoPersonal,
+        idPermisoOficial: solicitud.idPermisoOficial ?? null,
+        idPermisoVaca: solicitud.idPermisoVaca ?? null,
+        emailInstitucional: solicitud.emailInstitucional,
+        fecSolicitud: solicitud.fecSolicitud,
+        motivo: solicitud.motivo ?? solicitud.observaciones ?? null,
+        horSalida: solicitud.horSalida ?? null,
+        horRetorno: solicitud.horRetorno ?? null,
+        horSolicitadas:
+          solicitud.horSolicitadas ?? solicitud.cantVacaciones ?? null,
+        idHorasDisponibles:
+          solicitud.idHorasDisponibles ?? solicitud.totDiasRestantes ?? null,
+        horasDisponibles: solicitud.horasDisponibles ?? null,
+        catEmergencia: Boolean(solicitud.catEmergencia),
+        tipoSolicitud: {
+          nomTipo:
+            solicitud.tipoSolicitud?.nomTipo ??
+            this.obtenerNombreTipo(solicitud.origen),
           },
           origen: solicitud.origen,
           categoria: solicitud.categoria,

@@ -6,16 +6,19 @@ import { SolicitudPermiso } from '../modalAprobarPermisosRRHH/modalAprobarPermis
 export interface SolicitudAgentePermiso extends SolicitudPermiso {
   hor_salida?: string | null;
   hor_retorno?: string | null;
+  tipoPermiso?: 'PERSONAL' | 'OFICIAL';
 }
 
 export interface HoraSalidaPayload {
   id: string;
   horaSalida: string;
+  tipoPermiso: 'PERSONAL' | 'OFICIAL';
 }
 
 export interface HoraRetornoPayload {
   id: string;
   horaRetorno: string;
+  tipoPermiso: 'PERSONAL' | 'OFICIAL';
 }
 
 @Component({
@@ -78,17 +81,33 @@ export class ModalAgentePermisosRRHHComponent {
   }
 
   onRegistrarSalida(): void {
-    if (!this.horaSalida().trim()) {
-      alert('Debe ingresar la hora de salida.');
-      return;
-    }
-    this.registrarSalida.emit({ id: this.solicitud().id, horaSalida: this.horaSalida() });
+  if (!this.horaSalida().trim()) {
+    alert('Debe ingresar la hora de salida.');
+    return;
   }
 
+  const tipoPermiso = this.solicitud().tipoPermiso ??
+    (this.esPermisoOficial ? 'OFICIAL' : 'PERSONAL');
+
+  this.registrarSalida.emit({
+    id: this.solicitud().id,
+    horaSalida: this.horaSalida(),
+    tipoPermiso,
+  });
+}
+
   onRegistrarRetorno(): void {
-    if (this.horaInvalida() || !this.horaRetorno().trim()) return;
-    this.registrarRetorno.emit({ id: this.solicitud().id, horaRetorno: this.horaRetorno() });
-  }
+  if (this.horaInvalida() || !this.horaRetorno().trim()) return;
+
+  const tipoPermiso = this.solicitud().tipoPermiso ??
+    (this.esPermisoOficial ? 'OFICIAL' : 'PERSONAL');
+
+  this.registrarRetorno.emit({
+    id: this.solicitud().id,
+    horaRetorno: this.horaRetorno(),
+    tipoPermiso,
+  });
+}
 
   validarHoraRetorno(): void {
     const salida = this.horaSalida() || this.solicitud().hor_salida;

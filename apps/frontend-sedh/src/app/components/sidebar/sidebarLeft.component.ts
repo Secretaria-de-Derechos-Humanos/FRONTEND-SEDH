@@ -86,16 +86,16 @@ export class SidebarLeftComponent {
       // ROLES: 2, 3, 5
       // ========================================================
 
-      {
-        label: 'Pendientes',
-        icon: 'pending',
-        route: '/pendientes',
-        rolesPermitidos: [
-          2,
-          3,
-          5,
-        ],
-      },
+  {
+  label: 'Pendientes',
+  icon: 'pending',
+  route: '/pendientes',
+  rolesPermitidos: [
+    2,
+    3,
+    5,
+  ],
+},
 
 
       // ========================================================
@@ -108,8 +108,6 @@ export class SidebarLeftComponent {
         icon: 'approval',
         route: '/rrhh/aprobaciones',
         rolesPermitidos: [
-          2,
-          3,
           5,
         ],
       },

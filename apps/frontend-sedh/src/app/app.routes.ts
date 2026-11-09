@@ -223,8 +223,6 @@ export const appRoutes: Route[] = [
 
         data: {
           roles: [
-            2,
-            3,
             5,
           ],
         },

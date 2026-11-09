@@ -196,13 +196,26 @@ export class SolicitudesEmpleadoService {
 }
 
   insertarPermisoPersonal(
-    body: InsertarPermisoPersonalBody
-  ): Observable<InsertarPermisoPersonalResponse> {
-    return this.http.post<InsertarPermisoPersonalResponse>(
-      `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
-      body
-    );
+  body: InsertarPermisoPersonalBody,
+  archivo?: File
+): Observable<InsertarPermisoPersonalResponse> {
+
+  const formData = new FormData();
+
+  formData.append('fecha', body.fecha);
+  formData.append('horas', body.horas);
+  formData.append('motivo', body.motivo);
+  formData.append('emergencia', String(body.emergencia));
+
+  if (archivo) {
+    formData.append('archivo', archivo);
   }
+
+  return this.http.post<InsertarPermisoPersonalResponse>(
+    `${this.base}${EP_RRHH_PERMISOS_PERSONALES_INSERTAR}`,
+    formData
+  );
+}
 
   anularPermisoPersonal(
     idPermiso: string

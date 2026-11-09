@@ -603,14 +603,19 @@ puedeRegistrarPersonal(): boolean {
       .set('fechaFinal', fechaFinal);
 
     this.consultandoLlegadasTardias.set(true);
-    this.http.get<RespuestaReporte<ReporteLlegadaTardia>>(
+    this.http.get<RespuestaApi<RespuestaReporte<ReporteLlegadaTardia>>>(
       `${this.base}/rrhh/permisos-personales/llegadas-tardias`,
       { params },
     ).pipe(finalize(() => this.consultandoLlegadasTardias.set(false))).subscribe({
       next: (respuesta) => {
-        const data = Array.isArray(respuesta?.data) ? respuesta.data : [];
-        this.llegadasTardias.set(data);
-        this.totalLlegadasTardias.set(respuesta?.total ?? data.length);
+       const reporte = respuesta?.data;
+
+const data = Array.isArray(reporte?.data)
+  ? reporte.data
+  : [];
+
+this.llegadasTardias.set(data);
+this.totalLlegadasTardias.set(reporte?.total ?? data.length);
         this.mensajeReporte.set('Historial de llegadas tardías consultado correctamente.');
       },
       error: (error) => {

@@ -229,6 +229,21 @@ export class RecursosHumanosMainComponent {
     5,
   ],
 },
+// =====================================================
+// SOLICITUDES PENDIENTES
+// ROLES: 2, 3, 5
+// =====================================================
+
+{
+  label: 'Solicitudes pendientes',
+  imageUrl: 'Pendientes.png',
+  route: '/pendientes',
+  rolesPermitidos: [
+    2,
+    3,
+    5,
+  ],
+},
       // =====================================================
       // VACACIONES PENDIENTES JEFE
       // ROLES: 2, 5

@@ -390,9 +390,24 @@ export class SolicitudesEmpleadoComponent
     signal('Asunto Personal.');
 
 
-  ppCitaMedica =
-    signal(0);
+  ppCitaMedica = signal(0);
 
+  ppArchivo = signal<File | null>(null);
+
+onArchivoChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const archivo = input.files?.[0] ?? null;
+
+  this.ppArchivo.set(archivo);
+}
+
+onEmergenciaChange(valor: number): void {
+  this.ppCitaMedica.set(valor);
+
+  if (valor === 0) {
+    this.ppArchivo.set(null);
+  }
+}
 
   ppHorasDisponibles =
     signal<string>('--:--');
@@ -400,6 +415,8 @@ export class SolicitudesEmpleadoComponent
 
   ppErrores =
     computed(() => ({
+      archivo:
+  this.ppCitaMedica() === 1 && !this.ppArchivo(),
 
       fecha:
         !this.ppFecha()
@@ -429,7 +446,6 @@ export class SolicitudesEmpleadoComponent
 
       motivo:
         !this.ppMotivo().trim()
-
     }));
 
 
@@ -699,6 +715,7 @@ export class SolicitudesEmpleadoComponent
     );
 
     this.ppCitaMedica.set(0);
+    this.ppArchivo.set(null);
 
     this.ppHorasDisponibles.set(
       datos?.horasDisponibles
@@ -916,7 +933,10 @@ export class SolicitudesEmpleadoComponent
 
 
       this.solicitudesService
-        .insertarPermisoPersonal(body)
+        .insertarPermisoPersonal(
+          body,
+          this.ppArchivo() ?? undefined
+        )
         .subscribe({
 
           next: () => {
@@ -938,6 +958,13 @@ export class SolicitudesEmpleadoComponent
             );
 
             this.isEnviando.set(false);
+
+            this.errorMessage.set(
+              error?.error?.message ??
+              error?.error?.mensaje ??
+              error?.message ??
+              'No fue posible registrar el permiso personal.'
+            );
 
           }
 

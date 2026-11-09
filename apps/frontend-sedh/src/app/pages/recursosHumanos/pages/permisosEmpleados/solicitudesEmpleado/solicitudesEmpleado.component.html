@@ -1042,7 +1042,7 @@
                   name="ppCitaMedica"
                   [value]="1"
                   [ngModel]="ppCitaMedica()"
-                  (ngModelChange)="ppCitaMedica.set(+$event)"
+                  (ngModelChange)="onEmergenciaChange(+$event)"
                 />
 
                 <span>
@@ -1059,7 +1059,7 @@
                   name="ppCitaMedica"
                   [value]="0"
                   [ngModel]="ppCitaMedica()"
-                  (ngModelChange)="ppCitaMedica.set(+$event)"
+                  (ngModelChange)="onEmergenciaChange(+$event)"
                 />
 
                 <span>
@@ -1071,6 +1071,41 @@
             </div>
 
           </div>
+
+          @if (ppCitaMedica() === 1) {
+            <div class="form-group">
+              <label class="form-label" for="ppArchivo">
+                Comprobante de cita médica
+                <span class="required">*</span>
+              </label>
+
+              <input
+                id="ppArchivo"
+                type="file"
+                class="form-control"
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                [class.field-invalido]="ppErrores().archivo"
+                (change)="onArchivoChange($event)"
+              />
+
+              <small class="form-hint">
+                Adjunte el comprobante médico en formato PDF, JPG o PNG.
+                El documento es obligatorio para las solicitudes de emergencia.
+              </small>
+
+              @if (ppArchivo(); as archivo) {
+                <small class="form-hint">
+                  Archivo seleccionado: {{ archivo.name }}
+                </small>
+              }
+
+              @if (ppErrores().archivo) {
+                <span class="error-message">
+                  Debe adjuntar el comprobante médico para registrar una emergencia.
+                </span>
+              }
+            </div>
+          }
 
         </div>
 

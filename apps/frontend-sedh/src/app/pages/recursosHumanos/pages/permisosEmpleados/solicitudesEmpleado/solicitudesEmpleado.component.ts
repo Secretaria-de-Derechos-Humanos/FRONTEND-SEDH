@@ -74,12 +74,15 @@ export interface Solicitud {
     | 'APROBADO'
     | 'RECHAZADO'
     | 'ANULADO';
-
   pri_aporbacion: string | null;
-
   seg_aprobacion: string | null;
-
   mot_rechazo: string | null;
+// Datos del comprobante médico
+  catEmergencia?: boolean | null;
+  referenciaDocumento?: string | null;
+  estadoComprobante?: 'PENDIENTE' | 'ENTREGADO' | 'VENCIDO' | null;
+  fechaLimiteComprobante?: string | null;
+  fechaEntregaComprobante?: string | null;
 
 }
 
@@ -169,6 +172,14 @@ export class SolicitudesEmpleadoComponent
 
   solicitudesEmergencia =
     signal<Solicitud[]>([]);
+    // ENTREGA DE COMPROBANTE MÉDICO
+isSubiendoComprobante = signal(false);
+
+idPermisoSubiendoComprobante = signal<string | null>(null);
+
+mensajeComprobante = signal('');
+
+errorComprobante = signal('');
 
   solicitudesVacaciones =
     signal<SolicitudVacaciones[]>([]);
@@ -408,45 +419,123 @@ onEmergenciaChange(valor: number): void {
     this.ppArchivo.set(null);
   }
 }
+async subirComprobanteEmergencia(
+  event: Event,
+  solicitud: Solicitud
+): Promise<void> {
+
+  const input = event.target as HTMLInputElement;
+  const archivo = input.files?.[0];
+
+  if (!archivo) {
+    return;
+  }
+
+  this.mensajeComprobante.set('');
+  this.errorComprobante.set('');
+
+  // Validar estado del comprobante
+  if (solicitud.estadoComprobante !== 'PENDIENTE') {
+    this.errorComprobante.set(
+      'Esta solicitud no tiene un comprobante pendiente de entrega.'
+    );
+    input.value = '';
+    return;
+  }
+
+  // Validar formato
+  const formatosPermitidos = [
+    'application/pdf',
+    'image/jpeg',
+    'image/png'
+  ];
+
+  if (!formatosPermitidos.includes(archivo.type)) {
+    this.errorComprobante.set(
+      'Solo se permiten archivos PDF, JPG o PNG.'
+    );
+    input.value = '';
+    return;
+  }
+
+  // Validar tamaño máximo de 5 MB
+  if (archivo.size > 5 * 1024 * 1024) {
+    this.errorComprobante.set(
+      'El archivo no debe superar los 5 MB.'
+    );
+    input.value = '';
+    return;
+  }
+
+  if (this.isSubiendoComprobante()) {
+    input.value = '';
+    return;
+  }
+
+  this.isSubiendoComprobante.set(true);
+  this.idPermisoSubiendoComprobante.set(solicitud.idPermiso);
+
+  this.solicitudesService
+    .adjuntarComprobanteEmergencia(
+      solicitud.idPermiso,
+      archivo
+    )
+    .subscribe({
+
+      next: () => {
+        this.mensajeComprobante.set(
+          'Comprobante médico entregado correctamente.'
+        );
+
+        this.isSubiendoComprobante.set(false);
+        this.idPermisoSubiendoComprobante.set(null);
+
+        input.value = '';
+
+        this.cargarDatos();
+      },
+
+      error: (error) => {
+        this.errorComprobante.set(
+          error?.error?.message ??
+          'No fue posible entregar el comprobante médico.'
+        );
+
+        this.isSubiendoComprobante.set(false);
+        this.idPermisoSubiendoComprobante.set(null);
+
+        input.value = '';
+      }
+
+    });
+}
 
   ppHorasDisponibles =
     signal<string>('--:--');
 
 
   ppErrores =
-    computed(() => ({
-      archivo:
-  this.ppCitaMedica() === 1 && !this.ppArchivo(),
+  computed(() => ({
+    archivo: false,
 
-      fecha:
-        !this.ppFecha()
+    fecha:
+      !this.ppFecha()
+      ||
+      this.ppFecha() < this.ppFechaMin
+      ||
+      this.ppFecha() > this.ppFechaMax,
 
-        ||
+    horas:
+      this.ppHoras() < 0 ||
+      this.ppHoras() > 9,
 
-        this.ppFecha()
-          < this.ppFechaMin
+    minutos:
+      this.ppMinutos() < 0 ||
+      this.ppMinutos() > 59,
 
-        ||
-
-        this.ppFecha()
-          > this.ppFechaMax,
-
-
-      horas:
-        this.ppHoras() < 0
-        ||
-        this.ppHoras() > 9,
-
-
-      minutos:
-        this.ppMinutos() < 0
-        ||
-        this.ppMinutos() > 59,
-
-
-      motivo:
-        !this.ppMotivo().trim()
-    }));
+    motivo:
+      !this.ppMotivo().trim()
+  }));
 
 
   ppFormInvalido =

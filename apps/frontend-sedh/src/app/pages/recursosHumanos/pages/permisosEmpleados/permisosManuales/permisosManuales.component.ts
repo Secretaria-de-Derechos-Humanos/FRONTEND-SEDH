@@ -13,6 +13,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { environment } from '../../../../../../environments/environment';
+
 type TipoPestana = 'personal' | 'oficial' | 'tardia';
 type TipoPermisoExistente = 'personal' | 'oficial';
 interface RespuestaApi<T = unknown> {
@@ -65,8 +66,11 @@ interface ReportePersonal {
   referenciaDocumento: string | null;
   estado: string;
   empleado: string;
+  dependencia?: string | null;
   fechaRegistro: string;
   registradoPor: string;
+    observacion?: string | null;
+  horasDisponibles?: string | null;
 }
 interface ReporteOficial {
   idPermiso: string;
@@ -78,8 +82,11 @@ interface ReporteOficial {
   referenciaDocumento: string | null;
   estado: string;
   empleado: string;
+  dependencia?: string | null;
   fechaRegistro: string;
   registradoPor: string;
+  observacion?: string | null;
+  horasDisponibles?: string | null;
 }
 interface RespuestaReporte<T> {
   status: string;
@@ -99,6 +106,7 @@ interface ReporteLlegadaTardia {
   estado: string;
   minutosDescontados: number;
   empleado: string;
+  dependencia?: string | null;
   fechaRegistro?: string;
   registradoPor?: string;
 }
@@ -154,6 +162,7 @@ export class PermisosManualesComponent {
   readonly fechaInicioReporte = signal(new Date().toLocaleDateString('en-CA'));
   readonly fechaFinalReporte = signal(new Date().toLocaleDateString('en-CA'));
   readonly consultandoReportes = signal(false);
+  readonly exportandoConsolidado = signal(false);
   readonly errorReporte = signal('');
   readonly mensajeReporte = signal('');
   readonly reportePersonal = signal<ReportePersonal[]>([]);
@@ -723,53 +732,139 @@ this.totalLlegadasTardias.set(reporte?.total ?? data.length);
       });
   }
 
-  exportarExcel(): void {
-    if (this.reportePersonal().length === 0 && this.reporteOficial().length === 0) {
-      this.errorReporte.set('No hay registros para exportar. Consulte primero un rango de fechas.');
-      return;
-    }
-    const libro = XLSX.utils.book_new();
-    const datosPersonales = this.reportePersonal().map((p) => ({
-      Empleado: p.empleado ?? '',
-      Correo: p.emailInstitucional ?? '',
-      Fecha: this.formatearFecha(p.fecha),
-      Horas: p.horas ?? '',
-      Motivo: p.motivo ?? '',
-      Emergencia: p.emergencia ? 'Sí' : 'No',
-      Referencia: p.referenciaDocumento ?? '',
-      Estado: p.estado ?? '',
-      'Fecha de registro': this.formatearFecha(p.fechaRegistro),
-      'Registrado por': p.registradoPor ?? '',
-    }));
-    const datosOficiales = this.reporteOficial().map((p) => ({
-      Empleado: p.empleado ?? '',
-      Correo: p.emailInstitucional ?? '',
-      'Fecha inicial': this.formatearFecha(p.fechaInicio),
-      'Fecha final': this.formatearFecha(p.fechaFinal),
-      'Días laborables': p.diasLaborables ?? 0,
-      Motivo: p.motivo ?? '',
-      Referencia: p.referenciaDocumento ?? '',
-      Estado: p.estado ?? '',
-      'Fecha de registro': this.formatearFecha(p.fechaRegistro),
-      'Registrado por': p.registradoPor ?? '',
-    }));
-    const hojaPersonal = XLSX.utils.json_to_sheet(datosPersonales);
-    const hojaOficial = XLSX.utils.json_to_sheet(datosOficiales);
-    hojaPersonal['!cols'] = [
-      { wch: 28 }, { wch: 32 }, { wch: 14 }, { wch: 12 }, { wch: 36 },
-      { wch: 12 }, { wch: 24 }, { wch: 14 }, { wch: 16 }, { wch: 30 },
-    ];
-    hojaOficial['!cols'] = [
-      { wch: 28 }, { wch: 32 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
-      { wch: 36 }, { wch: 24 }, { wch: 14 }, { wch: 16 }, { wch: 30 },
-    ];
-    XLSX.utils.book_append_sheet(libro, hojaPersonal, 'Personales');
-    XLSX.utils.book_append_sheet(libro, hojaOficial, 'Oficiales');
-    XLSX.writeFile(
-      libro,
-      `Reporte_Permisos_Manuales${this.fechaInicioReporte()}${this.fechaFinalReporte()}.xlsx`,
+
+exportarExcel(): void {
+  if (
+    this.reportePersonal().length === 0 &&
+    this.reporteOficial().length === 0
+  ) {
+    this.errorReporte.set(
+      'No hay registros para exportar. Consulte primero un rango de fechas.',
     );
+    return;
   }
+
+  const libro = XLSX.utils.book_new();
+
+  const encabezadosPersonales = [
+    'Dependencia',
+    'Empleado',
+    'Correo',
+    'Fecha',
+    'Motivo',
+    'Fecha de registro',
+    'Observaciones',
+    'Horas solicitadas',
+    'Horas disponibles',
+    'Emergencia',
+    'Referencia',
+    'Estado',
+    'Registrado por',
+  ];
+
+  const encabezadosOficiales = [
+    'Dependencia',
+    'Empleado',
+    'Correo',
+    'Fecha inicial',
+    'Fecha final',
+    'Días laborables',
+    'Motivo',
+    'Fecha de registro',
+    'Observaciones',
+    'Horas disponibles',
+    'Referencia',
+    'Estado',
+    'Registrado por',
+  ];
+
+  const datosPersonales = this.reportePersonal().map((p) => [
+    p.dependencia ?? 'SIN DEPENDENCIA',
+    p.empleado ?? '',
+    p.emailInstitucional ?? '',
+    this.formatearFecha(p.fecha),
+    p.motivo ?? '',
+    this.formatearFecha(p.fechaRegistro),
+    p.observacion ?? '',
+    p.horas ?? '',
+    p.horasDisponibles ?? '',
+    p.emergencia ? 'Sí' : 'No',
+    p.referenciaDocumento ?? '',
+    p.estado ?? '',
+    p.registradoPor ?? '',
+  ]);
+
+  const datosOficiales = this.reporteOficial().map((p) => [
+    p.dependencia ?? 'SIN DEPENDENCIA',
+    p.empleado ?? '',
+    p.emailInstitucional ?? '',
+    this.formatearFecha(p.fechaInicio),
+    this.formatearFecha(p.fechaFinal),
+    p.diasLaborables ?? 0,
+    p.motivo ?? '',
+    this.formatearFecha(p.fechaRegistro),
+    p.observacion ?? '',
+    p.horasDisponibles ?? '',
+    p.referenciaDocumento ?? '',
+    p.estado ?? '',
+    p.registradoPor ?? '',
+  ]);
+
+  const filas: any[][] = [];
+
+  // SECCIÓN DE PERMISOS PERSONALES
+  filas.push(['PERMISOS PERSONALES']);
+  filas.push(encabezadosPersonales);
+  filas.push(...datosPersonales);
+
+  // Separación entre secciones
+  filas.push([]);
+  filas.push([]);
+
+  // SECCIÓN DE PERMISOS OFICIALES
+  filas.push(['PERMISOS OFICIALES']);
+  filas.push(encabezadosOficiales);
+  filas.push(...datosOficiales);
+
+  const hoja = XLSX.utils.aoa_to_sheet(filas);
+
+  // Combinar títulos de las secciones
+  hoja['!merges'] = [
+    {
+      s: { r: 0, c: 0 },
+      e: { r: 0, c: 12 },
+    },
+    {
+      s: { r: datosPersonales.length + 4, c: 0 },
+      e: { r: datosPersonales.length + 4, c: 12 },
+    },
+  ];
+
+  // Ancho de columnas
+  hoja['!cols'] = [
+    { wch: 28 },
+    { wch: 30 },
+    { wch: 32 },
+    { wch: 14 },
+    { wch: 35 },
+    { wch: 18 },
+    { wch: 40 },
+    { wch: 18 },
+    { wch: 18 },
+    { wch: 12 },
+    { wch: 24 },
+    { wch: 14 },
+    { wch: 30 },
+  ];
+
+  XLSX.utils.book_append_sheet(libro, hoja, 'Reporte de permisos');
+
+  XLSX.writeFile(
+    libro,
+    `Reporte_Permisos_Manuales_${this.fechaInicioReporte()}_${this.fechaFinalReporte()}.xlsx`,
+  );
+}
+
   exportarPDF(): void {
     if (this.reportePersonal().length === 0 && this.reporteOficial().length === 0) {
       this.errorReporte.set('No hay registros para exportar. Consulte primero un rango de fechas.');
@@ -816,6 +911,192 @@ this.totalLlegadasTardias.set(reporte?.total ?? data.length);
     });
     doc.save(`Reporte_Permisos_Manuales${this.fechaInicioReporte()}${this.fechaFinalReporte()}.pdf`);
   }
+
+exportarExcelConsolidado(): void {
+  const fechaInicio = this.fechaInicioReporte();
+  const fechaFinal = this.fechaFinalReporte();
+
+  if (!fechaInicio || !fechaFinal || fechaInicio > fechaFinal) {
+    this.errorReporte.set('Verifique el rango de fechas seleccionado.');
+    return;
+  }
+
+  const params = new HttpParams()
+    .set('fechaInicio', fechaInicio)
+    .set('fechaFinal', fechaFinal);
+
+  this.errorReporte.set('');
+  this.mensajeReporte.set('');
+  this.exportandoConsolidado.set(true);
+
+  forkJoin({
+    personal: this.http.get<any>(
+      `${this.base}/rrhh/permisos-personales/reporte-manual`,
+      { params }
+    ),
+    oficial: this.http.get<any>(
+      `${this.base}/rrhh/permisos-oficiales/reporte-manual`,
+      { params }
+    ),
+    tardias: this.http.get<any>(
+      `${this.base}/rrhh/permisos-personales/llegadas-tardias`,
+      { params }
+    ),
+  })
+    .pipe(finalize(() => this.exportandoConsolidado.set(false)))
+    .subscribe({
+      next: ({ personal, oficial, tardias }) => {
+        const obtenerRegistros = (respuesta: any): any[] => {
+          const contenido = respuesta?.data ?? respuesta;
+
+          if (Array.isArray(contenido)) return contenido;
+          if (Array.isArray(contenido?.data)) return contenido.data;
+
+          return [];
+        };
+
+        const registrosPersonal = obtenerRegistros(personal);
+        const registrosOficial = obtenerRegistros(oficial);
+        const registrosTardias = obtenerRegistros(tardias);
+        console.table(
+  registrosPersonal.map(r => ({
+    empleado: r.empleado,
+    email: r.emailInstitucional,
+    dependencia: r.dependencia
+  }))
+);
+
+console.table(
+  registrosOficial.map(r => ({
+    empleado: r.empleado,
+    email: r.emailInstitucional,
+    dependencia: r.dependencia
+  }))
+);
+
+console.table(
+  registrosTardias.map(r => ({
+    empleado: r.empleado,
+    email: r.emailInstitucional,
+    dependencia: r.dependencia
+  }))
+);
+
+        if (
+          registrosPersonal.length === 0 &&
+          registrosOficial.length === 0 &&
+          registrosTardias.length === 0
+        ) {
+          this.errorReporte.set(
+            'No existen registros para exportar en el período seleccionado.'
+          );
+          return;
+        }
+
+        const filas: any[][] = [];
+        const combinaciones: any[] = [];
+
+        const agregarSeccion = (
+          titulo: string,
+          registros: any[]
+        ): void => {
+          const filaTitulo = filas.length;
+
+          filas.push([titulo, '', '']);
+
+          combinaciones.push({
+            s: { r: filaTitulo, c: 0 },
+            e: { r: filaTitulo, c: 2 },
+          });
+
+          const grupos = new Map<string, any[]>();
+
+          registros.forEach((registro) => {
+            const dependencia =
+              registro.dependencia?.trim() || 'SIN DEPENDENCIA';
+
+            if (!grupos.has(dependencia)) {
+              grupos.set(dependencia, []);
+            }
+
+            grupos.get(dependencia)!.push(registro);
+          });
+
+          if (grupos.size === 0) {
+            filas.push(['Sin registros', '', '']);
+            return;
+          }
+
+          [...grupos.entries()]
+            .sort(([a], [b]) => a.localeCompare(b))
+            .forEach(([dependencia, empleados]) => {
+              const filaDependencia = filas.length;
+
+              filas.push([`DEPENDENCIA: ${dependencia}`, '', '']);
+
+              combinaciones.push({
+                s: { r: filaDependencia, c: 0 },
+                e: { r: filaDependencia, c: 2 },
+              });
+
+              filas.push([
+                'Nombre del empleado',
+                'Fecha de registro',
+                'Justificación',
+              ]);
+
+              empleados
+                .sort((a, b) =>
+                  (a.empleado || '').localeCompare(b.empleado || '')
+                )
+                .forEach((registro) => {
+                  filas.push([
+                    registro.empleado || registro.emailInstitucional || '',
+                    this.formatearFecha(registro.fechaRegistro),
+                    registro.motivo || '',
+                  ]);
+                });
+
+              filas.push(['', '', '']);
+            });
+        };
+
+        agregarSeccion('PERMISOS PERSONALES', registrosPersonal);
+        agregarSeccion('PERMISOS OFICIALES', registrosOficial);
+        agregarSeccion('LLEGADAS TARDÍAS', registrosTardias);
+
+        const hoja = XLSX.utils.aoa_to_sheet(filas);
+
+        hoja['!merges'] = combinaciones;
+        hoja['!cols'] = [
+          { wch: 38 },
+          { wch: 22 },
+          { wch: 65 },
+        ];
+
+        const libro = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(
+          libro,
+          hoja,
+          'Reporte consolidado'
+        );
+
+        XLSX.writeFile(
+          libro,
+          `Reporte_Consolidado_${fechaInicio}_${fechaFinal}.xlsx`
+        );
+
+        this.mensajeReporte.set(
+          'Excel consolidado generado correctamente.'
+        );
+      },
+      error: (error) => {
+        this.errorReporte.set(this.obtenerMensajeError(error));
+      },
+    });
+}
+
   formatearFecha(valor: string | null | undefined): string {
     if (!valor) return '';
     // Evita cambios de día por conversiones de zona horaria para valores YYYY-MM-DD.

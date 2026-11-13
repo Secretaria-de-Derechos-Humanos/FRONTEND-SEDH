@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-
 import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../services/auth.service';
 
@@ -13,9 +12,9 @@ import {
   EP_RRHH_PERMISOS_PERSONALES_INSERTAR,
   EP_RRHH_PERMISOS_OFICIALES_INSERTAR,
   EP_RRHH_PERMISOS_PERSONALES_ANULAR,
-  EP_RRHH_PERMISOS_OFICIALES_ANULAR
+  EP_RRHH_PERMISOS_OFICIALES_ANULAR,
+  EP_RRHH_PERMISOS_PERSONALES_COMPROBANTE,
 } from '../../../../../config/api.endpoints';
-
 import { Solicitud } from './solicitudesEmpleado.component';
 
 export interface DatosPermiso {
@@ -38,6 +37,11 @@ interface SolicitudApi {
   motRechazo: string | null;
   priAprobacion: string | null;
   segAprobacion: string | null;
+  catEmergencia?: boolean | null;
+  referenciaDocumento?: string | null;
+  estadoComprobante?: 'PENDIENTE' | 'ENTREGADO' | 'VENCIDO' | null;
+  fechaLimiteComprobante?: string | null;
+  fechaEntregaComprobante?: string | null;
 }
 
 interface MisSolicitudesResponse {
@@ -129,7 +133,12 @@ function mapSolicitud(s: SolicitudApi): Solicitud {
     nom_estado: s.estado,
     pri_aporbacion: s.priAprobacion,
     seg_aprobacion: s.segAprobacion,
-    mot_rechazo: s.motRechazo
+    mot_rechazo: s.motRechazo,
+    catEmergencia: s.catEmergencia ?? s.emergencia ?? false,
+    referenciaDocumento: s.referenciaDocumento ?? null,
+    estadoComprobante: s.estadoComprobante ?? null,
+    fechaLimiteComprobante: s.fechaLimiteComprobante ?? null,
+    fechaEntregaComprobante: s.fechaEntregaComprobante ?? null
   };
 }
 
@@ -216,7 +225,19 @@ export class SolicitudesEmpleadoService {
     formData
   );
 }
+adjuntarComprobanteEmergencia(
+  idPermiso: string,
+  archivo: File
+): Observable<unknown> {
 
+  const formData = new FormData();
+  formData.append('archivo', archivo);
+
+  return this.http.post<unknown>(
+    `${this.base}${EP_RRHH_PERMISOS_PERSONALES_COMPROBANTE}/${idPermiso}/comprobante`,
+    formData
+  );
+}
   anularPermisoPersonal(
     idPermiso: string
   ): Observable<AnularPermisoResponse> {

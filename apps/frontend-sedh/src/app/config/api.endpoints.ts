@@ -29,6 +29,8 @@ export const EP_RRHH_PERMISOS_OFICIALES_INSERTAR        = '/rrhh/permisos-oficia
 export const EP_RRHH_PERMISOS_PERSONALES_ANULAR = '/rrhh/permisos-personales/anular';
 export const EP_RRHH_PERMISOS_OFICIALES_ANULAR =  '/rrhh/permisos-oficiales/anular';
 export const EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD = '/rrhh/permisos-personales/disponibilidad';
+export const EP_RRHH_PERMISOS_PERSONALES_COMPROBANTE =
+  '/rrhh/permisos-personales';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -371,6 +371,21 @@ export const appRoutes: Route[] = [
           ),
       },
 
+      // =======================================================
+// MIS LLEGADAS TARDÍAS
+// ACCESO: USUARIOS AUTENTICADOS
+// =======================================================
+
+{
+  path: 'rrhh/mis-llegadas-tardias',
+
+  loadComponent: () =>
+    import(
+      './pages/recursosHumanos/pages/permisosEmpleados/misLlegadasTardias/misLlegadasTardias.component'
+    ).then(
+      (m) => m.MisLlegadasTardiasComponent,
+    ),
+},
 
       // =======================================================
       // CONTROL DE SALIDAS

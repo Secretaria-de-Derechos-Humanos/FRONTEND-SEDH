@@ -82,6 +82,12 @@ export class RecursosHumanosMainComponent {
           5,
         ],
       },
+      {
+  label: 'Mis llegadas tardías',
+  imageUrl: 'Registro_permisos.png',
+  route: '/rrhh/mis-llegadas-tardias',
+  rolesPermitidos: [1, 2, 3, 4, 5],
+},
 
       // =====================================================
 // SOLICITAR CONSTANCIA

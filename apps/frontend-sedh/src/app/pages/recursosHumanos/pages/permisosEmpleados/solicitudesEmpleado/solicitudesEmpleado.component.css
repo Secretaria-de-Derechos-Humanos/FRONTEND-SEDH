@@ -920,3 +920,20 @@ textarea.form-control {
     font-size: 0.75rem;
   }
 }
+label.btn-adjuntar {
+  display: inline-block;
+  padding: 8px 14px;
+  background-color: #198754;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+label.btn-adjuntar:hover {
+  background-color: #157347;
+}

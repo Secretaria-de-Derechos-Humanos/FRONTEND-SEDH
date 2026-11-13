@@ -1,0 +1,254 @@
+
+<div class="llegadas-page">
+
+  <header class="page-header">
+    <div class="header-icon">◷</div>
+    <div>
+      <h1>Mis llegadas tardías</h1>
+      <p>Registra y consulta tus justificaciones de llegada tardía.</p>
+    </div>
+  </header>
+
+  <section class="user-info">
+    <div>
+      <span>Empleado</span>
+      <strong>{{ usuario()?.nombre }} {{ usuario()?.apellido }}</strong>
+    </div>
+    <div>
+      <span>Correo institucional</span>
+      <strong>{{ usuario()?.email }}</strong>
+    </div>
+  </section>
+
+  @if (mensajeExito()) {
+    <div class="alert alert-success">
+      {{ mensajeExito() }}
+      <button type="button" (click)="limpiarMensajes()">×</button>
+    </div>
+  }
+
+  @if (mensajeError()) {
+    <div class="alert alert-error">
+      {{ mensajeError() }}
+      <button type="button" (click)="limpiarMensajes()">×</button>
+    </div>
+  }
+
+  <section class="form-card">
+    <div class="section-heading">
+      <div>
+        <h2>Registrar llegada tardía</h2>
+        <p>Complete la información correspondiente a su llegada.</p>
+      </div>
+      <span class="status-label">Aprobación automática</span>
+    </div>
+
+    <div class="notice">
+      Las justificaciones se registran automáticamente como aprobadas.
+      Los minutos de retraso se descuentan de tu saldo mensual disponible,
+      conforme a las reglas del sistema.
+    </div>
+
+    <form #formTardia="ngForm"
+      (ngSubmit)="registrarLlegadaTardia(formTardia)"
+      novalidate>
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label for="fechaLlegada">Fecha de llegada *</label>
+          <input
+            id="fechaLlegada"
+            name="fechaLlegada"
+            type="date"
+            [(ngModel)]="formulario.fechaLlegada"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="horaLlegadaReal">Hora real de llegada *</label>
+          <input
+            id="horaLlegadaReal"
+            name="horaLlegadaReal"
+            type="time"
+            min="08:01"
+            step="60"
+            [(ngModel)]="formulario.horaLlegadaReal"
+            required
+          />
+        </div>
+
+        <div class="field full-width">
+          <label for="motivo">Motivo de la llegada tardía *</label>
+          <textarea
+            id="motivo"
+            name="motivo"
+            rows="3"
+            maxlength="1000"
+            minlength="3"
+            [(ngModel)]="formulario.motivo"
+            placeholder="Describa el motivo de su llegada tardía"
+            required
+          ></textarea>
+        </div>
+
+        <div class="field">
+          <label for="referenciaDocumento">
+            Referencia del documento
+            <span class="optional">(opcional)</span>
+          </label>
+          <input
+            id="referenciaDocumento"
+            name="referenciaDocumento"
+            type="text"
+            maxlength="255"
+            [(ngModel)]="formulario.referenciaDocumento"
+            placeholder="Referencia del documento"
+          />
+        </div>
+
+        <div class="field">
+          <label for="horaSalida">
+            Hora de salida <span class="optional">(opcional)</span>
+          </label>
+          <input
+            id="horaSalida"
+            name="horaSalida"
+            type="time"
+            [(ngModel)]="formulario.horaSalida"
+          />
+        </div>
+
+        <div class="field">
+          <label for="horaRegreso">
+            Hora de regreso <span class="optional">(opcional)</span>
+          </label>
+          <input
+            id="horaRegreso"
+            name="horaRegreso"
+            type="time"
+            [(ngModel)]="formulario.horaRegreso"
+          />
+        </div>
+
+        <div class="field full-width">
+          <label for="observacion">
+            Observaciones <span class="optional">(opcional)</span>
+          </label>
+          <textarea
+            id="observacion"
+            name="observacion"
+            rows="2"
+            maxlength="500"
+            [(ngModel)]="formulario.observacion"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="submit-button"
+          [disabled]="enviando()"
+        >
+          {{ enviando() ? 'Registrando...' : 'Registrar justificación' }}
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+  <section class="history-card">
+
+    <div class="section-heading">
+      <div>
+        <h2>Mi historial de llegadas tardías</h2>
+        <p>Consulta exclusivamente tus propias justificaciones.</p>
+      </div>
+      <span class="total-badge">Total: {{ total() }}</span>
+    </div>
+
+    <div class="filters">
+      <div class="field">
+        <label for="fechaInicio">Fecha inicial</label>
+        <input
+          id="fechaInicio"
+          type="date"
+          [value]="fechaInicio()"
+          (change)="fechaInicio.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label for="fechaFinal">Fecha final</label>
+        <input
+          id="fechaFinal"
+          type="date"
+          [value]="fechaFinal()"
+          (change)="fechaFinal.set($any($event.target).value)"
+        />
+      </div>
+
+      <button
+        type="button"
+        class="submit-button"
+        [disabled]="consultando()"
+        (click)="consultarMisLlegadasTardias()"
+      >
+        {{ consultando() ? 'Consultando...' : 'Consultar historial' }}
+      </button>
+    </div>
+
+    @if (errorReporte()) {
+      <div class="alert alert-error">{{ errorReporte() }}</div>
+    }
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Entrada establecida</th>
+            <th>Hora de llegada</th>
+            <th>Retraso</th>
+            <th>Minutos descontados</th>
+            <th>Saldo disponible</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (registro of llegadas(); track registro.idJustificacion) {
+            <tr>
+              <td>{{ formatearFecha(registro.fechaLlegada) }}</td>
+              <td>{{ registro.horaEntradaEstablecida }}</td>
+              <td>{{ registro.horaLlegadaReal }}</td>
+              <td>{{ registro.minutosRetraso }} min</td>
+              <td>{{ registro.minutosDescontados }} min</td>
+              <td>{{ registro.horasDisponibles || '—' }}</td>
+              <td>{{ registro.motivo }}</td>
+              <td>
+                <span class="state-label">
+                  {{ registro.estado }}
+                </span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="empty-row">
+                {{ consultando()
+                  ? 'Consultando registros...'
+                  : 'No tienes llegadas tardías registradas en este período.' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</div>

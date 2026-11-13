@@ -16,6 +16,9 @@ export interface RegistroPermiso {
   horaRetorno: string;
   horasPermiso: string;
   horasDisponibles: string;
+  motivo?: string;
+  observacion?: string;
+  fechaRegistro?: string;
 }
 
 export interface DepGroup {

@@ -404,9 +404,29 @@
     @if (mensajeReporte()) { <div class="alert alert-success" role="status">{{ mensajeReporte() }}</div> }
 
     <div class="reportes-exportar">
-      <button type="button" [disabled]="consultandoReportes()" (click)="exportarExcel()">Exportar Excel (.xlsx)</button>
-      <button type="button" [disabled]="consultandoReportes()" (click)="exportarPDF()">Exportar PDF</button>
-    </div>
+  <button
+    type="button"
+    [disabled]="consultandoReportes() || exportandoConsolidado()"
+    (click)="exportarExcel()">
+    Exportar Excel (.xlsx)
+  </button>
+
+  <button
+    type="button"
+    [disabled]="consultandoReportes() || exportandoConsolidado()"
+    (click)="exportarPDF()">
+    Exportar PDF
+  </button>
+
+  <button
+    type="button"
+    [disabled]="consultandoReportes() || exportandoConsolidado()"
+    (click)="exportarExcelConsolidado()">
+    {{ exportandoConsolidado()
+      ? 'Generando consolidado...'
+      : 'Exportar Excel consolidado (.xlsx)' }}
+  </button>
+</div>
 
     @if (pestana() === 'personal') {
       <div class="tabla-heading"><h3>Permisos personales</h3><span class="total-badge">Total: {{ totalPersonal() }}</span></div>

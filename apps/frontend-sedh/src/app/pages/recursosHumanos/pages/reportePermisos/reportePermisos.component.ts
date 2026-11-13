@@ -138,87 +138,142 @@ export class ReportePermisosComponent implements OnInit {
       });
   }
 
-  async exportarExcel(): Promise<void> {
-    if (!this.hayDatos()) {
-      return;
-    }
 
-    this.exportando.set(true);
-
-    try {
-      const { utils, writeFile } =
-        await import('xlsx');
-
-      const encabezados = [
-        'Dependencia',
-        'Empleado',
-        'Fecha',
-        'Tipo de permiso',
-        'Hora salida',
-        'Hora retorno',
-        'Tiempo de permiso',
-        'Horas disponibles',
-      ];
-
-      const filas: (string | number)[][] = [
-        encabezados,
-      ];
-
-      for (const dependencia of this.dependencias()) {
-        for (const registro of dependencia.registros) {
-          filas.push([
-            registro.dependencia,
-            registro.empleado,
-            this.formatearFecha(registro.fecha),
-            registro.tipo,
-            registro.horaSalida,
-            registro.horaRetorno,
-            this.formatearHorasPermiso(
-              registro.horasPermiso,
-            ),
-            registro.horasDisponibles ?? '',
-          ]);
-        }
-      }
-
-      const hoja = utils.aoa_to_sheet(filas);
-
-      hoja['!cols'] = [
-        { wch: 35 },
-        { wch: 25 },
-        { wch: 14 },
-        { wch: 22 },
-        { wch: 14 },
-        { wch: 14 },
-        { wch: 18 },
-        { wch: 20 },
-      ];
-
-      const libro = utils.book_new();
-
-      utils.book_append_sheet(
-        libro,
-        hoja,
-        'Permisos',
-      );
-
-      const nombreArchivo =
-        `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.xlsx`;
-
-      writeFile(libro, nombreArchivo);
-    } catch (error) {
-      console.error(
-        'Error al exportar Excel:',
-        error,
-      );
-
-      this.error.set(
-        'No fue posible generar el archivo de Excel.',
-      );
-    } finally {
-      this.exportando.set(false);
-    }
+async exportarExcel(): Promise<void> {
+  if (!this.hayDatos()) {
+    return;
   }
+
+  this.exportando.set(true);
+
+  try {
+    const { utils, writeFile } = await import('xlsx');
+
+    const registros = this.dependencias().flatMap(
+      (dependencia) => dependencia.registros
+    );
+
+    const personales = registros.filter((r) =>
+      r.tipo?.toLowerCase().includes('personal')
+    );
+
+    const oficiales = registros.filter((r) =>
+      r.tipo?.toLowerCase().includes('oficial')
+    );
+
+    const encabezados = [
+      'Dependencia',
+      'Empleado',
+      'Fecha',
+      'Tipo de permiso',
+      'Hora salida',
+      'Hora retorno',
+      'Tiempo de permiso',
+      'Motivo',
+      'Fecha de registro',
+      'Observaciones',
+      'Horas disponibles',
+    ];
+
+    const filas: any[][] = [];
+
+    // PERMISOS PERSONALES
+    filas.push(['PERMISOS PERSONALES']);
+    filas.push(encabezados);
+
+    for (const registro of personales) {
+      filas.push([
+        registro.dependencia ?? '',
+        registro.empleado ?? '',
+        this.formatearFecha(registro.fecha),
+        registro.tipo ?? '',
+        registro.horaSalida ?? '',
+        registro.horaRetorno ?? '',
+        this.formatearHorasPermiso(registro.horasPermiso),
+        registro.motivo ?? '',
+        registro.fechaRegistro
+          ? this.formatearFecha(registro.fechaRegistro)
+          : '',
+        registro.observacion ?? '',
+        registro.horasDisponibles ?? '',
+      ]);
+    }
+
+    // Separación entre secciones
+    filas.push([]);
+    filas.push([]);
+
+    // PERMISOS OFICIALES
+    filas.push(['PERMISOS OFICIALES']);
+    filas.push(encabezados);
+
+    for (const registro of oficiales) {
+      filas.push([
+        registro.dependencia ?? '',
+        registro.empleado ?? '',
+        this.formatearFecha(registro.fecha),
+        registro.tipo ?? '',
+        registro.horaSalida ?? '',
+        registro.horaRetorno ?? '',
+        this.formatearHorasPermiso(registro.horasPermiso),
+        registro.motivo ?? '',
+        registro.fechaRegistro
+          ? this.formatearFecha(registro.fechaRegistro)
+          : '',
+        registro.observacion ?? '',
+        registro.horasDisponibles ?? '',
+      ]);
+    }
+
+    const hoja = utils.aoa_to_sheet(filas);
+
+    hoja['!cols'] = [
+      { wch: 35 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 22 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 35 },
+      { wch: 18 },
+      { wch: 40 },
+      { wch: 20 },
+    ];
+
+    const filaOficiales = personales.length + 4;
+
+    hoja['!merges'] = [
+      {
+        s: { r: 0, c: 0 },
+        e: { r: 0, c: 10 },
+      },
+      {
+        s: { r: filaOficiales, c: 0 },
+        e: { r: filaOficiales, c: 10 },
+      },
+    ];
+
+    const libro = utils.book_new();
+
+    utils.book_append_sheet(libro, hoja, 'Permisos');
+
+    const nombreArchivo =
+      `reporte-permisos-${this.mesBusqueda}-${this.anioBusqueda}.xlsx`;
+
+    writeFile(libro, nombreArchivo);
+
+  } catch (error) {
+    console.error('Error al exportar Excel:', error);
+
+    this.error.set(
+      'No fue posible generar el archivo de Excel.'
+    );
+  } finally {
+    this.exportando.set(false);
+  }
+}
+
 
   async exportarPDF(): Promise<void> {
     if (!this.hayDatos()) {

@@ -575,10 +575,36 @@
               </td>
 
 
-              <td>
-                —
-              </td>
+              <td class="td-comprobante">
 
+  @if (s.catEmergencia === true && s.estadoComprobante === 'PENDIENTE') {
+
+    <label class="btn-adjuntar">
+      Adjuntar comprobante
+
+      <input
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+        (change)="subirComprobanteEmergencia($event, s)"
+        hidden
+      />
+    </label>
+
+  } @else if (s.estadoComprobante === 'ENTREGADO') {
+
+    <span class="sin-accion">Entregado</span>
+
+  } @else if (s.estadoComprobante === 'VENCIDO') {
+
+    <span class="sin-accion">Vencido</span>
+
+  } @else {
+
+    <span class="sin-accion">—</span>
+
+  }
+
+</td>
 
               <td class="td-acciones">
 
@@ -1073,10 +1099,11 @@
           </div>
 
           @if (ppCitaMedica() === 1) {
+
             <div class="form-group">
+
               <label class="form-label" for="ppArchivo">
-                Comprobante de cita médica
-                <span class="required">*</span>
+                Comprobante de cita médica (opcional)
               </label>
 
               <input
@@ -1084,13 +1111,13 @@
                 type="file"
                 class="form-control"
                 accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
-                [class.field-invalido]="ppErrores().archivo"
                 (change)="onArchivoChange($event)"
               />
 
               <small class="form-hint">
-                Adjunte el comprobante médico en formato PDF, JPG o PNG.
-                El documento es obligatorio para las solicitudes de emergencia.
+                Puede adjuntar el comprobante médico en formato PDF, JPG o PNG.
+                Si no dispone de él al registrar la emergencia, tendrá
+                tres días hábiles para entregarlo posteriormente.
               </small>
 
               @if (ppArchivo(); as archivo) {
@@ -1099,12 +1126,8 @@
                 </small>
               }
 
-              @if (ppErrores().archivo) {
-                <span class="error-message">
-                  Debe adjuntar el comprobante médico para registrar una emergencia.
-                </span>
-              }
             </div>
+
           }
 
         </div>

@@ -40,7 +40,7 @@ import {
   SolicitudVacaciones,
   SaldoVacaciones
 } from '../../../../../core/services/vacaciones-api';
-
+import { AuthService } from '../../../../../services/auth.service';
 
 export type TipoSolicitud =
   | 'permiso-personal'
@@ -160,6 +160,8 @@ export class SolicitudesEmpleadoComponent
 
   private readonly platformId =
     inject(PLATFORM_ID);
+
+  private readonly authService = inject(AuthService);
 
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -337,6 +339,11 @@ errorComprobante = signal('');
         );
 
     });
+    puedeDescargarComprobante = computed(() =>
+  this.authService.currentUser()?.roles?.some(
+    rol => [3, 5].includes(Number(rol.r))
+  ) ?? false
+);
 
 
   readonly badgeClass =
@@ -1632,5 +1639,34 @@ async subirComprobanteEmergencia(
     );
 
   }
+  descargarComprobanteEmergencia(solicitud: Solicitud): void {
+  if (!this.puedeDescargarComprobante()) {
+    return;
+  }
+
+  this.solicitudesService
+    .descargarComprobanteEmergencia(solicitud.idPermiso)
+    .subscribe({
+      next: (archivo) => {
+        const url = window.URL.createObjectURL(archivo);
+        const enlace = document.createElement('a');
+
+        enlace.href = url;
+        enlace.download = 'comprobante-medico';
+        document.body.appendChild(enlace);
+
+        enlace.click();
+        enlace.remove();
+
+        window.URL.revokeObjectURL(url);
+      },
+      error: (error) => {
+        console.error('Error al descargar comprobante:', error);
+        this.errorComprobante.set(
+          'No fue posible descargar el comprobante médico.'
+        );
+      }
+    });
+}
 
 }

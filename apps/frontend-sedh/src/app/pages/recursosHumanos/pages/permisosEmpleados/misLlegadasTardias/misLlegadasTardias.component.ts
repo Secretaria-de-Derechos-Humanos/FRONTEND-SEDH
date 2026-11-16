@@ -11,6 +11,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { environment } from '../../../../../../environments/environment';
 import { AuthService } from '../../../../../services/auth.service';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface LlegadaTardia {
   idJustificacion: string;
@@ -258,6 +261,150 @@ export class MisLlegadasTardiasComponent {
       error?.error?.mensaje ??
       error?.message ??
       'Ocurrió un error al procesar la solicitud.'
+    );
+  }
+    exportarExcel(): void {
+    const registros = this.llegadas();
+
+    if (!registros.length) {
+      this.errorReporte.set(
+        'No hay registros para exportar en el período seleccionado.',
+      );
+      return;
+    }
+
+    const nombreEmpleado = [
+      this.usuario()?.nombre ?? '',
+      this.usuario()?.apellido ?? '',
+    ].join(' ').trim();
+
+    const datos = registros.map((registro) => ({
+      Empleado: nombreEmpleado,
+      Correo: this.usuario()?.email ?? '',
+      Fecha: this.formatearFecha(registro.fechaLlegada),
+      'Entrada establecida': registro.horaEntradaEstablecida,
+      'Hora de llegada': registro.horaLlegadaReal,
+      'Minutos de retraso': registro.minutosRetraso,
+      'Minutos descontados': registro.minutosDescontados,
+      'Saldo disponible': registro.horasDisponibles ?? '',
+      Motivo: registro.motivo,
+      'Referencia del documento': registro.referenciaDocumento ?? '',
+      'Hora de salida': registro.horaSalida ?? '',
+      'Hora de regreso': registro.horaRegreso ?? '',
+      Observaciones: registro.observacion ?? '',
+      Estado: registro.estado,
+    }));
+
+    const hoja = XLSX.utils.json_to_sheet(datos);
+
+    hoja['!cols'] = [
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 45 },
+      { wch: 28 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 35 },
+      { wch: 16 },
+    ];
+
+    const libro = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(
+      libro,
+      hoja,
+      'Mis llegadas tardías',
+    );
+
+    XLSX.writeFile(
+      libro,
+      `Mis_llegadas_tardias_${this.fechaInicio()}_${this.fechaFinal()}.xlsx`,
+    );
+  }
+
+  exportarPDF(): void {
+    const registros = this.llegadas();
+
+    if (!registros.length) {
+      this.errorReporte.set(
+        'No hay registros para exportar en el período seleccionado.',
+      );
+      return;
+    }
+
+    const nombreEmpleado = [
+      this.usuario()?.nombre ?? '',
+      this.usuario()?.apellido ?? '',
+    ].join(' ').trim();
+
+    const correo = this.usuario()?.email ?? '';
+
+    const documento = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4',
+    });
+
+    documento.setFontSize(16);
+    documento.text('Historial de llegadas tardías', 14, 15);
+
+    documento.setFontSize(10);
+    documento.text(`Empleado: ${nombreEmpleado}`, 14, 23);
+    documento.text(`Correo: ${correo}`, 14, 29);
+    documento.text(
+      `Período: ${this.formatearFecha(this.fechaInicio())} al ${this.formatearFecha(this.fechaFinal())}`,
+      14,
+      35,
+    );
+    documento.text(`Total de registros: ${registros.length}`, 14, 41);
+
+    autoTable(documento, {
+      startY: 47,
+      head: [[
+        'Fecha',
+        'Entrada',
+        'Llegada',
+        'Retraso',
+        'Descontado',
+        'Saldo',
+        'Motivo',
+        'Estado',
+      ]],
+      body: registros.map((registro) => [
+        this.formatearFecha(registro.fechaLlegada),
+        registro.horaEntradaEstablecida ?? '',
+        registro.horaLlegadaReal ?? '',
+        `${registro.minutosRetraso} min`,
+        `${registro.minutosDescontados} min`,
+        registro.horasDisponibles ?? '—',
+        registro.motivo ?? '',
+        registro.estado ?? '',
+      ]),
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak',
+      },
+      headStyles: {
+        fillColor: [37, 74, 122],
+      },
+      columnStyles: {
+        6: { cellWidth: 75 },
+      },
+      margin: {
+        left: 14,
+        right: 14,
+      },
+    });
+
+    documento.save(
+      `Mis_llegadas_tardias_${this.fechaInicio()}_${this.fechaFinal()}.pdf`,
     );
   }
 }

@@ -238,6 +238,14 @@ adjuntarComprobanteEmergencia(
     formData
   );
 }
+descargarComprobanteEmergencia(
+  idPermiso: string
+): Observable<Blob> {
+  return this.http.get(
+    `${this.base}/rrhh/solicitudes-empleados/${encodeURIComponent(idPermiso)}/comprobante`,
+    { responseType: 'blob' }
+  );
+}
   anularPermisoPersonal(
     idPermiso: string
   ): Observable<AnularPermisoResponse> {

@@ -199,6 +199,25 @@
       >
         {{ consultando() ? 'Consultando...' : 'Consultar historial' }}
       </button>
+            <button
+        type="button"
+        class="submit-button"
+        [disabled]="consultando() || llegadas().length === 0"
+        (click)="exportarExcel()"
+      >
+        <i class="fa-solid fa-file-excel"></i>
+        Exportar Excel
+      </button>
+
+      <button
+        type="button"
+        class="submit-button"
+        [disabled]="consultando() || llegadas().length === 0"
+        (click)="exportarPDF()"
+      >
+        <i class="fa-solid fa-file-pdf"></i>
+        Exportar PDF
+      </button>
     </div>
 
     @if (errorReporte()) {

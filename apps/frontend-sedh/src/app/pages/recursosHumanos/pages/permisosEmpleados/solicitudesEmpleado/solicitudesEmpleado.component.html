@@ -590,9 +590,19 @@
       />
     </label>
 
-  } @else if (s.estadoComprobante === 'ENTREGADO') {
+ } @else if (s.estadoComprobante === 'ENTREGADO') {
 
+  @if (puedeDescargarComprobante()) {
+    <button
+      type="button"
+      class="btn-adjuntar"
+      (click)="descargarComprobanteEmergencia(s)"
+    >
+      Descargar comprobante
+    </button>
+  } @else {
     <span class="sin-accion">Entregado</span>
+  }
 
   } @else if (s.estadoComprobante === 'VENCIDO') {
 

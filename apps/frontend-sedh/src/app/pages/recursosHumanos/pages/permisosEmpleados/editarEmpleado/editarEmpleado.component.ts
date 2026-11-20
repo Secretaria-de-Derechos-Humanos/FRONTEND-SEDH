@@ -22,6 +22,7 @@ import {
   GestionEmpleadosService,
   ResultadoBusquedaEmpleado,
 } from '../../gestionEmpleados/gestionEmpleados.service';
+import { AuthService } from '../../../../../services/auth.service';
 
 @Component({
   selector: 'app-editar-empleado',
@@ -39,8 +40,27 @@ export class EditarEmpleadoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
-  private readonly empleadosApi =
-    inject(GestionEmpleadosService);
+  private readonly empleadosApi = inject(GestionEmpleadosService);
+  private readonly authService = inject(AuthService);
+
+  readonly puedeEditarDatosPersonales = computed(() => {
+    const roles = this.authService.currentUser()?.roles ?? [];
+
+    return roles.some((rol) => {
+      const modulos = Array.isArray(rol.m)
+        ? rol.m
+        : rol.m !== undefined && rol.m !== null
+          ? [rol.m]
+          : [];
+
+      return (
+        [3, 5].includes(Number(rol.r)) &&
+        modulos.some((id) => Number(id) === 1)
+      );
+    });
+  });
+
+  readonly guardandoDatosPersonales = signal(false);
 
   readonly cargando = signal(false);
   readonly guardando = signal(false);
@@ -89,12 +109,18 @@ export class EditarEmpleadoComponent implements OnInit {
   );
 
   readonly formulario = this.fb.nonNullable.group({
-    primerNombre: [{ value: '', disabled: true }],
+    primerNombre: [{ value: '', disabled: true }, Validators.required],
     segundoNombre: [{ value: '', disabled: true }],
-    primerApellido: [{ value: '', disabled: true }],
+    primerApellido: [{ value: '', disabled: true }, Validators.required],
     segundoApellido: [{ value: '', disabled: true }],
-    identidad: [{ value: '', disabled: true }],
+    identidad: [{ value: '', disabled: true }, Validators.required],
     email: [{ value: '', disabled: true }],
+    idSexo: [{ value: '', disabled: true }, Validators.required],
+    idEstadoCivil: [{ value: '', disabled: true }, Validators.required],
+    idMunicipio: [
+      { value: 0, disabled: true },
+      [Validators.required, Validators.min(1)],
+    ],
 
     telefono: [
       '',
@@ -120,25 +146,6 @@ export class EditarEmpleadoComponent implements OnInit {
         Validators.min(1),
       ],
     ],
-
-    idSexo: [
-      '',
-      Validators.required,
-    ],
-
-    idEstadoCivil: [
-      '',
-      Validators.required,
-    ],
-
-    idMunicipio: [
-      0,
-      [
-        Validators.required,
-        Validators.min(1),
-      ],
-    ],
-
     jefeInmediatoIdentidad: [
       '',
       Validators.required,
@@ -282,6 +289,26 @@ export class EditarEmpleadoComponent implements OnInit {
       activo:
         empleado.activo ?? true,
     });
+
+    const camposPersonales = [
+      'primerNombre',
+      'segundoNombre',
+      'primerApellido',
+      'segundoApellido',
+      'identidad',
+      'idSexo',
+      'idEstadoCivil',
+      'idMunicipio',
+    ] as const;
+
+    camposPersonales.forEach((campo) => {
+      const control = this.formulario.controls[campo];
+      if (this.puedeEditarDatosPersonales()) {
+        control.enable({ emitEvent: false });
+      } else {
+        control.disable({ emitEvent: false });
+      }
+    });
   }
 
   moduloEstaSeleccionado(
@@ -319,11 +346,18 @@ export class EditarEmpleadoComponent implements OnInit {
     this.errorMessage.set('');
     this.successMessage.set('');
 
-    if (this.formulario.invalid) {
-      this.formulario.markAllAsTouched();
+    const controlesLaborales = [
+      this.formulario.controls.fechaIngreso,
+      this.formulario.controls.idTipoContratacion,
+      this.formulario.controls.idCargo,
+      this.formulario.controls.jefeInmediatoIdentidad,
+      this.formulario.controls.idRol,
+    ];
 
+    if (controlesLaborales.some((control) => control.invalid)) {
+      controlesLaborales.forEach((control) => control.markAsTouched());
       this.errorMessage.set(
-        'Complete correctamente los campos obligatorios.',
+        'Complete correctamente los campos laborales obligatorios.',
       );
       return;
     }
@@ -374,14 +408,16 @@ console.log('TIPO ACTIVO:', typeof valores.activo);
       idCargo:
         Number(valores.idCargo),
 
+      // Los datos personales se actualizan exclusivamente desde
+      // guardarDatosPersonales(); aquí se conservan los valores originales.
       idSexo:
-        valores.idSexo,
+        empleadoActual.idSexo,
 
       idEstadoCivil:
-        valores.idEstadoCivil,
+        empleadoActual.idEstadoCivil,
 
       idMunicipio:
-        Number(valores.idMunicipio),
+        Number(empleadoActual.idMunicipio),
 
       jefeInmediato: {
         identidad:
@@ -526,4 +562,72 @@ console.log('TIPO ACTIVO:', typeof valores.activo);
       predeterminado
     );
   }
+  guardarDatosPersonales(): void {
+    if (!this.puedeEditarDatosPersonales()) {
+      this.errorMessage.set(
+        'No tiene autorización para modificar los datos personales.',
+      );
+      return;
+    }
+
+    const empleado = this.empleadoActual();
+    if (!empleado) {
+      this.errorMessage.set('No se encontró la información del empleado.');
+      return;
+    }
+
+    const controles = this.formulario.controls;
+    const camposObligatorios = [
+      controles.primerNombre,
+      controles.primerApellido,
+      controles.identidad,
+      controles.idSexo,
+      controles.idEstadoCivil,
+      controles.idMunicipio,
+    ];
+
+    if (camposObligatorios.some((control) => control.invalid)) {
+      camposObligatorios.forEach((control) => control.markAsTouched());
+      this.errorMessage.set(
+        'Complete los campos personales obligatorios.',
+      );
+      return;
+    }
+
+    const valores = this.formulario.getRawValue();
+    this.guardandoDatosPersonales.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+
+    this.empleadosApi.actualizarDatosPersonales(empleado.email, {
+      priNombre: valores.primerNombre.trim(),
+      segNombre: valores.segundoNombre.trim(),
+      priApellido: valores.primerApellido.trim(),
+      segApellido: valores.segundoApellido.trim(),
+      numIdentidad: valores.identidad.trim(),
+      idSexo: valores.idSexo,
+      idEstadoCivil: valores.idEstadoCivil,
+      idMunicipio: Number(valores.idMunicipio),
+    }).subscribe({
+      next: (respuesta) => {
+        this.guardandoDatosPersonales.set(false);
+        this.successMessage.set(
+          respuesta.mensaje ||
+            'Datos personales actualizados correctamente.',
+        );
+        this.cargarInformacion(empleado.email);
+      },
+      error: (error: unknown) => {
+        console.error('Error actualizando datos personales:', error);
+        this.guardandoDatosPersonales.set(false);
+        this.errorMessage.set(
+          this.obtenerMensajeError(
+            error,
+            'No se pudieron actualizar los datos personales.',
+          ),
+        );
+      },
+    });
+  }
+
 }

@@ -18,6 +18,7 @@ import {
 } from './gestionEmpleados.service';
 import { ToastService } from '../../../../services/toast.service';
 import { ModalAgregarEmpleadoComponent } from '../../../../components/modalAgregarEmpleado/modalAgregarEmpleado.component';
+import { AuthService } from './../../../../services/auth.service';
 
 // ── Definición de tabs ────────────────────────────────────────────────────────
 
@@ -35,6 +36,18 @@ const TABS: Tab[] = [
   { id: 'historial', titulo: 'Historial de cargos' },
 ];
 
+interface DatosPersonalesEdicion {
+  priNombre: string;
+  segNombre: string;
+  priApellido: string;
+  segApellido: string;
+  numIdentidad: string;
+  idSexo: string;
+  idEstadoCivil: string;
+  idDepartamento: number;
+  idMunicipio: number | null;
+}
+
 @Component({
   selector: 'app-gestion-empleados',
   standalone: true,
@@ -46,7 +59,22 @@ const TABS: Tab[] = [
 export class GestionEmpleadosComponent {
   private readonly service = inject(GestionEmpleadosService);
   private readonly toastService = inject(ToastService);
+  private readonly authService = inject(AuthService);
+  readonly puedeEditarDatosPersonales = computed(() => {
+    const roles = this.authService.currentUser()?.roles ?? [];
+    return roles.some((rol) => {
+      const modulos = Array.isArray(rol.m)
+        ? rol.m
+        : rol.m !== undefined && rol.m !== null
+          ? [rol.m]
+          : [];
 
+      return (
+        [3, 5].includes(Number(rol.r)) &&
+        modulos.some((id) => Number(id) === 1)
+      );
+    });
+  });
   // ── Estado ──────────────────────────────────────────────────────────────────
   searchQuery = signal('');
   resultado = signal<ResultadoBusquedaEmpleado | null>(null);
@@ -62,7 +90,10 @@ export class GestionEmpleadosComponent {
   mostrarModalAgregar = signal(false);
   mensajeEdicion = signal('');
   errorEdicion = signal(false);
-
+  modoEdicionPersonal = signal(false);
+  datosPersonalesEdicion =
+  signal<DatosPersonalesEdicion | null>(null);
+  guardandoDatosPersonales = signal(false);
   readonly tabs = TABS;
 
   // ── Computados ──────────────────────────────────────────────────────────────
@@ -323,12 +354,28 @@ export class GestionEmpleadosComponent {
 
     this.guardando.set(true);
 
-    const emailEmpleado = this.resultado()?.empleado.email ?? '';
+    const empleadoOriginal = this.resultado()?.empleado;
+    const emailEmpleado = empleadoOriginal?.email ?? '';
+
+    if (!empleadoOriginal) return;
+
+    // La edición laboral conserva los datos personales originales.
+    const edicionLaboral: EmpleadoDetalle = {
+      ...edicion,
+      primerNombre: empleadoOriginal.primerNombre,
+      segundoNombre: empleadoOriginal.segundoNombre,
+      primerApellido: empleadoOriginal.primerApellido,
+      segundoApellido: empleadoOriginal.segundoApellido,
+      identidad: empleadoOriginal.identidad,
+      idSexo: empleadoOriginal.idSexo,
+      idEstadoCivil: empleadoOriginal.idEstadoCivil,
+      idMunicipio: empleadoOriginal.idMunicipio,
+    };
 
     this.service
       .actualizarEmpleado(
         emailEmpleado,
-        edicion,
+        edicionLaboral,
         this.accesosEdicion()
       )
       .subscribe({
@@ -337,7 +384,7 @@ export class GestionEmpleadosComponent {
             r
               ? {
                   ...r,
-                  empleado: { ...edicion },
+                  empleado: { ...edicionLaboral },
                   accesosSistema: [...this.accesosEdicion()],
                 }
               : r
@@ -363,4 +410,150 @@ export class GestionEmpleadosComponent {
         },
       });
   }
+  iniciarEdicionPersonal(): void {
+  if (!this.puedeEditarDatosPersonales()) return;
+
+  const emp = this.resultado()?.empleado;
+  if (!emp) return;
+
+  this.datosPersonalesEdicion.set({
+    priNombre: emp.primerNombre ?? '',
+    segNombre: emp.segundoNombre ?? '',
+    priApellido: emp.primerApellido ?? '',
+    segApellido: emp.segundoApellido ?? '',
+    numIdentidad: emp.identidad ?? '',
+    idSexo: emp.idSexo ?? '',
+    idEstadoCivil: emp.idEstadoCivil ?? '',
+    idDepartamento: emp.idDepartamento ?? 0,
+    idMunicipio: emp.idMunicipio ?? null,
+  });
+
+  this.modoEdicionPersonal.set(true);
+
+  if (!this.datosSedh()) {
+    this.cargandoDatos.set(true);
+
+    this.service.cargarDatosSedh().subscribe({
+      next: data => {
+        this.datosSedh.set(data);
+        this.cargandoDatos.set(false);
+      },
+      error: () => {
+        this.cargandoDatos.set(false);
+        this.toastService.mostrar(
+          'error',
+          'No se pudieron cargar los catálogos.'
+        );
+      },
+    });
+  }
+}
+
+actualizarDatoPersonal(
+  campo: keyof DatosPersonalesEdicion,
+  valor: string | number | null
+): void {
+  this.datosPersonalesEdicion.update(datos =>
+    datos ? { ...datos, [campo]: valor } : datos
+  );
+}
+
+seleccionarDepartamentoPersonal(id: number): void {
+  this.datosPersonalesEdicion.update(datos =>
+    datos
+      ? { ...datos, idDepartamento: Number(id), idMunicipio: null }
+      : datos
+  );
+}
+
+cancelarEdicionPersonal(): void {
+  this.modoEdicionPersonal.set(false);
+  this.datosPersonalesEdicion.set(null);
+}
+
+guardarDatosPersonales(): void {
+  if (!this.puedeEditarDatosPersonales()) {
+    this.toastService.mostrar(
+      'error',
+      'No tiene autorización para modificar los datos personales.'
+    );
+    return;
+  }
+
+  const datos = this.datosPersonalesEdicion();
+  const empleado = this.resultado()?.empleado;
+
+  if (!datos || !empleado) return;
+
+  if (
+    !datos.priNombre.trim() ||
+    !datos.priApellido.trim() ||
+    !datos.numIdentidad.trim() ||
+    !datos.idSexo ||
+    !datos.idEstadoCivil ||
+    !datos.idMunicipio
+  ) {
+    this.toastService.mostrar(
+      'error',
+      'Complete los campos personales obligatorios.'
+    );
+    return;
+  }
+
+  const municipio = this.datosSedh()?.municipios.find(
+    m => Number(m.id) === Number(datos.idMunicipio)
+  );
+
+  if (!municipio ||
+      Number(municipio.idDepartamento) !== Number(datos.idDepartamento)) {
+    this.toastService.mostrar(
+      'error',
+      'Seleccione un municipio válido para el departamento.'
+    );
+    return;
+  }
+
+  this.guardandoDatosPersonales.set(true);
+
+  this.service.actualizarDatosPersonales(empleado.email, {
+    priNombre: datos.priNombre.trim(),
+    segNombre: datos.segNombre.trim(),
+    priApellido: datos.priApellido.trim(),
+    segApellido: datos.segApellido.trim(),
+    numIdentidad: datos.numIdentidad.trim(),
+    idSexo: datos.idSexo,
+    idEstadoCivil: datos.idEstadoCivil,
+    idMunicipio: datos.idMunicipio,
+  }).subscribe({
+    next: resp => {
+      this.service.buscarEmpleado(empleado.email).subscribe({
+        next: resultado => {
+          this.resultado.set(resultado);
+          this.guardandoDatosPersonales.set(false);
+          this.cancelarEdicionPersonal();
+
+          this.toastService.mostrar(
+            'exito',
+            resp.mensaje || 'Datos personales actualizados correctamente.'
+          );
+        },
+        error: () => {
+          this.guardandoDatosPersonales.set(false);
+          this.toastService.mostrar(
+            'error',
+            'Los datos se guardaron, pero no se pudo actualizar la información en pantalla. Vuelva a buscar al empleado.'
+          );
+        },
+      });
+    },
+    error: err => {
+      this.guardandoDatosPersonales.set(false);
+
+      this.toastService.mostrar(
+        'error',
+        err.error?.message || 'No se pudieron actualizar los datos personales.'
+      );
+    },
+  });
+}
 }

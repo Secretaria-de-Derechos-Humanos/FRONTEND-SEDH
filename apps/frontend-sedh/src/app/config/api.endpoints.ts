@@ -31,6 +31,8 @@ export const EP_RRHH_PERMISOS_OFICIALES_ANULAR =  '/rrhh/permisos-oficiales/anul
 export const EP_RRHH_PERMISOS_PERSONALES_DISPONIBILIDAD = '/rrhh/permisos-personales/disponibilidad';
 export const EP_RRHH_PERMISOS_PERSONALES_COMPROBANTE =
   '/rrhh/permisos-personales';
+  export const EP_RRHH_EMPLEADOS_ACTUALIZAR_DATOS_PERSONALES =
+  '/rrhh/empleados/actualizar-datos-personales';
 
 
 // ─────────────────────────────────────────────────────────────────────────────

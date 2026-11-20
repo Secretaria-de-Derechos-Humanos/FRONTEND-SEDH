@@ -346,19 +346,19 @@
         </button>
 
         <button
-          type="submit"
-          class="boton-guardar"
-          [disabled]="
-            guardando() ||
-            formulario.invalid ||
-            modulosSeleccionados().length === 0
-          ">
-          {{
-            guardando()
-              ? 'Guardando...'
-              : 'Guardar cambios'
-          }}
-        </button>
+  type="submit"
+  class="boton-guardar"
+  [disabled]="
+    guardando() ||
+    formulario.controls.idRol.invalid ||
+    modulosSeleccionados().length === 0
+  ">
+  {{
+    guardando()
+      ? 'Guardando...'
+      : 'Guardar cambios'
+  }}
+</button>
       </div>
 
     </form>
